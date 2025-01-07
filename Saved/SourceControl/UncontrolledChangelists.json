@@ -1,0 +1,15 @@
+{
+	"version": 1,
+	"changelists": [
+		{
+			"guid": "00000000000000000000000000000000",
+			"description": "Default Uncontrolled Changelist",
+			"files": [
+				"G:/UE_Project/Aura/Content/Map.umap",
+				"G:/UE_Project/Aura/Content/Map/66665.umap",
+				"G:/UE_Project/Aura/Content/Map/StartMap.umap",
+				"G:/UE_Project/Aura/Content/Map/StartupMap.umap"
+			]
+		}
+	]
+}
