@@ -11,7 +11,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "GameFramework/Controller.h"
-#include "MyPlayerController.generated.h"
+#include "AuraPlayerController.generated.h"
 
 
 /**
@@ -21,11 +21,11 @@ class UInputMappingContext;
 
 
 UCLASS()
-class AURA_API AMyPlayerController : public APlayerController
+class AURA_API AAuraPlayerController : public APlayerController
 {
 	GENERATED_BODY()
 public:
-	AMyPlayerController();
+	AAuraPlayerController();
 	
 protected:
 	virtual void  BeginPlay()override;

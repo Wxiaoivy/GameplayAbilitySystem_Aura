@@ -1,15 +1,15 @@
 // Copyright Ivy
 
 
-#include "Player/MyPlayerController.h"
+#include "Player/AuraPlayerController.h"
 
-AMyPlayerController::AMyPlayerController()
+AAuraPlayerController::AAuraPlayerController()
 {
 	bReplicates = true;
 
 }
 
-void AMyPlayerController::BeginPlay()
+void AAuraPlayerController::BeginPlay()
 
 {
 	Super::BeginPlay();
@@ -47,19 +47,19 @@ void AMyPlayerController::BeginPlay()
 
 }
 
-void AMyPlayerController::SetUpInputComponent()
+void AAuraPlayerController::SetUpInputComponent()
 {
 	APawn* ControlledPawn = GetPawn<APawn>();
 	if (ControlledPawn !=nullptr){
 
 		//为什么这里外面能确定InputComponent就是UEnhancedInputComponent   因为在UE编辑器里设置Input的默认方式就是增强输入
 		UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(InputComponent);
-		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AMyPlayerController::Move);
+		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AAuraPlayerController::Move);
 	}
 	
 }
 
-void AMyPlayerController::Move(const FInputActionValue& InputActionValue)
+void AAuraPlayerController::Move(const FInputActionValue& InputActionValue)
 {
 	const FVector2D InputAxisVector = InputActionValue.Get<FVector2D>();
 	const FRotator Rotation = GetControlRotation();
