@@ -16,6 +16,7 @@ public class Aura : ModuleRules
         //迁移了文件后（也迁移在Public/Private及其子目录下） 必须要加这两句话让VS能识别到源文件的地址（我在Public下面加了个Character这个文件夹
         PublicIncludePaths.AddRange(new string[] { Path.Combine(ModuleDirectory, "public", "Character") });
         PrivateIncludePaths.AddRange(new string[] { Path.Combine(ModuleDirectory, "private", "Character") });
+        
 
 
         // Uncomment if you are using Slate UI
