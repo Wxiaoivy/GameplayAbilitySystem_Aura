@@ -4,6 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "Character/AuraCharacterBase.h"
+//#include "EnhancedInputModule.h"
+//#include "InputActionValue.h"
+//#include "EnhancedInputComponent.h"
+//#include "EnhancedInputSubsystems.h"
 #include "AuraCharacter.generated.h"
 
 /**
