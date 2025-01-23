@@ -80,11 +80,21 @@ void AAuraPlayerController::PlayerTick(float DeltaTime)
 
 void AAuraPlayerController::CursorTrace()
 {
+	// 定义一个FHitResult类型的变量CursorHit，用于存储光标追踪的结果。
 	FHitResult CursorHit;
+
+	// 调用GetHitResultUnderCursor函数，尝试获取光标下的物体碰撞信息。
+	// CursorHit用于存储函数返回的结果。
 	GetHitResultUnderCursor(ECC_Visibility, false, CursorHit);
+
+	// 检查CursorHit.bBlockingHit是否为false，即是否没有发生阻挡碰撞。
 	if (!CursorHit.bBlockingHit)return;
 
+	// 如果发生了阻挡碰撞，更新LastActor为之前的ThisActor。
+    // 这里假设LastActor用于存储上一次选中的怪物。
 	LastActor = ThisActor;
+
+	// 如果转换成功，ThisActor将指向一个新的怪物对象；如果失败，则ThisActor将为nullptr。
 	ThisActor = Cast<IEnemyInterface>(CursorHit.GetActor());
 
 
