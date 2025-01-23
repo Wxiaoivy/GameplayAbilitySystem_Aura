@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Character/AuraCharacter.h"
 #include "Interaction/EnemyInterface.h"
+#include "Aura/Aura.h"
 #include "AuraEnemy.generated.h"
 
 /**
@@ -18,7 +19,6 @@ public:
 	virtual void HighlightActor() override;
 	virtual void UnHighlightActor() override;
 	
+	AAuraEnemy();
 
-	UPROPERTY(BlueprintReadOnly)
-	bool  bHighlighted = false;
 };
