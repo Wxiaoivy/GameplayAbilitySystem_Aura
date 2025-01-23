@@ -9,4 +9,13 @@ AAuraPlayerState::AAuraPlayerState()
 	//用于客户端和服务器之间的数据同步
 	NetUpdateFrequency = 100.0f;
 
+	AbilitySystemComponent = CreateDefaultSubobject<UAuraAbilitySystemComponent>("AbilitySystemComponent");
+	AbilitySystemComponent->SetIsReplicated(true);
+
+	AttributeSet = CreateDefaultSubobject<UAuraAttributeSet>("AttributeSet");
+}
+
+UAbilitySystemComponent* AAuraPlayerState::GetAbilitySystemComponent() const
+{
+	return AbilitySystemComponent;
 }

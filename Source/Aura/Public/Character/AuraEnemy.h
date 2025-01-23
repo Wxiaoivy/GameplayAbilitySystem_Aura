@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Character/AuraCharacter.h"
 #include "Interaction/EnemyInterface.h"
+//#include "AbilitySystem/AuraAbilitySystemComponent.h"
 #include "Aura/Aura.h"
 #include "AuraEnemy.generated.h"
 
