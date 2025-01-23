@@ -47,21 +47,33 @@ void AAuraPlayerController::BeginPlay()
 
 }
 
-void AAuraPlayerController::SetUpInputComponent()
+void AAuraPlayerController::SetupInputComponent()
 {
-	APawn* ControlledPawn = GetPawn<APawn>();
-	if (ControlledPawn !=nullptr){
+	Super::SetupInputComponent();
+	//为什么这里外面能确定InputComponent就是UEnhancedInputComponent   因为在UE编辑器里设置Input的默认方式就是增强输入
+		
+		UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(InputComponent);
+		if (EnhancedInputComponent)
+		{
 
-		//为什么这里外面能确定InputComponent就是UEnhancedInputComponent   因为在UE编辑器里设置Input的默认方式就是增强输入
-		UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(InputComponent);
-		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AAuraPlayerController::Move);
-	}
+			EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AAuraPlayerController::Move);
+
+		}
+		else {
+			// 处理转换失败的情况，可能记录错误或警告
+			UE_LOG(LogTemp, Error, TEXT("InputComponent is not an instance of UEnhancedInputComponent!"));
+		}
+	
+	
 	
 }
 
 void AAuraPlayerController::Move(const FInputActionValue& InputActionValue)
 {
+	//这个二维向量拿来储存用户输入的Value.
 	const FVector2D InputAxisVector = InputActionValue.Get<FVector2D>();
+
+	//用Controller的旋转来计算方向
 	const FRotator Rotation = GetControlRotation();
 	const FRotator YawRotation(0.0f, Rotation.Yaw, 0.0f);
 

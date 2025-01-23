@@ -30,13 +30,15 @@ public:
 protected:
 	virtual void  BeginPlay()override;
 
-	void SetUpInputComponent();
+	virtual void SetupInputComponent()override;
 	
 
 private:
+	//声明一个UInputMappingContext类型的指针，在UE编辑器里设置已经做好了的IMC
 	UPROPERTY(EditAnywhere,Category="Input")
 	TObjectPtr<UInputMappingContext>AuraContext;
 
+	//声明一个UInputAction类型的指针，在UE编辑器里设置已经做好了的IA
 	UPROPERTY(EditAnywhere, Category = "Input")
 	TObjectPtr<UInputAction>MoveAction;
 
