@@ -22,7 +22,7 @@ public:
 
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
-	TObjectPtr<UAttributeSet>GetAttributeSet() const { return AttributeSet; }
+	UAttributeSet*GetAttributeSet() const { return AttributeSet; }
 
 protected:
 
