@@ -4,8 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-//#include "GameFramework/Pawn.h"
-#include "AuraCharacter.h"
 #include "EnhancedInputModule.h"
 #include "InputActionValue.h"
 #include "EnhancedInputComponent.h"

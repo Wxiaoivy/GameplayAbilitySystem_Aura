@@ -20,7 +20,7 @@ void AAuraCharacter::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
 	//Init Ability Actor Info for the Server
-	//InitAbilityActorInfo();
+	InitAbilityActorInfo();
 
 }
 
@@ -28,7 +28,7 @@ void AAuraCharacter::OnRep_PlayerState()
 {
 	Super::OnRep_PlayerState();
 	//Init Ability Actor Info for the Client
-	//InitAbilityActorInfo();
+	InitAbilityActorInfo();
 }
 
 void AAuraCharacter::InitAbilityActorInfo()
@@ -37,9 +37,12 @@ void AAuraCharacter::InitAbilityActorInfo()
 		APlayerController* PlayerController = Cast<APlayerController>(Controller);
 		check(PlayerController);*/
 
-	AAuraPlayerState* AuraPlayerState = GetPlayerState <AAuraPlayerState>();
-	//check(AuraPlayerState);
-	AuraPlayerState->GetAbilitySystemComponent()->InitAbilityActorInfo(AuraPlayerState, this);
-	AbilitySystemComponent = AuraPlayerState->GetAbilitySystemComponent();
-	AttributeSet = AuraPlayerState->GetAttributeSet();
+	if (AAuraPlayerState* AuraPlayerState = GetPlayerState <AAuraPlayerState>())
+		//check(AuraPlayerState); check有大坑，因为PossessedBy函数调用的很早，第一次检查PlayerState的时候还没初始化，check就检查第一次就崩了
+		// 但是PossessedBy会反复调用。等PlayerState初始化好了就得用if,if就是反复判断条件成立就会执行花括号内容。
+	{
+		AuraPlayerState->GetAbilitySystemComponent()->InitAbilityActorInfo(AuraPlayerState, this);
+		AbilitySystemComponent = AuraPlayerState->GetAbilitySystemComponent();
+		AttributeSet = AuraPlayerState->GetAttributeSet();
+	}
 }

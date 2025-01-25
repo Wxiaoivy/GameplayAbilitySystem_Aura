@@ -16,6 +16,7 @@ UCLASS()
 class AURA_API AAuraPlayerState : public APlayerState, public IAbilitySystemInterface
 {
 	GENERATED_BODY()
+
 public:
 
 	AAuraPlayerState();
@@ -31,4 +32,8 @@ protected:
 
 	UPROPERTY()
 	TObjectPtr <UAttributeSet>AttributeSet;
+
+
+	//UPROPERTY()
+	//TObjectPtr <UAttributeSet>AuraAttributeSet;
 };
