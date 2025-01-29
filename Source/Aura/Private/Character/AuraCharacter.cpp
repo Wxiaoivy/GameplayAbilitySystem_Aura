@@ -38,6 +38,7 @@ void AAuraCharacter::InitAbilityActorInfo()
 		check(PlayerController);*/
 
 	if (AAuraPlayerState* AuraPlayerState = GetPlayerState <AAuraPlayerState>())
+
 		//check(AuraPlayerState); check有大坑，因为PossessedBy函数调用的很早，第一次检查PlayerState的时候还没初始化，check就检查第一次就崩了
 		// 但是PossessedBy会反复调用。等PlayerState初始化好了就得用if,if就是反复判断条件成立就会执行花括号内容。
 	{
