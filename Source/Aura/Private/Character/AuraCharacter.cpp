@@ -33,11 +33,9 @@ void AAuraCharacter::OnRep_PlayerState()
 
 void AAuraCharacter::InitAbilityActorInfo()
 {
-	/*
-		APlayerController* PlayerController = Cast<APlayerController>(Controller);
-		check(PlayerController);*/
 
-	if (AAuraPlayerState* AuraPlayerState = GetPlayerState <AAuraPlayerState>())
+	AAuraPlayerState* AuraPlayerState = GetPlayerState <AAuraPlayerState>();
+	if (AuraPlayerState)
 
 		//check(AuraPlayerState); check有大坑，因为PossessedBy函数调用的很早，第一次检查PlayerState的时候还没初始化，check就检查第一次就崩了
 		// 但是PossessedBy会反复调用。等PlayerState初始化好了就得用if,if就是反复判断条件成立就会执行花括号内容。
@@ -45,5 +43,13 @@ void AAuraCharacter::InitAbilityActorInfo()
 		AuraPlayerState->GetAbilitySystemComponent()->InitAbilityActorInfo(AuraPlayerState, this);
 		AbilitySystemComponent = AuraPlayerState->GetAbilitySystemComponent();
 		AttributeSet = AuraPlayerState->GetAttributeSet();
+	}
+	if (AAuraPlayerController* AuraPlayerController = Cast<AAuraPlayerController>(GetController()))
+	{
+		if (AAuraHUD* AuraHUD = Cast<AAuraHUD>(AuraPlayerController->GetHUD()))
+		{
+			AuraHUD->InitOverlay(AuraPlayerController, AuraPlayerState, AbilitySystemComponent, AttributeSet);
+		}
+
 	}
 }
