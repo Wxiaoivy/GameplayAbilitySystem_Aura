@@ -32,6 +32,7 @@ void AAuraEffectActor::OnOverlap(UPrimitiveComponent* OverlappedComponent, AActo
 		// 通常，这意味着您需要在 UAuraAttributeSet 类中添加一个非 const 的方法来修改健康值。（AuraAttributeSet是const的）
 		UAuraAttributeSet* MutableAuraAttributeSet = const_cast<UAuraAttributeSet*>(AuraAttributeSet);
 		MutableAuraAttributeSet->SetHealth(AuraAttributeSet->GetHealth() + 25.f);
+		MutableAuraAttributeSet->SetMana(AuraAttributeSet->GetMana() + 25.f);
 		Destroy();
 	}
 

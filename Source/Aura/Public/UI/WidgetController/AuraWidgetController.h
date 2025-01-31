@@ -48,6 +48,11 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetWidgetControllerParams(const FWidgetControllerParams& WCParams);
 
+
+	virtual void BroadCastInitialValues();
+
+	virtual void BindCallbacksToDependencies();
+
 protected:
 
 	// 只读属性，存储玩家控制器对象。

@@ -5,10 +5,10 @@
 
 UAuraAttributeSet::UAuraAttributeSet()
 {
-	InitHealth(100.f);
-	InitMaxHealth(150.f);
-	InitMana(100.f);
-	InitMaxMana(150.f);
+	InitHealth(50.f);
+	InitMaxHealth(100.f);
+	InitMana(75.f);
+	InitMaxMana(100.f);
 }
 // UAuraAttributeSet类的GetLifetimeReplicatedProps函数实现
 // 这个函数会调用父类的同名函数，并添加Health属性到需要复制的属性列表中
@@ -37,17 +37,17 @@ void UAuraAttributeSet::OnRep_Health(const FGameplayAttributeData& OldHealth) co
 	GAMEPLAYATTRIBUTE_REPNOTIFY(UAuraAttributeSet, Health, OldHealth);
 }
 
-void UAuraAttributeSet::OnRep_MaxHealth(const FGameplayAttributeData& OldHealth) const
+void UAuraAttributeSet::OnRep_MaxHealth(const FGameplayAttributeData& OldMaxHealth) const
 {
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UAuraAttributeSet, MaxHealth, OldHealth);
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UAuraAttributeSet, MaxHealth, OldMaxHealth);
 }
 
-void UAuraAttributeSet::OnRep_Mana(const FGameplayAttributeData& OldHealth) const
+void UAuraAttributeSet::OnRep_Mana(const FGameplayAttributeData& OldMana) const
 {
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UAuraAttributeSet, Mana, OldHealth);
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UAuraAttributeSet, Mana, OldMana);
 }
 
-void UAuraAttributeSet::OnRep_MaxMana(const FGameplayAttributeData& OldHealth) const
+void UAuraAttributeSet::OnRep_MaxMana(const FGameplayAttributeData& OldMaxMana) const
 {
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UAuraAttributeSet, MaxMana, OldHealth);
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UAuraAttributeSet, MaxMana, OldMaxMana);
 }

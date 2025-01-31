@@ -10,6 +10,8 @@ UOverlayWidgetController* AAuraHUD::GetOverlayWidgetController(const FWidgetCont
 	{
 		OverlayWidgetController = NewObject<UOverlayWidgetController>(this, OverlayWidgetControllerClass);
 		OverlayWidgetController->SetWidgetControllerParams(WCParams);
+		//OverlayWidgetController->BindCallbacksToDependencies();
+
 
 		return OverlayWidgetController;
 
@@ -36,6 +38,8 @@ void AAuraHUD::InitOverlay(APlayerController* PC, APlayerState* PS, UAbilitySyst
 
 		OverlayWidget->SetWidgetController(WidgetController);
 
+		WidgetController->BroadCastInitialValues();
+		WidgetController->BindCallbacksToDependencies();//老师写在GetOverlayWidgetController里面的 我写在这里的 测试过一样的效果
 		Widget->AddToViewport();
 
 	
