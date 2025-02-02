@@ -6,6 +6,9 @@
 #include "AttributeSet.h"
 #include "AbilitySystemComponent.h"
 #include "Net/UnrealNetwork.h"
+#include "GameplayEffectExtension.h"
+#include "AbilitySystemBlueprintLibrary.h"
+#include "GameFramework/Character.h"
 #include "AuraAttributeSet.generated.h"
 
 /**
@@ -19,6 +22,45 @@
      GAMEPLAYATTRIBUTE_VALUE_SETTER(PropertyName) \
      GAMEPLAYATTRIBUTE_VALUE_INITTER(PropertyName)
 
+USTRUCT()
+struct FEffectProperties
+{
+	GENERATED_BODY()
+
+	FEffectProperties() {}
+
+	FGameplayEffectContextHandle EffectContextHandle;
+
+	UPROPERTY()
+	UAbilitySystemComponent* SourceASC = nullptr;
+
+	UPROPERTY()
+	AActor* SourceAvatarActor = nullptr;
+
+	UPROPERTY()
+	AController* SourceController = nullptr;
+
+	UPROPERTY()
+	ACharacter* SourceCharacter = nullptr;
+
+	UPROPERTY()
+	UAbilitySystemComponent* TargetASC = nullptr;
+
+	UPROPERTY()
+	AActor* TargetAvatarActor = nullptr;
+
+	UPROPERTY()
+	AController* TargetController = nullptr;
+
+	UPROPERTY()
+	ACharacter* TargetCharacter = nullptr;
+
+};
+
+
+
+
+
 UCLASS()
 class AURA_API UAuraAttributeSet : public UAttributeSet
 {
@@ -29,18 +71,22 @@ public:
 
 	// 重写父类的GetLifetimeReplicatedProps函数，用于指定哪些属性需要在网络上复制
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps)const override;
-	
+
+	virtual void PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue)override;
+
+	virtual void PostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data)override;
+
 	// 定义一个名为Health的属性，它是FGameplayAttributeData类型的
 	// BlueprintReadOnly表示这个属性可以在蓝图（Blueprint）中读取，但不能修改
 	// ReplicatedUsing=OnRep_Health表示这个属性的复制会调用OnRep_Health函数
 	// Category="Vital Attributes"表示这个属性在编辑器中的分类是“Vital Attributes”
-	UPROPERTY(BlueprintReadOnly,ReplicatedUsing=OnRep_Health,Category="Vital Attributes")
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_Health, Category = "Vital Attributes")
 	FGameplayAttributeData Health;
 	//GAMEPLAYATTRIBUTE_PROPERTY_GETTER(UAuraAttributeSet, Health); 这个只有Getter，所以用ATTRIBUTE_ACCESSORS更好
 	ATTRIBUTE_ACCESSORS(UAuraAttributeSet, Health);
-	
 
-	
+
+
 
 	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_MaxHealth, Category = "Vital Attributes")
 	FGameplayAttributeData MaxHealth;
@@ -67,5 +113,8 @@ public:
 
 	UFUNCTION()
 	void OnRep_MaxMana(const FGameplayAttributeData& OldHealth) const;
+
+private:
+	void SetEffectProperties(const FGameplayEffectModCallbackData& Data, FEffectProperties& Props)const;
 
 };
