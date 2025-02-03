@@ -39,7 +39,7 @@ void AAuraEffectActor::ApplyEffectToTarget(AActor* TargetActor, TSubclassOf<UGam
 	EffectContextHandle.AddSourceObject(this);
 
 	// 使用游戏效果类、强度（1.0f）和上下文句柄创建一个游戏效果规范句柄
-	const FGameplayEffectSpecHandle EffectSpecHandle = TargetASC->MakeOutgoingSpec(GameplayEffectClass, 1.0f, EffectContextHandle);
+	const FGameplayEffectSpecHandle EffectSpecHandle = TargetASC->MakeOutgoingSpec(GameplayEffectClass, ActorLevel, EffectContextHandle);
 
 	// 将游戏效果规范应用到目标自身
 	// EffectSpecHandle 是一个 句柄，这个句柄用于管理游戏效果规范(GameplayEffectSpec)的生命周期，并确保在适当的时候创建和销毁规范。
