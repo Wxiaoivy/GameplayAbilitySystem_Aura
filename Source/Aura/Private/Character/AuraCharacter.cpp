@@ -41,6 +41,7 @@ void AAuraCharacter::InitAbilityActorInfo()
 		// 但是PossessedBy会反复调用。等PlayerState初始化好了就得用if,if就是反复判断条件成立就会执行花括号内容。
 	{
 		AuraPlayerState->GetAbilitySystemComponent()->InitAbilityActorInfo(AuraPlayerState, this);
+		Cast<UAuraAbilitySystemComponent>(AuraPlayerState->GetAbilitySystemComponent())->AbilityActorInfoSet();
 		AbilitySystemComponent = AuraPlayerState->GetAbilitySystemComponent();
 		AttributeSet = AuraPlayerState->GetAttributeSet();
 	}

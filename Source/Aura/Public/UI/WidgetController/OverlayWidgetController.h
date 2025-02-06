@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "AbilitySystem/AuraAttributeSet.h"
+#include "AbilitySystem/AuraAbilitySystemComponent.h"
 #include "UI/WidgetController/AuraWidgetController.h"
 #include "OverlayWidgetController.generated.h"
 

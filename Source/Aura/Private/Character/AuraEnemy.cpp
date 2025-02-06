@@ -32,10 +32,16 @@ AAuraEnemy::AAuraEnemy()
 void AAuraEnemy::BeginPlay()
 {
 	Super::BeginPlay();
+	InitAbilityActorInfo();
 
+}
+
+void AAuraEnemy::InitAbilityActorInfo()
+{
 	//InitAbilityActorInfo() 函数可能是用于初始化某个游戏实体（如角色或道具）的能力信息的。
-	// 这可能包括设置该实体的技能、属性、动画或其他与其能力相关的数据。
+    // 这可能包括设置该实体的技能、属性、动画或其他与其能力相关的数据。
 	check(AbilitySystemComponent);
-	
+
 	AbilitySystemComponent->InitAbilityActorInfo(this, this);
+	Cast<UAuraAbilitySystemComponent>(AbilitySystemComponent)->AbilityActorInfoSet();
 }
