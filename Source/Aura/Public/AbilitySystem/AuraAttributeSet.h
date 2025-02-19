@@ -73,8 +73,10 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps)const override;
 
 	virtual void PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue)override;
+	virtual void PreAttributeBaseChange(const FGameplayAttribute& Attribute, float& NewValue) const override;
 
 	virtual void PostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data)override;
+
 
 	// 定义一个名为Health的属性，它是FGameplayAttributeData类型的
 	// BlueprintReadOnly表示这个属性可以在蓝图（Blueprint）中读取，但不能修改

@@ -9,14 +9,39 @@
 #include "OverlayWidgetController.generated.h"
 
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHealthChangedSignature, float, NewHealth);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMaxHealthChangedSignature, float, NewMaxHealth);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnManaChangedSignature, float, NewMana);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMaxManaChangedSignature, float, NewMaxMana);
+class UAuraUserWidget;
+
+USTRUCT(BlueprintType)
+struct FUIWidgetRow : public FTableRowBase
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	FGameplayTag MessageTag = FGameplayTag();
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	FText Message = FText();
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TSubclassOf<UAuraUserWidget> MessageWidget;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UTexture2D* Image = nullptr;
+
+};
+
+
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAttributeChangedSignature, float, NewValue);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMessageWidgetRowSignature, FUIWidgetRow, Row);
+
 
 /**
  * 
  */
+
+
+
 UCLASS(BlueprintType,Blueprintable)
 class AURA_API UOverlayWidgetController : public UAuraWidgetController
 {
@@ -28,16 +53,20 @@ public:
 	virtual void BindCallbacksToDependencies()override;
 
 	UPROPERTY(BlueprintAssignable, Category = "GAS|Attributes")
-	FOnHealthChangedSignature OnHealthChanged;
+	FOnAttributeChangedSignature OnHealthChanged;
 
 	UPROPERTY(BlueprintAssignable, Category = "GAS|Attributes")
-	FOnMaxHealthChangedSignature OnMaxHealthChanged;
+	FOnAttributeChangedSignature OnMaxHealthChanged;
 
 	UPROPERTY(BlueprintAssignable, Category = "GAS|Attributes")
-	FOnManaChangedSignature OnManaChanged;
+	FOnAttributeChangedSignature OnManaChanged;
 
 	UPROPERTY(BlueprintAssignable, Category = "GAS|Attributes")
-	FOnMaxManaChangedSignature OnMaxManaChanged;
+	FOnAttributeChangedSignature OnMaxManaChanged;
+
+	UPROPERTY(BlueprintAssignable, Category = "GAS|Message")
+	FMessageWidgetRowSignature MessageWidgetRowDelegate;
+
 
 
 protected:
@@ -47,11 +76,30 @@ protected:
 
 	//在您的 HealthChanged 函数中，FOnAttributeChangeData 是作为参数传入的。这意味着在某个地方（可能是属性变化的触发点），
 	//有一个代码片段创建了一个 FOnAttributeChangeData 实例，并填充了相关的变化信息，然后调用了 HealthChanged 函数，将这个实例作为参数传递。
-	void HealthChanged(const FOnAttributeChangeData& Data)const;
+	//void HealthChanged(const FOnAttributeChangeData& Data)const;
 
-	void MaxHealthChanged(const FOnAttributeChangeData& Data)const;
+	//void MaxHealthChanged(const FOnAttributeChangeData& Data)const;
 
-	void ManaChanged(const FOnAttributeChangeData& Data)const;
+	//void ManaChanged(const FOnAttributeChangeData& Data)const;
 
-	void MaxManaChanged(const FOnAttributeChangeData& Data)const;
+	//void MaxManaChanged(const FOnAttributeChangeData& Data)const;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Widget Data")
+	TObjectPtr<UDataTable>MessageWidgetDataTable;
+
+	//这里的T表示无论什么类型的DataTable;是个模板函数，可以从任何类型的DataTable获取信息。
+	template<typename T>
+	T* GetDataTableRowByTag(UDataTable* DataTable, const FGameplayTag& Tag);
+
+
+
 }; 
+
+template<typename T>
+inline T* UOverlayWidgetController::GetDataTableRowByTag(UDataTable* DataTable, const FGameplayTag& Tag)
+{
+	//通常是通过RowName来获取该行（Row）的信息，但是我们在DataTable里把RowName直接写成了TagName所以可以直接利用Tag.GetTagName()来获得RowName.
+
+	T* Row = DataTable->FindRow<T>(Tag.GetTagName(), TEXT(""));//TEXT("")没什么意义 只是为了凑参数的。
+	return Row;
+}
