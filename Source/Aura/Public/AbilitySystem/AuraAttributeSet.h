@@ -161,6 +161,7 @@ public:
 	FGameplayAttributeData Health;
 	//GAMEPLAYATTRIBUTE_PROPERTY_GETTER(UAuraAttributeSet, Health); 这个只有Getter，所以用ATTRIBUTE_ACCESSORS更好
 	ATTRIBUTE_ACCESSORS(UAuraAttributeSet, Health);
+	
 
 
 	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_Mana, Category = "Vital Attributes")

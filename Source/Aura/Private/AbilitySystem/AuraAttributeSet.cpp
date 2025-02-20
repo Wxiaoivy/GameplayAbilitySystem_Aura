@@ -59,6 +59,9 @@ void UAuraAttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute, 
 {
 	Super::PreAttributeChange( Attribute, NewValue);
 	
+
+	//这里的NewValue是CurrentValue,周期性GE是修改BaseValue的,BaseValue被修改时会重新计算相关属性的聚合器中的各项Mod,间接修改CurrentValue 
+	//只钳制了CurrentValue没有钳制BaseValue GetValue获取的是CurrentValue 所以实际上BaseValue一直在溢出
 	/*if (Attribute == GetHealthAttribute())
 	{
 		NewValue = FMath::Clamp(NewValue, 0.f, GetMaxHealth());
@@ -73,15 +76,16 @@ void UAuraAttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute, 
 void UAuraAttributeSet::PreAttributeBaseChange(const FGameplayAttribute& Attribute, float& NewValue) const
 {
 	Super::PreAttributeBaseChange(Attribute, NewValue);
+	//这里的NewValue是BaseValue
 
 	if (Attribute == GetHealthAttribute())
 	{
-		//NewValue = FMath::Clamp(NewValue, 0.f, GetMaxHealth());
+		NewValue = FMath::Clamp(NewValue, 0.f, GetMaxHealth());
 	}
 
 	if (Attribute == GetManaAttribute())
 	{
-		//NewValue = FMath::Clamp(NewValue, 0.f, GetMaxMana());
+		NewValue = FMath::Clamp(NewValue, 0.f, GetMaxMana());
 	}
 }
 
@@ -95,6 +99,7 @@ void UAuraAttributeSet::PreAttributeBaseChange(const FGameplayAttribute& Attribu
 void UAuraAttributeSet::SetEffectProperties(const FGameplayEffectModCallbackData& Data, FEffectProperties& Props)const
 {
 	// 从Data中获取游戏效果的上下文（Context），这个上下文包含了关于游戏效果如何被执行的信息。
+	
 	Props.EffectContextHandle = Data.EffectSpec.GetContext();
 
 	// 从上下文中获取触发游戏效果的原始发起者的能力系统组件（ASC）。

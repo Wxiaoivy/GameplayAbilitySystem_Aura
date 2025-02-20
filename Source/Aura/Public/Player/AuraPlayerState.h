@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerState.h"
+#include "Net/UnrealNetwork.h"
 #include "AbilitySystem/AuraAbilitySystemComponent.h"
 #include "AbilitySystemInterface.h"
 #include "AbilitySystem/AuraAttributeSet.h"
@@ -33,7 +34,16 @@ protected:
 	UPROPERTY()
 	TObjectPtr <UAttributeSet>AttributeSet;
 
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps)const override;
 
-	//UPROPERTY()
-	//TObjectPtr <UAttributeSet>AuraAttributeSet;
+
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_Level, Category = "Character Defualt Value")
+	int32 Level = 1;
+
+
+	UFUNCTION()
+	void OnRep_Level(int32 OldLevel) ;
+public:
+	int32 GetPlayerLevel()const;
+
 };

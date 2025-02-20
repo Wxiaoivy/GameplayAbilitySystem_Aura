@@ -28,4 +28,13 @@ protected:
 	virtual void BeginPlay()override;
 
 	virtual void InitAbilityActorInfo()override;
+
+	
+	
+	UPROPERTY(VisibleAnywhere)
+	int32 Level = 1;
+
+	/*Combat Interface*/
+	virtual int32 GetPlayerLevel() override;
+	/*End Combat Interface*/
 };
