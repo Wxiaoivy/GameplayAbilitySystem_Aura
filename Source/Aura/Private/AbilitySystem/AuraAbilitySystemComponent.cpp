@@ -22,6 +22,6 @@ void UAuraAbilitySystemComponent::EffectApplied(UAbilitySystemComponent* Ability
 	FGameplayTagContainer TagContainer;
 	// 从效果规范中获取所有的资产标签，并将它们存储在TagContainer中。
 	EffectSpec.GetAllAssetTags(TagContainer);
-	EffectAssetTag.Broadcast(TagContainer);//广播该代理（发送数据）
+	EffectAssetTag.Broadcast(TagContainer);//广播代理到WidgetController（发送数据）
 }
 

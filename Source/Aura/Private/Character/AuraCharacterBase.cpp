@@ -26,6 +26,17 @@ void AAuraCharacterBase::InitAbilityActorInfo()
 {
 }
 
+
+
+void AAuraCharacterBase::InitializeDefualtAttributes(TSubclassOf<UGameplayEffect> GameplayEffect, float level)
+{
+	check(IsValid(GetAbilitySystemComponent()));
+	check(GameplayEffect);
+	const FGameplayEffectContextHandle ContextHandle = GetAbilitySystemComponent()->MakeEffectContext();
+	const FGameplayEffectSpecHandle SpecHandle = GetAbilitySystemComponent()->MakeOutgoingSpec(GameplayEffect, level, ContextHandle);
+	GetAbilitySystemComponent()->ApplyGameplayEffectSpecToTarget(*SpecHandle.Data.Get(), GetAbilitySystemComponent());
+}
+
 UAbilitySystemComponent* AAuraCharacterBase::GetAbilitySystemComponent() const
 {
 	return AbilitySystemComponent;

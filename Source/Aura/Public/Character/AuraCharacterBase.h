@@ -9,6 +9,8 @@
 #include "AbilitySystem/AuraAttributeSet.h"
 #include "AuraCharacterBase.generated.h"
 
+
+
 UCLASS(Abstract)
 class AURA_API AAuraCharacterBase : public ACharacter, public IAbilitySystemInterface
 {
@@ -30,8 +32,17 @@ protected:
 
 	virtual void InitAbilityActorInfo();
 
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Attribute")
+	TSubclassOf<UGameplayEffect>DefaultPrimaryAttribute;
 
-public:
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Attribute")
+	TSubclassOf<UGameplayEffect>DefaultSecondaryAttribute;
+
+
+	virtual void InitializeDefualtAttributes(TSubclassOf<UGameplayEffect> GameplayEffect, float level);
+
+
+ public:
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	TObjectPtr<USkeletalMeshComponent>Weapon;
 
@@ -40,4 +51,7 @@ public:
 
 	UPROPERTY()
 	TObjectPtr <UAttributeSet>AttributeSet;
+
+
+	
 };
