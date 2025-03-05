@@ -9,6 +9,7 @@
 #include "GameplayEffectExtension.h"
 #include "AbilitySystemBlueprintLibrary.h"
 #include "GameFramework/Character.h"
+#include "AuraGameplayTags.h"
 #include "AuraAttributeSet.generated.h"
 
 /**
@@ -21,6 +22,9 @@
      GAMEPLAYATTRIBUTE_VALUE_GETTER(PropertyName) \
      GAMEPLAYATTRIBUTE_VALUE_SETTER(PropertyName) \
      GAMEPLAYATTRIBUTE_VALUE_INITTER(PropertyName)
+
+
+
 
 USTRUCT()
 struct FEffectProperties
@@ -57,8 +61,19 @@ struct FEffectProperties
 
 };
 
+//typedef 是 C++ 中的一个关键字，用于为现有的数据类型定义一个新的名称（别名）。它的主要作用是简化代码、提高可读性，并使代码更易于维护。
+//typedef is Specific to the FGameplayAttribute()Signature, butTStaticFuncPtr is generic to any Signature chosen
+//typedef TBaseStaticDelegateInstance<FGameplayAttribute(), FDefaultDelegateUserPolicy>::FFuncPtr FAttributeFuncPtr ;
 
-
+template<class T>
+//using TStaticFuncPtr = ...:定义了一个类型别名 TStaticFuncPtr，它的具体类型由后面的表达式决定。
+//FDefaultDelegateUserPolicy 是用户定义的策略类。
+//FFuncPtr 是 TBaseStaticDelegateInstance 类中定义的类型别名，表示一个静态函数指针类型。
+//typename 关键字用于告诉编译器 FFuncPtr 是一个类型（而不是成员变量或其他内容）。
+//总结:
+//TStaticFuncPtr<T> 是一个类型别名，表示 TBaseStaticDelegateInstance<T, FDefaultDelegateUserPolicy> 类中定义的静态函数指针类型 FFuncPtr。
+//例如，如果 T 是 FGameplayAttribute()，那么 TStaticFuncPtr<FGameplayAttribute()> 就是 FGameplayAttribute(*)() 的类型别名。
+using TStaticFuncPtr = typename TBaseStaticDelegateInstance<T, FDefaultDelegateUserPolicy>::FFuncPtr;
 
 
 UCLASS()
@@ -77,6 +92,12 @@ public:
 
 	virtual void PostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data)override;
 
+
+	//TStaticFuncPtr<FGameplayAttribute()>:这是前面定义的模板类型别名 TStaticFuncPtr 的具体实例化。
+    //FGameplayAttribute() 是一个函数签名，表示一个返回 FGameplayAttribute 且无参数的函数。
+	//最终，TStaticFuncPtr<FGameplayAttribute()> 就是 FGameplayAttribute(*)() 的类型别名。
+	//因此，TStaticFuncPtr<FGameplayAttribute()> 是一个指向 FGameplayAttribute() 类型函数的静态函数指针。
+	TMap<FGameplayTag, TStaticFuncPtr<FGameplayAttribute()>> TagsToAttributes;
 
 
 

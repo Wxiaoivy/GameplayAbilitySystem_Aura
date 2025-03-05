@@ -19,7 +19,7 @@ FAuraAttributeInfo UAttributeInfo::FindAttributeInfoForTag(const FGameplayTag& A
 			// 返回匹配的属性信息
 			return Info;
 		}
-		return FAuraAttributeInfo();//这行自己加的
+		//return FAuraAttributeInfo();//这行自己加的  (不能加 加了就一直是空的默认值！！）
 	}
 
 	// 如果没有找到匹配的属性信息，并且需要打印日志
