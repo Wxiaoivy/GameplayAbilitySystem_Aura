@@ -5,10 +5,7 @@
 
 UAuraAttributeSet::UAuraAttributeSet()
 {
-	InitHealth(10.f);
-	InitMaxHealth(100.f);
-	InitMana(10.f);
-	InitMaxMana(100.f);
+
 }
 // UAuraAttributeSet类的GetLifetimeReplicatedProps函数实现
 // 这个函数会调用父类的同名函数，并添加Health属性到需要复制的属性列表中

@@ -31,6 +31,7 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	//跟AbilitySystem里面一个函数一样的名字（这个有点坑）
 	virtual void InitAbilityActorInfo();
 
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Attribute")
@@ -39,8 +40,11 @@ protected:
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Attribute")
 	TSubclassOf<UGameplayEffect>DefaultSecondaryAttribute;
 
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Attribute")
+	TSubclassOf<UGameplayEffect>DefaultVitalAttribute;
 
-	virtual void InitializeDefualtAttributes(TSubclassOf<UGameplayEffect> GameplayEffect, float level);
+	virtual void ApplyEffectToSelf(TSubclassOf<UGameplayEffect> GameplayEffect, float level)const;
+	virtual void InitializeDefualtAttributes()const;
 
 
  public:

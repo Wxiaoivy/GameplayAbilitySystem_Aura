@@ -1,0 +1,58 @@
+// Copyright Ivy
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "GameplayTagContainer.h"
+#include "GameplayTagsManager.h"
+
+/**
+ * AuraGameplayTags
+ * 
+ * Singleton containing native Gameplay Tags(单例类，包含原生Gameplay标签)
+ */
+
+struct FAuraGameplayTags
+{
+public:
+	// 获取单例实例的静态方法
+	static const FAuraGameplayTags& Get() {return GameplayTags;}
+	// 初始化原生Gameplay标签的静态方法
+	static void InitializeNativeGameplayTags();
+	/*
+	*Primary Attribute
+	*
+	*/
+	FGameplayTag Attribute_Primary_Strength;
+	FGameplayTag Attribute_Primary_Intelligence;
+	FGameplayTag Attribute_Primary_Resilience;
+	FGameplayTag Attribute_Primary_Vigor;
+
+
+	/*
+	*Secondary Attribute
+	*
+	*/
+	FGameplayTag Attribute_Secondary_Armor;
+	FGameplayTag Attribute_Secondary_ArmorPenetration;
+	FGameplayTag Attribute_Secondary_BlockChance;
+	FGameplayTag Attribute_Secondary_CriticalHitChance;
+	FGameplayTag Attribute_Secondary_CriticalHitDamage;
+	FGameplayTag Attribute_Secondary_CriticalHitResistance;
+	FGameplayTag Attribute_Secondary_HealthRegeneration;
+	FGameplayTag Attribute_Secondary_ManaRegeneration;
+	FGameplayTag Attribute_Secondary_MaxHealth;
+	FGameplayTag Attribute_Secondary_MaxMana;
+
+
+protected:
+
+private:
+	// 声明静态成员变量，存储单例实例
+	// 这个声明告诉编译器，这个类的所有实例共享一个 GameplayTags 变量。
+	//特点：// 静态成员变量在类级别存在，而不是在实例级别(静态成员变量属于类不属于某个实例）。
+	       // 它在内存中只有一份，无论创建多少个类的实例，都共享这一个变量。
+	
+	static FAuraGameplayTags GameplayTags;
+
+};

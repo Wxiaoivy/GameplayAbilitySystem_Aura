@@ -28,7 +28,7 @@ void AAuraCharacterBase::InitAbilityActorInfo()
 
 
 
-void AAuraCharacterBase::InitializeDefualtAttributes(TSubclassOf<UGameplayEffect> GameplayEffect, float level)
+void AAuraCharacterBase::ApplyEffectToSelf(TSubclassOf<UGameplayEffect> GameplayEffect, float level)const
 {
 	check(IsValid(GetAbilitySystemComponent()));
 	check(GameplayEffect);
@@ -40,6 +40,13 @@ void AAuraCharacterBase::InitializeDefualtAttributes(TSubclassOf<UGameplayEffect
 	const FGameplayEffectSpecHandle SpecHandle = GetAbilitySystemComponent()->MakeOutgoingSpec(GameplayEffect, level, ContextHandle);
 	// 将游戏效果规范应用到目标
 	GetAbilitySystemComponent()->ApplyGameplayEffectSpecToTarget(*SpecHandle.Data.Get(), GetAbilitySystemComponent());
+}
+
+void AAuraCharacterBase::InitializeDefualtAttributes() const
+{
+	ApplyEffectToSelf(DefaultPrimaryAttribute,1.0f);
+	ApplyEffectToSelf(DefaultSecondaryAttribute, 1.0f);
+	ApplyEffectToSelf(DefaultVitalAttribute, 1.0f);
 }
 
 UAbilitySystemComponent* AAuraCharacterBase::GetAbilitySystemComponent() const

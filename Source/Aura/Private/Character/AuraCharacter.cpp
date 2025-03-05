@@ -53,8 +53,8 @@ void AAuraCharacter::InitAbilityActorInfo()
 		AttributeSet = AuraPlayerState->GetAttributeSet();
 
 		//≥ı ºªØPrimaryAttribute∫ÕSecondaryAttribute
-		InitializeDefualtAttributes(DefaultPrimaryAttribute, 1.0f);
-		InitializeDefualtAttributes(DefaultSecondaryAttribute, 1.0f);
+		InitializeDefualtAttributes();
+	
 	}
 	if (AAuraPlayerController* AuraPlayerController = Cast<AAuraPlayerController>(GetController()))
 	{
