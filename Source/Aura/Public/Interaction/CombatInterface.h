@@ -25,5 +25,7 @@ public:
 
 
 	virtual int32 GetPlayerLevel();
+//protected:
+	virtual FVector GetCombatSocketLocation();
 
 };

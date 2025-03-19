@@ -43,9 +43,16 @@ protected:
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Attribute")
 	TSubclassOf<UGameplayEffect>DefaultVitalAttribute;
 
+	UPROPERTY(EditAnywhere, Category = "Combat")
+	FName WeaponTipSocketName;
+
+	//得到武器上面发射抛射物的Socket的位置
+	virtual FVector GetCombatSocketLocation()override;
+
 	virtual void ApplyEffectToSelf(TSubclassOf<UGameplayEffect> GameplayEffect, float level)const;
 	virtual void InitializeDefualtAttributes()const;
 
+	void AddCharacterAbilities();
 
  public:
 	UPROPERTY(EditAnywhere, Category = "Combat")
@@ -57,6 +64,9 @@ protected:
 	UPROPERTY()
 	TObjectPtr <UAttributeSet>AttributeSet;
 
+private:
+	UPROPERTY(EditAnywhere, Category = "Abilities")
+	TArray<TSubclassOf<UGameplayAbility>>StartupAbilities;
 
 	
 };

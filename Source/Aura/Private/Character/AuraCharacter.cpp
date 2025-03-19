@@ -21,7 +21,8 @@ void AAuraCharacter::PossessedBy(AController* NewController)
 	Super::PossessedBy(NewController);
 	//Init Ability Actor Info for the Server
 	InitAbilityActorInfo();
-
+	//这里调用AuraCharacterBase中的AddCharacterAbilities()这个函数
+	AddCharacterAbilities();
 }
 
 void AAuraCharacter::OnRep_PlayerState()
@@ -29,6 +30,8 @@ void AAuraCharacter::OnRep_PlayerState()
 	Super::OnRep_PlayerState();
 	//Init Ability Actor Info for the Client
 	InitAbilityActorInfo();
+	
+	
 }
 
 int32 AAuraCharacter::GetPlayerLevel()

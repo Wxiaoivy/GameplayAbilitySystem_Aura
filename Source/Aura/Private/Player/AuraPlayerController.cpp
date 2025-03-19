@@ -7,7 +7,11 @@ AAuraPlayerController::AAuraPlayerController()
 {
 	bReplicates = true;
 
+	Spline = CreateDefaultSubobject<USplineComponent>("Spline");
+
 }
+
+
 
 void AAuraPlayerController::BeginPlay()
 
@@ -53,31 +57,180 @@ void AAuraPlayerController::BeginPlay()
 void AAuraPlayerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
+
 	//为什么这里外面能确定InputComponent就是UEnhancedInputComponent   因为在UE编辑器里设置Input的默认方式就是增强输入
 
-	UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(InputComponent);
-	if (EnhancedInputComponent)
+	UAuraInputComponent* AuraInputComponent = Cast<UAuraInputComponent>(InputComponent);
+	if (AuraInputComponent)
 	{
 
-		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AAuraPlayerController::Move);
+		AuraInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AAuraPlayerController::Move);
+		AuraInputComponent->BindAbilityActions(InputConfig,this,&ThisClass::AbilityInputTagPressed, &ThisClass::AbilityInputTagReleased, &ThisClass::AbilityInputTagHeld);
 
 	}
-	else {
+	else 
+	{
 		// 处理转换失败的情况，可能记录错误或警告
 		UE_LOG(LogTemp, Error, TEXT("InputComponent is not an instance of UEnhancedInputComponent!"));
 	}
-
-
-
 }
+
+void AAuraPlayerController::AbilityInputTagPressed(FGameplayTag InputTag)
+{
+	if (InputTag.MatchesTagExact(FAuraGameplayTags::Get().InputTag_RMB))
+	{
+		bTargeting = ThisActor ? true : false;
+		bAutoRunning = false;
+	}
+}
+
+void AAuraPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
+{
+	if (!InputTag.MatchesTagExact(FAuraGameplayTags::Get().InputTag_RMB))
+	{
+		if (GetASC())
+		{
+			GetASC()->AbilityInputTagReleased(InputTag);
+		}
+		return;
+	}
+	if (bTargeting)
+	{
+		if (GetASC())
+		{
+			GetASC()->AbilityInputTagReleased(InputTag);
+		}
+	}
+	else
+	{
+		APawn* ControlledPawn = GetPawn();
+		if (FollowTime <= ShortPressThreshold && ControlledPawn)
+		{
+			// 获取点击位置
+			FHitResult Hit;
+			bool bHit = GetHitResultUnderCursor(ECC_Visibility, false, Hit);
+
+			// 如果点击的位置在导航网格上，直接使用点击的位置
+			if (bHit)
+			{
+				CachedDestination = Hit.ImpactPoint;
+			}
+			// 计算路径
+			UNavigationPath* NavPath = UNavigationSystemV1::FindPathToLocationSynchronously(
+				GetWorld(),                      // WorldContextObject
+				ControlledPawn->GetActorLocation(), // Start Location
+				CachedDestination               // End Location
+			);
+
+			// 更新 Spline
+			if (NavPath && NavPath->PathPoints.Num() > 0)
+			{
+				if (!IsValid(Spline))
+				{
+					UE_LOG(LogTemp, Error, TEXT("Spline is not valid!"));
+					return;
+				}
+
+				Spline->ClearSplinePoints();
+				for (const FVector& PointLoc : NavPath->PathPoints)
+				{
+					if (PointLoc.ContainsNaN())
+					{
+						continue;
+					}
+
+					Spline->AddSplinePoint(PointLoc, ESplineCoordinateSpace::World);
+					DrawDebugSphere(GetWorld(), PointLoc, 8.f, 8, FColor::Green, false, 5.f);
+				}
+				CachedDestination = NavPath->PathPoints[NavPath->PathPoints.Num() - 1];
+				bAutoRunning = true;
+			}
+			else
+			{
+				UE_LOG(LogTemp, Error, TEXT("NavPath is invalid or has no points!"));
+			}
+		}
+		FollowTime = 0.f;
+		bTargeting = false;
+	}
+}
+
+void AAuraPlayerController::AbilityInputTagHeld(FGameplayTag InputTag)
+{
+	if (!InputTag.MatchesTagExact(FAuraGameplayTags::Get().InputTag_RMB))
+	{
+		if (GetASC())
+		{
+			GetASC()->AbilityInputTagHeld(InputTag);
+		}
+		return;
+	}
+	if (bTargeting)
+	{
+		if (GetASC())
+		{
+			GetASC()->AbilityInputTagHeld(InputTag);
+		}
+	}
+	else
+	{
+		FollowTime += GetWorld()->GetDeltaSeconds();
+
+		FHitResult Hit;
+		if (GetHitResultUnderCursor(ECC_Visibility, false, Hit))
+		{
+			CachedDestination = Hit.ImpactPoint;
+		}
+		if (APawn* ControlledPawn = GetPawn())
+		{
+			const FVector WorldDirection = (CachedDestination - ControlledPawn->GetActorLocation()).GetSafeNormal();
+			ControlledPawn->AddMovementInput(WorldDirection);
+		}
+		
+	}
+}
+
+UAuraAbilitySystemComponent* AAuraPlayerController::GetASC()
+{
+
+	if (AuraAbilitySystemComponent== nullptr)
+	{
+		AuraAbilitySystemComponent = Cast<UAuraAbilitySystemComponent>(UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetPawn<APawn>()));
+	}
+	return AuraAbilitySystemComponent;
+}
+
 
 void AAuraPlayerController::PlayerTick(float DeltaTime)
 {
 	Super::PlayerTick(DeltaTime);
 
 	CursorTrace();
+	AutoRun();
 
+}
+void AAuraPlayerController::AutoRun()
+{
+	if (!bAutoRunning)return;
+	if (APawn* ControlledPawn = GetPawn())
+	{
+		if (!IsValid(Spline))
+		{
+			UE_LOG(LogTemp, Error, TEXT("Spline is not valid!"));
+			return;
+		}
+		const FVector LocationOnSpline = Spline->FindLocationClosestToWorldLocation(ControlledPawn->GetActorLocation(), ESplineCoordinateSpace::World);
+		const FVector Direction = Spline->FindDirectionClosestToWorldLocation(LocationOnSpline, ESplineCoordinateSpace::World);
+		ControlledPawn->AddMovementInput(Direction);
 
+		const float DistanceToDestination = (LocationOnSpline - CachedDestination).Length();
+		UE_LOG(LogTemp, Log, TEXT("Distance to destination: %f"), DistanceToDestination);
+		if (DistanceToDestination <= AutoRunAcceptanceRadius)
+		{
+			bAutoRunning = false;
+			UE_LOG(LogTemp, Log, TEXT("AutoRun stopped."));
+		}
+	}
 }
 
 
@@ -155,6 +308,8 @@ void AAuraPlayerController::CursorTrace()
 		}
 	}
 }
+
+
 
 
 

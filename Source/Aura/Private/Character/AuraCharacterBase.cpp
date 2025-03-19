@@ -27,6 +27,11 @@ void AAuraCharacterBase::InitAbilityActorInfo()
 }
 
 
+//	//得到武器上面发射抛射物的Socket的位置
+FVector AAuraCharacterBase::GetCombatSocketLocation()
+{
+	return Weapon->GetSocketLocation(WeaponTipSocketName);
+}
 
 void AAuraCharacterBase::ApplyEffectToSelf(TSubclassOf<UGameplayEffect> GameplayEffect, float level)const
 {
@@ -47,6 +52,16 @@ void AAuraCharacterBase::InitializeDefualtAttributes() const
 	ApplyEffectToSelf(DefaultPrimaryAttribute,1.0f);
 	ApplyEffectToSelf(DefaultSecondaryAttribute, 1.0f);
 	ApplyEffectToSelf(DefaultVitalAttribute, 1.0f);
+}
+
+//这个函数在AuraCharacter.cpp中的PossessedBy中调用 
+void AAuraCharacterBase::AddCharacterAbilities()
+{
+	UAuraAbilitySystemComponent* AuraASC = CastChecked< UAuraAbilitySystemComponent>(AbilitySystemComponent);
+
+	if (!HasAuthority())return;
+	//这里调用AuraAbilitySystemComponent的AddCharacterAbilities（）这个函数。
+	AuraASC->AddCharacterAbilities(StartupAbilities);
 }
 
 UAbilitySystemComponent* AAuraCharacterBase::GetAbilitySystemComponent() const

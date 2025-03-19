@@ -45,7 +45,22 @@ public:
 	FGameplayTag Attribute_Secondary_MaxMana;
 
 
-protected:
+	/*
+	*Input Tag
+	*
+	*/
+
+	FGameplayTag InputTag_LMB;
+	FGameplayTag InputTag_RMB;
+	FGameplayTag InputTag_1;
+	FGameplayTag InputTag_2;
+	FGameplayTag InputTag_3;
+	FGameplayTag InputTag_4;
+
+
+
+
+
 
 private:
 	// 声明静态成员变量，存储单例实例
