@@ -8,6 +8,8 @@
 #include "AbilitySystemInterface.h"
 #include "AbilitySystem/AuraAbilitySystemComponent.h"
 #include "AbilitySystem/AuraAttributeSet.h"
+#include "Components/CapsuleComponent.h"
+#include "Aura/Aura.h"
 #include "AuraCharacterBase.generated.h"
 
 

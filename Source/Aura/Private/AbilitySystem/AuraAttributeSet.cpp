@@ -99,9 +99,11 @@ void UAuraAttributeSet::PreAttributeBaseChange(const FGameplayAttribute& Attribu
 	Super::PreAttributeBaseChange(Attribute, NewValue);
 	//这里的NewValue是BaseValue
 
+
 	if (Attribute == GetHealthAttribute())
 	{
 		NewValue = FMath::Clamp(NewValue, 0.f, GetMaxHealth());
+		
 	}
 
 	if (Attribute == GetManaAttribute())
@@ -190,16 +192,17 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 	FEffectProperties Props;
 	SetEffectProperties(Data, Props);
 
-	/*if (Data.EvaluatedData.Attribute == GetHealthAttribute())
+	if (Data.EvaluatedData.Attribute == GetHealthAttribute())
 	{
-		SetHealth(FMath::Clamp(GetHealth(), 0.f, GetMaxHealth()));
+		//SetHealth(FMath::Clamp(GetHealth(), 0.f, GetMaxHealth()));
+		UE_LOG(LogTemp, Warning, TEXT("Changed Health on %s,Health=%f"),*Props.TargetAvatarActor->GetName(),GetHealth())
 	}
 
-	if (Data.EvaluatedData.Attribute == GetManaAttribute())
+	/*if (Data.EvaluatedData.Attribute == GetManaAttribute())
 	{
 		SetMana(FMath::Clamp(GetMana(), 0.f, GetMaxMana()));
-	}*/
-	
+	}
+	*/
 }
 
 // UAuraAttributeSet类的OnRep_Health函数实现

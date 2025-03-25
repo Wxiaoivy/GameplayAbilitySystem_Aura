@@ -16,9 +16,9 @@ void UAuraProjectileSpell::ActivateAbility(const FGameplayAbilitySpecHandle Hand
 	
 }
 
-void UAuraProjectileSpell::SpawnProjectile()
+void UAuraProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLocation)
 {
-	bool bIsSever = GetAvatarActorFromActorInfo()->HasAuthority();
+	const bool bIsSever = GetAvatarActorFromActorInfo()->HasAuthority();
 	if (!bIsSever)return;
 
 
@@ -27,9 +27,13 @@ void UAuraProjectileSpell::SpawnProjectile()
 	if (CombatInterface)
 	{
 		FVector SocketLocation = CombatInterface->GetCombatSocketLocation();
+		FRotator Rotation = (ProjectileTargetLocation - SocketLocation).Rotation();
+		Rotation.Pitch = 0.f;
+
+
 		FTransform SpawnTransform;//生成抛射物的位置，在ICombatInterface里实现
 		SpawnTransform.SetLocation(SocketLocation);
-
+		SpawnTransform.SetRotation(Rotation.Quaternion());
 
 		AAuraProjectile* Projectile = GetWorld()->SpawnActorDeferred<AAuraProjectile>(
 			ProjectileClass, // 抛射物的类
@@ -41,6 +45,15 @@ void UAuraProjectileSpell::SpawnProjectile()
 
 			ESpawnActorCollisionHandlingMethod::AlwaysSpawn // 碰撞处理方式:表示无论是否有碰撞，都会生成Actor。即使生成位置有其他物体阻挡，抛射物也会被生成。
 		);
+
+
+		const UAbilitySystemComponent* SourceASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetAvatarActorFromActorInfo());
+		FGameplayEffectContextHandle EffectContext = SourceASC->MakeEffectContext();
+		const FGameplayEffectSpecHandle EffectSpecHandle = SourceASC->MakeOutgoingSpec(DamageEffectClass,GetAbilityLevel(), EffectContext);
+		EffectContext.AddInstigator(GetOwningActorFromActorInfo(), GetAvatarActorFromActorInfo());
+		EffectContext.AddSourceObject(this);
+		Projectile->DamageEffectSpecHandle = EffectSpecHandle;
+
 
 		Projectile->FinishSpawning(SpawnTransform);
 	}
