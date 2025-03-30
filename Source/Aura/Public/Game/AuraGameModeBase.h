@@ -9,9 +9,14 @@
 /**
  * 
  */
+class UCharacterClassInfo;
 UCLASS()
 class AURA_API AAuraGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
-	
+public:
+
+	UPROPERTY(EditDefaultsOnly, Category = "CharacterClassDefaultInfo")
+	TObjectPtr<UCharacterClassInfo>CharacterClassInfo;
+
 };

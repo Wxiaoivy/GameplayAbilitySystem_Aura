@@ -192,17 +192,68 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 	FEffectProperties Props;
 	SetEffectProperties(Data, Props);
 
-	if (Data.EvaluatedData.Attribute == GetHealthAttribute())
-	{
-		//SetHealth(FMath::Clamp(GetHealth(), 0.f, GetMaxHealth()));
-		UE_LOG(LogTemp, Warning, TEXT("Changed Health on %s,Health=%f"),*Props.TargetAvatarActor->GetName(),GetHealth())
-	}
+	//if (Data.EvaluatedData.Attribute == GetHealthAttribute())
+	//{
+	//	SetHealth(FMath::Clamp(GetHealth(), 0.f, GetMaxHealth()));
+	//	UE_LOG(LogTemp, Warning, TEXT("Changed Health on %s,Health=%f"),*Props.TargetAvatarActor->GetName(),GetHealth())
+	//}
 
 	/*if (Data.EvaluatedData.Attribute == GetManaAttribute())
 	{
 		SetMana(FMath::Clamp(GetMana(), 0.f, GetMaxMana()));
 	}
 	*/
+	//检查被修改的属性是否是"IncomingDamage"(传入伤害)
+	if (Data.EvaluatedData.Attribute == GetIncomingDamageAttribute())
+	{
+		const float LocalIncomingDamage = GetIncomingDamage();//获取当前的伤害值
+
+		SetIncomingDamage(0);//立即将伤害属性重置为0(为下一次伤害做准备)
+
+		if (LocalIncomingDamage > 0)
+		{
+			const float NewHealth = GetHealth() - LocalIncomingDamage;//计算新的生命值(当前生命值减去伤害)
+
+			SetHealth(FMath::Clamp(NewHealth, 0.f, GetMaxHealth()));//使用FMath::Clamp确保生命值在0和最大值之间
+
+			const bool bFetal = NewHealth <= 0;//检查新生命值是否小于等于0(即是否死亡)
+
+			if (bFetal)
+			{
+				ICombatInterface* CombatInterface = Cast<ICombatInterface>(Props.TargetAvatarActor);
+					if (CombatInterface)
+					{
+						CombatInterface->die();
+					}
+			}
+			else
+			{
+				//如果没有死亡，则尝试激活带有"Effects_HitReact"标签的技能
+				//这会触发受击动画或其他受击反应逻辑
+				FGameplayTagContainer TagContainer;
+				TagContainer.AddTag(FAuraGameplayTags::Get().Effects_HitReact);
+				Props.TargetASC->TryActivateAbilitiesByTag(TagContainer);
+				//Data是引擎提供的原始回调数据，包含所有GameplayEffect执行的原始信息
+				// Props是开发者自定义的结构体，通过SetEffectProperties函数从Data中提取并组织成更易用的形式
+				
+				// 典型情况下，Props可能包含：
+
+					//目标ASC(AbilitySystemComponent)
+
+					//来源ASC
+
+					//目标Actor
+
+					//来源Actor
+
+					//效果规格(EffectSpec)等
+			}
+		}
+
+
+
+
+	}
 }
 
 // UAuraAttributeSet类的OnRep_Health函数实现

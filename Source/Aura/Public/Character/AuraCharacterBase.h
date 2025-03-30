@@ -27,7 +27,21 @@ public:
 
 	TObjectPtr<UAttributeSet>GetAttributeSet() const { return AttributeSet; }
 
+	virtual UAnimMontage* GetHitReactMontage_Implementation()override;
 
+	virtual void die()override;
+
+	//NetMulticast：表示这是一个 多播 RPC，会在服务器调用后同步到所有客户端。
+	//Reliable：保证该 RPC 必定会执行（即使网络条件差，也会重试直到成功）。
+	/*关键点：
+
+		必须在服务器调用。
+
+		使用 _Implementation 实现函数。
+
+		用 Reliable 确保关键逻辑不丢失。*/
+	UFUNCTION(NetMulticast,Reliable)
+	virtual void MulticastHandleDeath();
 
 protected:
 	// Called when the game starts or when spawned
@@ -70,5 +84,6 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Abilities")
 	TArray<TSubclassOf<UGameplayAbility>>StartupAbilities;
 
-	
+	UPROPERTY(EditAnywhere, Category = "Combat")
+	TObjectPtr<UAnimMontage>HitReactMontage;
 };

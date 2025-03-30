@@ -7,6 +7,7 @@
 #include "Actor/AuraProjectile.h"
 #include "Interaction/CombatInterface.h"
 #include "AbilitySystemComponent.h"
+#include "AuraGameplayTags.h"
 #include "AuraProjectileSpell.generated.h"
 
 class UAuraProjectile;

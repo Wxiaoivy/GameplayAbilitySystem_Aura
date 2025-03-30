@@ -10,6 +10,7 @@
 #include "AbilitySystemBlueprintLibrary.h"
 #include "GameFramework/Character.h"
 #include "AuraGameplayTags.h"
+#include "Interaction/CombatInterface.h"
 #include "AuraAttributeSet.generated.h"
 
 /**
@@ -190,9 +191,14 @@ public:
 	ATTRIBUTE_ACCESSORS(UAuraAttributeSet, Mana);
 
 
-	
+	/*
+	*  Meta Attribute
+	*
+	*/
 
-	
+	UPROPERTY(BlueprintReadOnly,  Category = "Vital Attributes")
+	FGameplayAttributeData IncomingDamage;
+	ATTRIBUTE_ACCESSORS(UAuraAttributeSet, IncomingDamage);
 	
 	
 	
