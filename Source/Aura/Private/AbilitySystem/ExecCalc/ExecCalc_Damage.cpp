@@ -110,15 +110,15 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 
 
     //获得CharacterClassInfo
-    //UCharacterClassInfo* CharacterClassInfo = UAuraAbilitySystemLibrary::GetCharacterClassInfo(SourceAvatar);
+    UCharacterClassInfo* CharacterClassInfo = UAuraAbilitySystemLibrary::GetCharacterClassInfo(SourceAvatar);
 
 
     //得到CurveTable中的各等级的Coefficient（下面两行是模板）（ArmorPenetrationCoefficient，EffectArmorCoefficient）
-   /* FRealCurve* ArmorPenetrationCurve = CharacterClassInfo->DamageCalculationCoefficient->FindCurve(FName("ArmorPenetration"), FString());
+    FRealCurve* ArmorPenetrationCurve = CharacterClassInfo->DamageCalculationCoefficient->FindCurve(FName("ArmorPenetration"), FString());
     float ArmorPenetrationCoefficient = ArmorPenetrationCurve->Eval(SourceCombatInterface->GetPlayerLevel());
 
     FRealCurve* EffectArmorCurve = CharacterClassInfo->DamageCalculationCoefficient->FindCurve(FName("EffectArmor"), FString());
-    float EffectArmorCoefficient = ArmorPenetrationCurve->Eval(TargetCombatInterface->GetPlayerLevel());*/
+    float EffectArmorCoefficient = ArmorPenetrationCurve->Eval(TargetCombatInterface->GetPlayerLevel());
     //得到CurveTable中的各等级的Coefficient（ArmorPenetrationCoefficient，EffectArmorCoefficient）
 
 
@@ -130,35 +130,35 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
     Damage *= (100 - EffectArmor* 0.33) / 100;
 
 
-    ///*捕获CriticalHitChance和CriticalHitDamage和CriticalHitResistance的值*/
-    //float SourceCriticalHitChance = 0.f;
-    //ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(DamageStatics().CriticalHitChanceDef, EvaluateParameters, SourceCriticalHitChance);
-    //SourceCriticalHitChance = FMath::Max<float>(SourceCriticalHitChance, 0);
+    /*捕获CriticalHitChance和CriticalHitDamage和CriticalHitResistance的值*/
+    float SourceCriticalHitChance = 0.f;
+    ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(DamageStatics().CriticalHitChanceDef, EvaluateParameters, SourceCriticalHitChance);
+    SourceCriticalHitChance = FMath::Max<float>(SourceCriticalHitChance, 0);
 
-    //float SourceCriticalHitDamage = 0.f;
-    //ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(DamageStatics().CriticalHitDamageDef, EvaluateParameters, SourceCriticalHitDamage);
-    //SourceCriticalHitDamage = FMath::Max<float>(SourceCriticalHitDamage, 0);
+    float SourceCriticalHitDamage = 0.f;
+    ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(DamageStatics().CriticalHitDamageDef, EvaluateParameters, SourceCriticalHitDamage);
+    SourceCriticalHitDamage = FMath::Max<float>(SourceCriticalHitDamage, 0);
 
-    //float TargetCriticalHitResistance = 0.f;
-    //ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(DamageStatics().CriticalHitResistanceDef, EvaluateParameters, TargetCriticalHitResistance);
-    //TargetCriticalHitResistance = FMath::Max<float>(TargetCriticalHitResistance, 0);
+    float TargetCriticalHitResistance = 0.f;
+    ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(DamageStatics().CriticalHitResistanceDef, EvaluateParameters, TargetCriticalHitResistance);
+    TargetCriticalHitResistance = FMath::Max<float>(TargetCriticalHitResistance, 0);
 
-    ///*捕获CriticalHitChance和CriticalHitDamage和CriticalHitResistance的值*/
-
-
-    // //得到CurveTable中的各等级的Coefficient(CriticalHitResistanceCoefficient)
-    //FRealCurve* CriticalHitResistanceCurve = CharacterClassInfo->DamageCalculationCoefficient->FindCurve(FName("CriticalHitResistance"), FString());
-    //float CriticalHitResistanceCoefficient = ArmorPenetrationCurve->Eval(TargetCombatInterface->GetPlayerLevel());
-    ////得到CurveTable中的各等级的Coefficient(CriticalHitResistanceCoefficient)
+    /*捕获CriticalHitChance和CriticalHitDamage和CriticalHitResistance的值*/
 
 
-    ////得到有效的暴击率（本人暴击率-敌军宝鸡抵抗*系数）
-    //const float EffectCriticalHitChance = SourceCriticalHitChance - TargetCriticalHitResistance * CriticalHitResistanceCoefficient;
+     //得到CurveTable中的各等级的Coefficient(CriticalHitResistanceCoefficient)
+    FRealCurve* CriticalHitResistanceCurve = CharacterClassInfo->DamageCalculationCoefficient->FindCurve(FName("CriticalHitResistance"), FString());
+    float CriticalHitResistanceCoefficient = ArmorPenetrationCurve->Eval(TargetCombatInterface->GetPlayerLevel());
+    //得到CurveTable中的各等级的Coefficient(CriticalHitResistanceCoefficient)
 
 
-    ////确定是否暴击，如果暴击的话 伤害就等于2倍伤害+CriticalHitDamage
-    //bool bCriticalHit = FMath::RandRange(1, 100) < EffectCriticalHitChance;
-    //Damage = bCriticalHit ? 2.f * Damage + SourceCriticalHitDamage : Damage;
+    //得到有效的暴击率（本人暴击率-敌军宝鸡抵抗*系数）
+    const float EffectCriticalHitChance = SourceCriticalHitChance - TargetCriticalHitResistance * CriticalHitResistanceCoefficient;
+
+
+    //确定是否暴击，如果暴击的话 伤害就等于2倍伤害+CriticalHitDamage
+    bool bCriticalHit = FMath::RandRange(1, 100) < EffectCriticalHitChance;
+    Damage = bCriticalHit ? 2.f * Damage + SourceCriticalHitDamage : Damage;
 
 
     const FGameplayModifierEvaluatedData EvaluatedData(UAuraAttributeSet::GetIncomingDamageAttribute(), EGameplayModOp::Additive, Damage);
