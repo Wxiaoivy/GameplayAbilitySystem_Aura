@@ -210,6 +210,7 @@ void AAuraPlayerController::PlayerTick(float DeltaTime)
 	AutoRun();
 
 }
+
 void AAuraPlayerController::AutoRun()
 {
 	if (!bAutoRunning)return;
@@ -347,3 +348,17 @@ void AAuraPlayerController::Move(const FInputActionValue& InputActionValue)
 
 }
 
+void AAuraPlayerController::ShowDamageNumber_Implementation(float Damage, ACharacter* TargetCharacter)
+{
+
+	if (IsValid(TargetCharacter) && DamageTextComponentClass)
+	{
+		UDamageTextComponent* DamageTextComponent = NewObject<UDamageTextComponent>(TargetCharacter, DamageTextComponentClass);
+		DamageTextComponent->RegisterComponent();
+		DamageTextComponent->AttachToComponent(TargetCharacter->GetRootComponent(),FAttachmentTransformRules::KeepRelativeTransform);
+		DamageTextComponent->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+		DamageTextComponent->SetDamageText(Damage);
+		
+		
+	}
+}

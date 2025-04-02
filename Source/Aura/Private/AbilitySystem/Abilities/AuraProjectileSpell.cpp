@@ -54,7 +54,7 @@ void UAuraProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLocati
 
 
 		FAuraGameplayTags GameplayTags = FAuraGameplayTags::Get();
-		const float ScaledDamage = Damage.GetValueAtLevel(20/*GetAbilityLevel()*/);
+		const float ScaledDamage = Damage.GetValueAtLevel(10/*GetAbilityLevel()*/);
 
 		//SetByCaller 是一种动态数值传递方式，允许在 Gameplay Effect 执行时传入变量值，而不是硬编码在数据资产里。
 		//给某个技能效果（EffectSpec）动态绑定一个伤害值（50），这个伤害值可以在运行时被修改（比如受技能等级、属性加成等影响）。

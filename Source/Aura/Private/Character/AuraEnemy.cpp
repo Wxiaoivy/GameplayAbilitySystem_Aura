@@ -22,6 +22,8 @@ void AAuraEnemy::UnHighlightActor()
 
 AAuraEnemy::AAuraEnemy()
 {
+
+	bReplicates = true;
 	GetMesh()->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
 
 	AbilitySystemComponent = CreateDefaultSubobject<UAuraAbilitySystemComponent>("AbilitySystemComponent");

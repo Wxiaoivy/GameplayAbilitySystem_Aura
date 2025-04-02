@@ -70,6 +70,17 @@ protected:
 
 	void AddCharacterAbilities();
 
+	/*Dissolve Effect*/
+	void Dissolve();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void StartDissolveTimeline(UMaterialInstanceDynamic* DynamicMatInst);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void StartWeaponDissolveTimeline(UMaterialInstanceDynamic* DynamicMatInst);
+
+	/*Dissolve Effect*/
+
  public:
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	TObjectPtr<USkeletalMeshComponent>Weapon;
@@ -79,6 +90,16 @@ protected:
 
 	UPROPERTY()
 	TObjectPtr <UAttributeSet>AttributeSet;
+	
+	/*Dissolve Effect*/
+
+	UPROPERTY(EditAnywhere,BlueprintReadOnly)
+	TObjectPtr <UMaterialInstance>DissolveMaterialInstance;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TObjectPtr <UMaterialInstance>WeaponDissolveMaterialInstance;
+
+	/*Dissolve Effect*/
 
 private:
 	UPROPERTY(EditAnywhere, Category = "Abilities")

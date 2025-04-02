@@ -2,6 +2,7 @@
 
 
 #include "AbilitySystem/AuraAttributeSet.h"
+#include "Player/AuraPlayerController.h"
 
 UAuraAttributeSet::UAuraAttributeSet()
 {
@@ -160,7 +161,7 @@ void UAuraAttributeSet::SetEffectProperties(const FGameplayEffectModCallbackData
 		// 注意：这里的转换可能失败，如果Pawn不是ACharacter类型的话，但代码中没有处理这种情况。
 		if (Props.SourceController)
 		{
-			Props.SourceCharacter = Cast< ACharacter>(Props.SourceController->GetPawn());
+			Props.SourceCharacter = Cast<ACharacter>(Props.SourceController->GetPawn());
 		}
 	}
 
@@ -248,11 +249,18 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 
 					//效果规格(EffectSpec)等
 			}
+			if (Props.SourceCharacter != Props.TargetCharacter)
+			{
+				AAuraPlayerController* PC = Cast<AAuraPlayerController>(UGameplayStatics::GetPlayerController(Props.SourceCharacter, 0));
+					if (PC)
+					{
+
+						PC->ShowDamageNumber(LocalIncomingDamage, Props.TargetCharacter);
+					}
+			}
+
+
 		}
-
-
-
-
 	}
 }
 

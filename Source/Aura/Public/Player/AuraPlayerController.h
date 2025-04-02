@@ -17,6 +17,7 @@
 #include "Components/SplineComponent.h"
 #include "NavigationSystem.h"
 #include "NavigationPath.h"
+#include "UI/Widget/DamageTextComponent.h"
 #include "AuraPlayerController.generated.h"
 
 
@@ -34,7 +35,9 @@ class AURA_API AAuraPlayerController : public APlayerController
 public:
 	AAuraPlayerController();
 
-	
+	UFUNCTION(Client, Reliable)
+	void ShowDamageNumber(float Damage, ACharacter* TargetCharacter);//该伤害数字在客户端没显示 还没检查出来什么原因
+
 	
 protected:
 	virtual void  BeginPlay()override;
@@ -42,6 +45,8 @@ protected:
 	virtual void SetupInputComponent()override;
 
 	virtual void PlayerTick(float DeltaTime)override;
+
+	
 	
 
 private:
@@ -94,5 +99,8 @@ private:
 
 
 	void AutoRun();
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<UDamageTextComponent>DamageTextComponentClass;
 
 };

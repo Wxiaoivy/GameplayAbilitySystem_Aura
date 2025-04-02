@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "AttributeSet.h"
 #include "AbilitySystemComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 #include "GameplayEffectExtension.h"
 #include "AbilitySystemBlueprintLibrary.h"
@@ -12,6 +13,7 @@
 #include "AuraGameplayTags.h"
 #include "Interaction/CombatInterface.h"
 #include "AuraAttributeSet.generated.h"
+
 
 /**
  * 
@@ -82,7 +84,7 @@ class AURA_API UAuraAttributeSet : public UAttributeSet
 {
 	GENERATED_BODY()
 
-public:
+ public:
 	UAuraAttributeSet();
 
 	// 重写父类的GetLifetimeReplicatedProps函数，用于指定哪些属性需要在网络上复制
