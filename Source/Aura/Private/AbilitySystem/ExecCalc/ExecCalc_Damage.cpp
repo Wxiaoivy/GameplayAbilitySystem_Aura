@@ -94,9 +94,14 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
     TargetBlockChance = FMath::Max<float>(TargetBlockChance, 0);
 
     const bool bBlocked = FMath::RandRange(1, 100) < TargetBlockChance;
+
+    FGameplayEffectContextHandle ContextHandle = Spec.GetContext();
+    UAuraAbilitySystemLibrary::SetIsBlockedHit(ContextHandle, bBlocked);//传递bBlocked，到蓝图里调用
+
     Damage = bBlocked ? Damage / 2 : Damage;
     /*已经捕获BlockChance，如果成功Block则伤害减半*/
-
+    
+     
 
     /*捕获Armor和ArmorPenetration的值*/
     float TargetArmor = 0.f;
@@ -158,6 +163,7 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 
     //确定是否暴击，如果暴击的话 伤害就等于2倍伤害+CriticalHitDamage
     bool bCriticalHit = FMath::RandRange(1, 100) < EffectCriticalHitChance;
+    UAuraAbilitySystemLibrary::SetIsCriticalHit(ContextHandle, bCriticalHit);//传递bCriticalHit,到蓝图里调用
     Damage = bCriticalHit ? 2.f * Damage + SourceCriticalHitDamage : Damage;
 
 

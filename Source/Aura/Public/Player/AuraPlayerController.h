@@ -35,8 +35,8 @@ class AURA_API AAuraPlayerController : public APlayerController
 public:
 	AAuraPlayerController();
 
-	UFUNCTION(Client, Reliable)
-	void ShowDamageNumber(float Damage, ACharacter* TargetCharacter);//该伤害数字在客户端没显示 还没检查出来什么原因
+	UFUNCTION(/*Client, Reliable*/)
+	void ShowDamageNumber(float Damage, ACharacter* TargetCharacter, bool bBlockedHit, bool bCriticalHit);//该伤害数字在客户端没显示 还没检查出来什么原因
 
 	
 protected:

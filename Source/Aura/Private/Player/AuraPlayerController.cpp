@@ -348,7 +348,7 @@ void AAuraPlayerController::Move(const FInputActionValue& InputActionValue)
 
 }
 
-void AAuraPlayerController::ShowDamageNumber_Implementation(float Damage, ACharacter* TargetCharacter)
+void AAuraPlayerController::ShowDamageNumber(float Damage, ACharacter* TargetCharacter, bool bBlockedHit, bool bCriticalHit)
 {
 
 	if (IsValid(TargetCharacter) && DamageTextComponentClass)
@@ -357,7 +357,7 @@ void AAuraPlayerController::ShowDamageNumber_Implementation(float Damage, AChara
 		DamageTextComponent->RegisterComponent();
 		DamageTextComponent->AttachToComponent(TargetCharacter->GetRootComponent(),FAttachmentTransformRules::KeepRelativeTransform);
 		DamageTextComponent->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
-		DamageTextComponent->SetDamageText(Damage);
+		DamageTextComponent->SetDamageText(Damage, bBlockedHit, bCriticalHit);
 		
 		
 	}

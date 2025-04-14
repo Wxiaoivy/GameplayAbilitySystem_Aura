@@ -249,6 +249,9 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 
 					//效果规格(EffectSpec)等
 			}
+			bool bIsBlockedHit = UAuraAbilitySystemLibrary::IsBlockedHit(Props.EffectContextHandle);
+			bool bIsCriticalHit = UAuraAbilitySystemLibrary::IsCriticalHit(Props.EffectContextHandle);
+
 
 			if (Props.SourceCharacter != Props.TargetCharacter)
 			{
@@ -256,7 +259,7 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 					if (PC)
 					{
 
-						PC->ShowDamageNumber(LocalIncomingDamage, Props.TargetCharacter);
+						PC->ShowDamageNumber(LocalIncomingDamage, Props.TargetCharacter, bIsBlockedHit, bIsCriticalHit);
 					}
 			}
 
