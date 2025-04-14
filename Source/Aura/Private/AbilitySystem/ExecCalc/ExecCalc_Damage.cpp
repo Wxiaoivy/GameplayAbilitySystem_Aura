@@ -128,11 +128,11 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 
 
     //得到EffectArmor（Target的有效护甲），该变量是等于Tatget的护甲减去（Source的护甲穿透乘以一个系数）
-    const float EffectArmor = TargetArmor *= (100 - SourceArmorPenetration* 0.25) / 100;
+    const float EffectArmor = TargetArmor *= (100 - SourceArmorPenetration* ArmorPenetrationCoefficient) / 100;
 
 
     //算出Damage，有效护甲会抵抗伤害（抵抗的伤害是以 有效护甲*一个系数 来计算的）
-    Damage *= (100 - EffectArmor* 0.33) / 100;
+    Damage *= (100 - EffectArmor* EffectArmorCoefficient) / 100;
 
 
     /*捕获CriticalHitChance和CriticalHitDamage和CriticalHitResistance的值*/
