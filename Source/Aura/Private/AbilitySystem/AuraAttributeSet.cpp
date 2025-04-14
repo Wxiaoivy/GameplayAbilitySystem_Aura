@@ -249,6 +249,7 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 
 					//效果规格(EffectSpec)等
 			}
+
 			if (Props.SourceCharacter != Props.TargetCharacter)
 			{
 				AAuraPlayerController* PC = Cast<AAuraPlayerController>(UGameplayStatics::GetPlayerController(Props.SourceCharacter, 0));
