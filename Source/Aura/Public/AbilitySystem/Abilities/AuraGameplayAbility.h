@@ -20,8 +20,6 @@ public:
 	FGameplayTag StartupInputTag;
 
 
-	UPROPERTY(EditDefaultsOnly, Category = "Combat")
-	FScalableFloat Damage;
 
 	
 };

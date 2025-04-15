@@ -8,6 +8,7 @@
 #include "Interaction/CombatInterface.h"
 #include "AbilitySystemComponent.h"
 #include "AuraGameplayTags.h"
+#include "AbilitySystem/Abilities/AuraDamageGameplayAbility.h"
 #include "AuraProjectileSpell.generated.h"
 
 class UAuraProjectile;
@@ -15,7 +16,7 @@ class UAuraProjectile;
  * 
  */
 UCLASS()
-class AURA_API UAuraProjectileSpell : public UAuraGameplayAbility
+class AURA_API UAuraProjectileSpell : public UAuraDamageGameplayAbility
 {
 	GENERATED_BODY()
 protected:
@@ -28,7 +29,6 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	void SpawnProjectile(const FVector& ProjectileTargetLocation);
 
-	UPROPERTY(EditDefaultsOnly)
-	TSubclassOf<UGameplayEffect>DamageEffectClass;
+
 
 };
