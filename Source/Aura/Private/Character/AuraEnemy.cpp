@@ -49,7 +49,17 @@ void AAuraEnemy::BeginPlay()
 	
 	GetCharacterMovement()->MaxWalkSpeed = BaseWalkSpeed;
 	InitAbilityActorInfo();
-	UAuraAbilitySystemLibrary::GiveStartupAbilities(this, AbilitySystemComponent);
+	if (HasAuthority())
+	{ 
+		//GiveStartupAbilities 是服务器权威逻辑：
+		//BeginPlay 在客户端和服务器都会调用，但技能数据只需服务器初始化一次，然后通过网络同步
+
+		//如果不加 HasAuthority() 的风险:
+		//客户端可能会尝试给自己赋予技能，但无法同步到其他玩家，导致状态不一致。
+		// 可能触发冗余操作（如多次初始化技能）。
+		UAuraAbilitySystemLibrary::GiveStartupAbilities(this, AbilitySystemComponent);
+	}
+	
 
 
 	if (UAuraUserWidget* AuraUserWidget = Cast<UAuraUserWidget>(HealthBar->GetUserWidgetObject()))
@@ -109,11 +119,21 @@ void AAuraEnemy::InitAbilityActorInfo()
 
 	AbilitySystemComponent->InitAbilityActorInfo(this, this);
 	Cast<UAuraAbilitySystemComponent>(AbilitySystemComponent)->AbilityActorInfoSet();
-	InitializeDefualtAttributes();
+	if (HasAuthority())
+	{
+		InitializeDefualtAttributes();
+	}
+	//InitializeDefaultAttributes 是服务器权威逻辑：
+	//初始化默认属性（如血量、攻击力）必须由服务器完成，客户端只需接收同步后的结果。
+	//如果客户端也能初始化属性，可能导致数值被篡改（例如客户端修改自己的血量）。
+
+	//InitAbilityActorInfo 的其他部分无需权限检查：
+    //AbilitySystemComponent->InitAbilityActorInfo(this, this) 和 AbilityActorInfoSet() 是基础设置，客户端和服务器均需执行（例如绑定ASC到Actor。
 }
 
 void AAuraEnemy::InitializeDefualtAttributes() const
 {
+	//InitializeDefaultAttributes应该在服务器完成 所以应该检查权威 HasAuthority()
 	UAuraAbilitySystemLibrary::InitializeDefaultAttributes(this, CharacterClass, Level, AbilitySystemComponent);
 }
 

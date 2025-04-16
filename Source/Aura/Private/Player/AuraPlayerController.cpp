@@ -348,7 +348,12 @@ void AAuraPlayerController::Move(const FInputActionValue& InputActionValue)
 
 }
 
-void AAuraPlayerController::ShowDamageNumber(float Damage, ACharacter* TargetCharacter, bool bBlockedHit, bool bCriticalHit)
+bool AAuraPlayerController::ShowDamageNumber_Validate(float Damage, ACharacter* TargetCharacter, bool bBlockedHit, bool bCriticalHit)
+{
+	return Damage >= 0 && IsValid(TargetCharacter);
+}
+
+void AAuraPlayerController::ShowDamageNumber_Implementation(float Damage, ACharacter* TargetCharacter, bool bBlockedHit, bool bCriticalHit)
 {
 
 	if (IsValid(TargetCharacter) && DamageTextComponentClass)

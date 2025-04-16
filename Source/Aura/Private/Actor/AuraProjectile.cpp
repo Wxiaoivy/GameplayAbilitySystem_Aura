@@ -32,20 +32,35 @@ void AAuraProjectile::BeginPlay()
 
 	Sphere->OnComponentBeginOverlap.AddDynamic(this, &AAuraProjectile::OnSphereBeginOverlap);
 
+	//UGameplayStatics::SpawnSoundAttached
+	//这是 UE 提供的一个静态函数，用于在场景中播放声音并将其附加（Attach）到某个组件上。
+    //当声音被附加到组件时，它会跟随该组件移动（比如角色移动时声音也会跟着移动）。
 	LoopingSoundComponent = UGameplayStatics::SpawnSoundAttached(LoopingSound, GetRootComponent());
 }
 
 void AAuraProjectile::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+
+	// 防止投射物（Projectile）对“造成伤害的源头”（Effect Causer）自身造成伤害，通常用于避免自伤或逻辑冲突的情况。
+	//DamageEffectSpecHandle.Data.IsValid()  判断这个是因为AuraProjectileSpell类里的SpawnProjectile函数里会判断是否为服务器端， 
+	// 如果是客户端就直接返回 并不会生成DamageEffectSpecHandle，所以这种情况下DamageEffectSpecHandle.Data是无效的，
+	//因为Actor被标记为bReplicated = true后  Actor 的生成销毁和变换都会被引擎服务器端自动处理并复制
+	if (DamageEffectSpecHandle.Data.IsValid() && DamageEffectSpecHandle.Data.Get()->GetContext().GetEffectCauser() == OtherActor)
+	{
+		return;
+	}
 	//bHit = true; 的作用是标记投射物已经发生了碰撞。(详见有道云笔记数据传递和网络同步)
 	// 由于网络同步的问题，客户端可能会在触发 OnSphereBeginOverlap 之前收到服务器的 Destroy() 调用，导致 OnSphereBeginOverlap 没有被执行。
 	// 因此，bHit 的设计是为了确保即使客户端提前销毁了 Actor，也能正确处理碰撞逻辑。
-	bHit = true;
-	LoopingSoundComponent->Stop();
-	UGameplayStatics::PlaySoundAtLocation(this,ImpactSound,GetActorLocation(),FRotator::ZeroRotator);
-	UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ImpactEffect, GetActorLocation());
+	if (!bHit)
+	{
+		LoopingSoundComponent->Stop();
+		UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation(), FRotator::ZeroRotator);
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ImpactEffect, GetActorLocation());
+	}
+	
 
-	if (HasAuthority())
+	if (HasAuthority())//HasAuthority()检查当前是否为服务器（Authority）。只有服务器能处理伤害逻辑和销毁 Actor，客户端需等待服务器同步。
 	{
 		//获取TargetASC:
 		//可以遍历 Overlap 结果，获取所有受影响的 Actor 的 ASC：
@@ -54,20 +69,23 @@ void AAuraProjectile::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedCompon
 			TargetASC->ApplyGameplayEffectSpecToSelf(*DamageEffectSpecHandle.Data.Get());
 		}
 		//Destroy()这是一个主动调用的函数，用于销毁 AActor 实例。
-		//调用 Destroy() 后，引擎会自动调用 Destroyed()。Destroyed();
+		//调用 Destroy() 后，引擎会自动调用 Destroyed()。
 		Destroy();
 		
 	}
-	/*else
+	else
 	{
-		bHit = true;
-	}*/
+		//bHit = true 被放在 else 块中（即客户端逻辑分支），而不是直接放在碰撞检测之后，这是为了 严格区分服务器和客户端的职责，并确保网络同步的正确性。
+		bHit = true;// 关于这个bHit具体去看DeepSeek搜索的   “Unreal Engine中的网络同步相关知识点（P160）”
+	}
 }
 
 void AAuraProjectile::Destroyed()
 {
 
-	if (!bHit && !HasAuthority())
+	if (!bHit && !HasAuthority())//!bHit && !HasAuthority()
+		                         //!bHit：说明客户端在收到销毁通知前未触发 OnSphereBeginOverlap（可能因网络延迟）。
+		                         //!HasAuthority()：仅在客户端执行补播逻辑（服务器已正常处理过碰撞）。
 	{
 		UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation(), FRotator::ZeroRotator);
 		UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ImpactEffect, GetActorLocation());

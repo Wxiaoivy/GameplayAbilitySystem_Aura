@@ -35,7 +35,11 @@ class AURA_API AAuraPlayerController : public APlayerController
 public:
 	AAuraPlayerController();
 
-	UFUNCTION(/*Client, Reliable*/)
+
+	 /*Client RPC 必须严格遵循 _Implementation + _Validate 的命名规则.
+		使用 WithValidation 时，必须实现验证函数。
+		参数列表在声明和实现中必须完全一致。*/
+	UFUNCTION(Client, Reliable, WithValidation)//ShowDamageNumber 是 Client RPC，只能在服务器调用并同步到客户端。
 	void ShowDamageNumber(float Damage, ACharacter* TargetCharacter, bool bBlockedHit, bool bCriticalHit);//该伤害数字在客户端没显示 还没检查出来什么原因
 
 	
