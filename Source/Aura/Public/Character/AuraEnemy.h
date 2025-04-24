@@ -10,12 +10,14 @@
 #include "Components/WidgetComponent.h"
 #include "UI/WidgetController/OverlayWidgetController.h"
 #include "AuraGameplayTags.h"
-
+#include "AI/AuraAIController.h"
+#include "BehaviorTree/BehaviorTree.h"
 #include "AuraEnemy.generated.h"
 
 /**
  * 
  */
+class UBehaviorTreeComponent;
 class UCharacterClassInfo;
 UCLASS()
 class AURA_API AAuraEnemy : public AAuraCharacter , public IEnemyInterface
@@ -28,6 +30,8 @@ public:
 	virtual void HighlightActor() override;
 	virtual void UnHighlightActor() override;
 	/*End Enemy Interface*/
+
+	virtual void PossessedBy(AController* NewController)override;//PossessedBy()是角色被控制器接管时自动触发；（角色出生，重生，控制器变更都会触发）
 
 	UPROPERTY(BlueprintAssignable)
 	FOnAttributeChangedSignature  OnHealthChanged;
@@ -69,5 +73,9 @@ protected:
 	UPROPERTY(VisibleAnywhere,BlueprintReadOnly)
 	UWidgetComponent* HealthBar;
 
+	UPROPERTY(EditAnywhere, Category="AI")
+	TObjectPtr<UBehaviorTree>BehaviorTree;
 
+	UPROPERTY()
+	TObjectPtr<AAuraAIController>AuraAIController;
 };
