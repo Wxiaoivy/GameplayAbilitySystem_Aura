@@ -23,6 +23,12 @@ void AAuraEffectActor::BeginPlay()
 // ApplyEffectToTarget函数的实现，用于向目标应用一个游戏效果
 void AAuraEffectActor::ApplyEffectToTarget(AActor* TargetActor, TSubclassOf<UGameplayEffect> GameplayEffectClass)
 {
+	
+	bool bIsEnemy = TargetActor->ActorHasTag(FName("Enemy"));
+	if (bIsEnemy && !bApplyEffectOnEnemies) return;  //如果确定是敌人 而且不需要应用Effect就直接跳过
+	
+
+
 	// 获取目标的能力系统组件
 	UAbilitySystemComponent* TargetASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(TargetActor);
 
@@ -54,13 +60,21 @@ void AAuraEffectActor::ApplyEffectToTarget(AActor* TargetActor, TSubclassOf<UGam
 		ActiveEffectHandles.Add(ActiveEffectHandle, TargetASC);
 	}
 
-
+	if (!bIsInfinite)
+	{
+		Destroy();
+	}
 
 
 }
 
 void AAuraEffectActor::OnOverlap(AActor* TargetActor)
 {
+
+
+	bool bIsEnemy = TargetActor->ActorHasTag(FName("Enemy"));
+	if (bIsEnemy && !bApplyEffectOnEnemies) return;  //如果确定是敌人 而且不需要应用Effect就直接跳过
+
 	if (InstantEffectApplicationPolicy == EEffectApplicationPolicy::ApplyOnOverlap)
 	{
 		ApplyEffectToTarget(TargetActor, InstantGameplayEffectClass);
@@ -80,6 +94,12 @@ void AAuraEffectActor::OnOverlap(AActor* TargetActor)
 
 void AAuraEffectActor::OnEndOverlap(AActor* TargetActor)
 {
+
+
+	bool bIsEnemy = TargetActor->ActorHasTag(FName("Enemy"));
+	if (bIsEnemy && !bApplyEffectOnEnemies) return;  //如果确定是敌人 而且不需要应用Effect就直接跳过
+
+
 	if (InstantEffectApplicationPolicy == EEffectApplicationPolicy::ApplyOnEndOverlap)
 	{
 		ApplyEffectToTarget(TargetActor, InstantGameplayEffectClass);

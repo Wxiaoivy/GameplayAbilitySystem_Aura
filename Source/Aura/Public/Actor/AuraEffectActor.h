@@ -56,8 +56,12 @@ protected:
 
 	
 
+	/*UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Applied Effects")
+	bool bDestoryOnEffectAppilication = false;*/  //暂时没用到这个布尔值
+
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Applied Effects")
-	bool bDestoryOnEffectRemoval = false;
+	bool bApplyEffectOnEnemies = false;
 
 
 	// 功能：存储一个游戏效果的类，这个效果可以瞬间应用
