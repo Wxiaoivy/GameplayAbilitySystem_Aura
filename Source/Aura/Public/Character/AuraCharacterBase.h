@@ -27,9 +27,9 @@ public:
 
 	TObjectPtr<UAttributeSet>GetAttributeSet() const { return AttributeSet; }
 
-	virtual UAnimMontage* GetHitReactMontage_Implementation()override;
+	
 
-	virtual void die()override;
+	
 
 	//NetMulticast：表示这是一个 多播 RPC，会在服务器调用后同步到所有客户端。
 	//Reliable：保证该 RPC 必定会执行（即使网络条件差，也会重试直到成功）。
@@ -62,8 +62,7 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	FName WeaponTipSocketName;
 
-	//得到武器上面发射抛射物的Socket的位置
-	virtual FVector GetCombatSocketLocation()override;
+	
 
 	virtual void ApplyEffectToSelf(TSubclassOf<UGameplayEffect> GameplayEffect, float level)const;
 	virtual void InitializeDefualtAttributes()const;
@@ -90,7 +89,22 @@ protected:
 
 	UPROPERTY()
 	TObjectPtr <UAttributeSet>AttributeSet;
-	
+
+	/*CombatInterface*/
+
+	//Unreal Header Tool(UHT) 会自动生成以下代码：
+	//	一个纯虚函数 GetCombatSocketLocation()（必须由 C++ 子类实现）。
+	//	一个默认实现 GetCombatSocketLocation_Implementation()（可选覆盖）。
+	//	一个全局执行函数 Execute_GetCombatSocketLocation(UObject * Object)（用于动态调用）。
+	FVector GetCombatSocketLocation_Implementation();//得到武器上面发射抛射物的Socket的位置
+	virtual void die()override;
+	UAnimMontage* GetHitReactMontage_Implementation();
+	bool IsDead_Implementation();
+	AActor* GetAvatar_Implementation();
+
+	/*CombatInterface*/
+
+
 	/*Dissolve Effect*/
 
 	UPROPERTY(EditAnywhere,BlueprintReadOnly)
@@ -100,6 +114,10 @@ protected:
 	TObjectPtr <UMaterialInstance>WeaponDissolveMaterialInstance;
 
 	/*Dissolve Effect*/
+
+protected:
+	bool bIsDead = false;
+
 
 private:
 	UPROPERTY(EditAnywhere, Category = "Abilities")

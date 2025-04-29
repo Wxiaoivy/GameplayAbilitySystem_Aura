@@ -34,7 +34,7 @@ void AAuraCharacterBase::InitAbilityActorInfo()
 
 
 //	//得到武器上面发射抛射物的Socket的位置
-FVector AAuraCharacterBase::GetCombatSocketLocation()
+FVector AAuraCharacterBase::GetCombatSocketLocation_Implementation()
 {
 	return Weapon->GetSocketLocation(WeaponTipSocketName);
 }
@@ -104,6 +104,8 @@ void AAuraCharacterBase::MulticastHandleDeath_Implementation()
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	Dissolve();
+	bIsDead = true;
+
 }
 
 void AAuraCharacterBase::Dissolve()
@@ -123,5 +125,14 @@ void AAuraCharacterBase::Dissolve()
 	}
 }
 
+AActor* AAuraCharacterBase::GetAvatar_Implementation()
+{
+	return this;
+}
+
+bool AAuraCharacterBase::IsDead_Implementation()
+{
+	return bIsDead;
+}
 
 

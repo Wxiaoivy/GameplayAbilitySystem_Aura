@@ -29,7 +29,15 @@ public:
 	/*Enemy Interface*/
 	virtual void HighlightActor() override;
 	virtual void UnHighlightActor() override;
+     void SetCombatTarget_Implementation(AActor* InCombatTarget);
+	 AActor* GetCombatTarget_Implementation()const ;
 	/*End Enemy Interface*/
+
+	/*Combat Interface*/
+	virtual int32 GetPlayerLevel() override;
+	virtual void die()override;
+	
+	/*End Combat Interface*/
 
 	virtual void PossessedBy(AController* NewController)override;//PossessedBy()是角色被控制器接管时自动触发；（角色出生，重生，控制器变更都会触发）
 
@@ -49,8 +57,9 @@ public:
 
 	UPROPERTY(EditAnywhere,BlueprintReadOnly, Category = "Combat")
 	float LifeSpan = 5.f;
-
-	virtual void die()override;
+	
+	UPROPERTY(BlueprintReadWrite, Category = "Combat")
+	TObjectPtr<AActor>CombatTarget;
 
 
 protected:
@@ -66,9 +75,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "CharacterClassDefaultInfo")
 	ECharacterClass CharacterClass = ECharacterClass::Warrior;
 
-	/*Combat Interface*/
-	virtual int32 GetPlayerLevel() override;
-	/*End Combat Interface*/
+	
 
 	UPROPERTY(VisibleAnywhere,BlueprintReadOnly)
 	UWidgetComponent* HealthBar;
@@ -78,4 +85,6 @@ protected:
 
 	UPROPERTY()
 	TObjectPtr<AAuraAIController>AuraAIController;
+
+	
 };

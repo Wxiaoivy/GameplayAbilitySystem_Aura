@@ -20,6 +20,18 @@ void AAuraEnemy::UnHighlightActor()
 	Weapon->SetRenderCustomDepth(false);
 }
 
+void AAuraEnemy::SetCombatTarget_Implementation(AActor* InCombatTarget)
+{
+	CombatTarget = InCombatTarget;
+}
+
+AActor* AAuraEnemy::GetCombatTarget_Implementation() const
+{
+	return CombatTarget;
+}
+
+
+
 //PossessedBy()是角色被控制器接管时自动触发；（角色出生，重生，控制器变更 都会触发）
 void AAuraEnemy::PossessedBy(AController* NewController)
 {
@@ -68,6 +80,8 @@ void AAuraEnemy::die()
 	SetLifeSpan(LifeSpan);
 }
 
+
+
 void AAuraEnemy::BeginPlay()
 {
 	Super::BeginPlay();
@@ -83,7 +97,7 @@ void AAuraEnemy::BeginPlay()
 		//如果不加 HasAuthority() 的风险:
 		//客户端可能会尝试给自己赋予技能，但无法同步到其他玩家，导致状态不一致。
 		// 可能触发冗余操作（如多次初始化技能）。
-		UAuraAbilitySystemLibrary::GiveStartupAbilities(this, AbilitySystemComponent);
+		UAuraAbilitySystemLibrary::GiveStartupAbilities(this, AbilitySystemComponent, CharacterClass);
 	}
 	
 

@@ -28,7 +28,11 @@ void UAuraProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLocati
 	ICombatInterface* CombatInterface = Cast<ICombatInterface>(GetAvatarActorFromActorInfo());
 	if (CombatInterface)
 	{
-		FVector SocketLocation = CombatInterface->GetCombatSocketLocation();
+		/*	Execute_GetCombatSocketLocation 是 静态全局函数，它的作用是：
+				接收一个 UObject* 参数（通常是实现了该接口的对象）。
+				检查该对象是否实现了 ICombatInterface。
+				调用该对象的 GetCombatSocketLocation() 或 _Implementation 版本。*/
+		FVector SocketLocation = ICombatInterface::Execute_GetCombatSocketLocation(GetAvatarActorFromActorInfo());
 		FRotator Rotation = (ProjectileTargetLocation - SocketLocation).Rotation();
 		Rotation.Pitch = 0.f;
 
