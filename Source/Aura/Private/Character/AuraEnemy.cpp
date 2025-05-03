@@ -142,14 +142,26 @@ void AAuraEnemy::BeginPlay()
 		OnHealthChanged.Broadcast(AuraAS->GetHealth());
 		OnMaxHealthChanged.Broadcast(AuraAS->GetMaxHealth());
 	}
-
+	 
 }
 
-void AAuraEnemy::HitReactTagChanged(const FGameplayTag CallbackTag, int32 NewCount)
+void AAuraEnemy::HitReactTagChanged(const FGameplayTag CallbackTag, int32 NewCount)//CallbackTag：触发此函数调用的 GameplayTag（如 State.HitReacting）。NewCount：该标签当前的数量（用于判断是否进入或退出受击状态）。
 {
-	bHitReacting = NewCount > 0;
-	GetCharacterMovement()->MaxWalkSpeed = bHitReacting ? 0.f : BaseWalkSpeed;
+	bHitReacting = NewCount > 0;//如果 NewCount > 0，表示标签被添加，设置 bHitReacting 为 true（敌人正在受击）。如果 NewCount == 0，表示标签被移除，设置 bHitReacting 为 false（受击结束）。
+
+	GetCharacterMovement()->MaxWalkSpeed = bHitReacting ? 0.f : BaseWalkSpeed;//控制敌人移动速度。如果 bHitReacting 为 true，设置 MaxWalkSpeed 为 0（受击时敌人停止移动）。
+
+	if (AuraAIController && AuraAIController->GetBlackboardComponent())//安全检查：检查 AuraAIController（敌人的 AI 控制器）是否存在。检查该控制器的 BlackboardComponent（行为树的黑板）是否存在。
+        /*为什么需要：
+		客户端可能没有 AIController（仅在服务器有效）。
+		行为树未配置黑板时，GetBlackboardComponent() 返回 nullptr*/
+	{
+		AuraAIController->GetBlackboardComponent()->SetValueAsBool(FName("HitReacting"), bHitReacting);//将受击状态同步到行为树的黑板中。
+		                                                                                              //键名："HitReacting"（需与行为树中定义的键名一致）。
+																									  // 键值：bHitReacting（true / false）
+	}
 }
+	
 
 void AAuraEnemy::InitAbilityActorInfo()
 {

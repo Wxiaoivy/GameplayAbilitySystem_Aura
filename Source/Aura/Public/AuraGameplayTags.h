@@ -94,6 +94,15 @@ public:
 	*/
 	FGameplayTag Abilities_Attack;
 
+	/*
+	*Montage Tag
+	*
+	*/
+	FGameplayTag Montage_Attack_Weapon;
+	FGameplayTag Montage_Attack_RightHand;
+	FGameplayTag Montage_Attack_LeftHand;
+
+
 
 private:
 	// 声明静态成员变量，存储单例实例

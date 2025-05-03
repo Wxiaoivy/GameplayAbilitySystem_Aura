@@ -278,10 +278,16 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 
 			if (Props.SourceCharacter != Props.TargetCharacter)
 			{
-				AAuraPlayerController* PC = Cast<AAuraPlayerController>(Props.SourceCharacter->GetController());
-					if (PC)
+			
+				if (AAuraPlayerController* PC = Cast<AAuraPlayerController>(Props.SourceCharacter->GetController()))
 					{
-
+						//对于玩家是攻击者(SourceCharacter)：当玩家攻击别人时，可能想在攻击目标身上显示造成的伤害数字
+					     PC->ShowDamageNumber(LocalIncomingDamage, Props.TargetCharacter, bIsBlockedHit, bIsCriticalHit);
+						 return;
+					}
+				if (AAuraPlayerController* PC = Cast<AAuraPlayerController>(Props.TargetCharacter->GetController()))
+					{  
+					    //对于玩家是受击者(TargetCharacter)：当玩家被攻击时，可能想在自己角色身上显示受到的伤害数字
 						PC->ShowDamageNumber(LocalIncomingDamage, Props.TargetCharacter, bIsBlockedHit, bIsCriticalHit);
 					}
 			}
@@ -296,7 +302,7 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 // GAMEPLAYATTRIBUTE_REPNOTIFY宏用于处理属性复制的通知逻辑
 void UAuraAttributeSet::OnRep_Health(const FGameplayAttributeData& OldHealth) const
 {
-	//GAMEPLAYATTRIBUTE_REPNOTIFY这个宏专门用于处理游戏玩法属性（Gameplay Attributes）复制时的通知。
+	//GAMEPLAYATTRIBUTE_REPNOTIFY这个宏专门用于处理游戏玩法属性（Gameplay Attributes）复制时的通知
 	GAMEPLAYATTRIBUTE_REPNOTIFY(UAuraAttributeSet, Health, OldHealth);
 }
 

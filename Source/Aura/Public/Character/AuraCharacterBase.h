@@ -62,6 +62,11 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	FName WeaponTipSocketName;
 
+	UPROPERTY(EditAnywhere, Category = "Combat")
+	FName LeftHandSocketName;
+
+	UPROPERTY(EditAnywhere, Category = "Combat")
+	FName RightHandSocketName;
 	
 
 	virtual void ApplyEffectToSelf(TSubclassOf<UGameplayEffect> GameplayEffect, float level)const;
@@ -96,11 +101,12 @@ protected:
 	//	一个纯虚函数 GetCombatSocketLocation()（必须由 C++ 子类实现）。
 	//	一个默认实现 GetCombatSocketLocation_Implementation()（可选覆盖）。
 	//	一个全局执行函数 Execute_GetCombatSocketLocation(UObject * Object)（用于动态调用）。
-	FVector GetCombatSocketLocation_Implementation();//得到武器上面发射抛射物的Socket的位置
+	FVector GetCombatSocketLocation_Implementation(const FGameplayTag& MontageTag);//得到武器上面发射抛射物的Socket的位置
 	virtual void die()override;
 	UAnimMontage* GetHitReactMontage_Implementation();
 	bool IsDead_Implementation();
 	AActor* GetAvatar_Implementation();
+	TArray<FTaggedMontage>GetAttackMontages_Implementation();
 
 	/*CombatInterface*/
 
@@ -114,6 +120,10 @@ protected:
 	TObjectPtr <UMaterialInstance>WeaponDissolveMaterialInstance;
 
 	/*Dissolve Effect*/
+
+
+	UPROPERTY(EditAnywhere, Category = "Combat")
+	TArray <FTaggedMontage> AttackMontages;
 
 protected:
 	bool bIsDead = false;
