@@ -67,5 +67,5 @@ public:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
     TArray<FTaggedMontage>GetAttackMontages();
 
-	virtual void die() = 0;
+	virtual void die() = 0; //主要逻辑写在AuraCharacterBase里面的
 };
