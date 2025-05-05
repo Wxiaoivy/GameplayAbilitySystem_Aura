@@ -2,6 +2,7 @@
 
 
 #include "Actor/AuraProjectile.h"
+#include "AbilitySystem/AuraAbilitySystemLibrary.h"
 
 
 AAuraProjectile::AAuraProjectile()
@@ -49,6 +50,13 @@ void AAuraProjectile::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedCompon
 	{
 		return;
 	}
+
+	//检查攻击者（EffectCauser）和目标（OtherActor）是否是友方关系。如果是友方，则直接返回，不造成伤害。
+	if (!UAuraAbilitySystemLibrary::IsNotFriend(DamageEffectSpecHandle.Data.Get()->GetContext().GetEffectCauser(),OtherActor))
+	{
+		return;
+	}
+
 	//bHit = true; 的作用是标记投射物已经发生了碰撞。(详见有道云笔记数据传递和网络同步)
 	// 由于网络同步的问题，客户端可能会在触发 OnSphereBeginOverlap 之前收到服务器的 Destroy() 调用，导致 OnSphereBeginOverlap 没有被执行。
 	// 因此，bHit 的设计是为了确保即使客户端提前销毁了 Actor，也能正确处理碰撞逻辑。
