@@ -95,14 +95,21 @@ public:
 	FGameplayTag Abilities_Attack;
 
 	/*
+	*CombatSocket Tag
+	*
+	*/
+	FGameplayTag CombatSocket_Weapon;
+	FGameplayTag CombatSocket_RightHand;
+	FGameplayTag CombatSocket_LeftHand;
+
+	/*
 	*Montage Tag
 	*
 	*/
-	FGameplayTag Montage_Attack_Weapon;
-	FGameplayTag Montage_Attack_RightHand;
-	FGameplayTag Montage_Attack_LeftHand;
-
-
+	FGameplayTag Montage_Attack_1;
+	FGameplayTag Montage_Attack_2;
+	FGameplayTag Montage_Attack_3;
+	FGameplayTag Montage_Attack_4;
 
 private:
 	// 声明静态成员变量，存储单例实例

@@ -36,8 +36,19 @@ void AAuraProjectile::BeginPlay()
 	//UGameplayStatics::SpawnSoundAttached
 	//这是 UE 提供的一个静态函数，用于在场景中播放声音并将其附加（Attach）到某个组件上。
     //当声音被附加到组件时，它会跟随该组件移动（比如角色移动时声音也会跟着移动）。
-	LoopingSoundComponent = UGameplayStatics::SpawnSoundAttached(LoopingSound, GetRootComponent());
+	FTimerHandle TimerHandle;
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle, [this]()
+		{
+			if (IsValid(this) && LoopingSound && GetRootComponent())
+			{
+				LoopingSoundComponent = UGameplayStatics::SpawnSoundAttached(
+					LoopingSound,
+					GetRootComponent()
+				);
+			}
+		}, 0.05f, false); // 下一帧执行
 }
+
 
 void AAuraProjectile::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
@@ -46,7 +57,7 @@ void AAuraProjectile::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedCompon
 	//DamageEffectSpecHandle.Data.IsValid()  判断这个是因为AuraProjectileSpell类里的SpawnProjectile函数里会判断是否为服务器端， 
 	// 如果是客户端就直接返回 并不会生成DamageEffectSpecHandle，所以这种情况下DamageEffectSpecHandle.Data是无效的，
 	//因为Actor被标记为bReplicated = true后  Actor 的生成销毁和变换都会被引擎服务器端自动处理并复制
-	if (DamageEffectSpecHandle.Data.IsValid() && DamageEffectSpecHandle.Data.Get()->GetContext().GetEffectCauser() == OtherActor)
+	if (!DamageEffectSpecHandle.Data.IsValid() || DamageEffectSpecHandle.Data.Get()->GetContext().GetEffectCauser() == OtherActor)
 	{
 		return;
 	}
@@ -60,11 +71,12 @@ void AAuraProjectile::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedCompon
 	//bHit = true; 的作用是标记投射物已经发生了碰撞。(详见有道云笔记数据传递和网络同步)
 	// 由于网络同步的问题，客户端可能会在触发 OnSphereBeginOverlap 之前收到服务器的 Destroy() 调用，导致 OnSphereBeginOverlap 没有被执行。
 	// 因此，bHit 的设计是为了确保即使客户端提前销毁了 Actor，也能正确处理碰撞逻辑。
-	if (!bHit)
+	if (!bHit && LoopingSoundComponent)
 	{
 		LoopingSoundComponent->Stop();
 		UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation(), FRotator::ZeroRotator);
 		UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ImpactEffect, GetActorLocation());
+		bHit = true;
 	}
 	
 
@@ -91,13 +103,14 @@ void AAuraProjectile::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedCompon
 void AAuraProjectile::Destroyed()
 {
 
-	if (!bHit && !HasAuthority())//!bHit && !HasAuthority()
-		                         //!bHit：说明客户端在收到销毁通知前未触发 OnSphereBeginOverlap（可能因网络延迟）。
-		                         //!HasAuthority()：仅在客户端执行补播逻辑（服务器已正常处理过碰撞）。
+	if (!bHit && !HasAuthority() && LoopingSoundComponent)//!bHit && !HasAuthority()
+		                                                   //!bHit：说明客户端在收到销毁通知前未触发 OnSphereBeginOverlap（可能因网络延迟）。
+		                                                   //!HasAuthority()：仅在客户端执行补播逻辑（服务器已正常处理过碰撞）。
 	{
 		UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation(), FRotator::ZeroRotator);
 		UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ImpactEffect, GetActorLocation());
 		LoopingSoundComponent->Stop();
+		bHit = true;
 	}
 	Super::Destroyed();
 }

@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
 #include "GameplayTagContainer.h"
+#include <../../../../../../../Plugins/FX/Niagara/Source/Niagara/Classes/NiagaraSystem.h>
 #include "CombatInterface.generated.h"
 
 
@@ -20,6 +21,12 @@ struct FTaggedMontage
 
    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
    FGameplayTag MontageTag;
+
+   UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+   FGameplayTag CombatSocketTag;
+
+   UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+   USoundBase* ImpactSound;
 
 };
 
@@ -66,6 +73,12 @@ public:
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
     TArray<FTaggedMontage>GetAttackMontages();
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	UNiagaraSystem* GetBloodEffect();
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	FTaggedMontage GetTaggedMontageByTag(const FGameplayTag& MontageTag);
 
 	virtual void die() = 0; //主要逻辑写在AuraCharacterBase里面的
 };

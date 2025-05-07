@@ -67,6 +67,8 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	FName RightHandSocketName;
+
+
 	
 
 	virtual void ApplyEffectToSelf(TSubclassOf<UGameplayEffect> GameplayEffect, float level)const;
@@ -107,7 +109,8 @@ protected:
 	bool IsDead_Implementation();
 	AActor* GetAvatar_Implementation();
 	TArray<FTaggedMontage>GetAttackMontages_Implementation();
-
+	UNiagaraSystem*GetBloodEffect_Implementation();
+	FTaggedMontage GetTaggedMontageByTag_Implementation(const FGameplayTag& MontageTag);
 	/*CombatInterface*/
 
 
@@ -124,6 +127,13 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	TArray <FTaggedMontage> AttackMontages;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
+	UNiagaraSystem* BloodEffect;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
+	USoundBase* DeathSound;
+
 
 protected:
 	bool bIsDead = false;
