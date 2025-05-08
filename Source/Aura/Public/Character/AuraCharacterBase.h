@@ -68,7 +68,8 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	FName RightHandSocketName;
 
-
+	UPROPERTY(EditAnywhere, Category = "Combat")
+	FName TailSocketName;
 	
 
 	virtual void ApplyEffectToSelf(TSubclassOf<UGameplayEffect> GameplayEffect, float level)const;

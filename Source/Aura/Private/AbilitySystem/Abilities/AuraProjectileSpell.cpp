@@ -16,7 +16,7 @@ void UAuraProjectileSpell::ActivateAbility(const FGameplayAbilitySpecHandle Hand
 	
 }
 
-void UAuraProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLocation)
+void UAuraProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLocation, const FGameplayTag& CombatSocket)
 {
 	// 仅在服务器端（Server）生成投射物（Projectile），而在客户端（Client）直接返回，不执行生成逻辑。
 	// 这是多人联网游戏中的一种常见设计模式，目的是确保 网络同步的权威性（Authority） 和 避免重复生成。
@@ -32,7 +32,7 @@ void UAuraProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLocati
 				接收一个 UObject* 参数（通常是实现了该接口的对象）。
 				检查该对象是否实现了 ICombatInterface。
 				调用该对象的 GetCombatSocketLocation() 或 _Implementation 版本。*/
-		FVector SocketLocation = ICombatInterface::Execute_GetCombatSocketLocation(GetAvatarActorFromActorInfo(),FAuraGameplayTags::Get().CombatSocket_Weapon);
+		FVector SocketLocation = ICombatInterface::Execute_GetCombatSocketLocation(GetAvatarActorFromActorInfo(), CombatSocket);
 		FRotator Rotation = (ProjectileTargetLocation - SocketLocation).Rotation();
 		Rotation.Pitch = 0.f;
 
