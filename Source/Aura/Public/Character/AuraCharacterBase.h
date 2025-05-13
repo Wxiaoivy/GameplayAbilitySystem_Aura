@@ -88,6 +88,14 @@ protected:
 
 	/*Dissolve Effect*/
 
+	/*Minions*/
+
+	int32 MinionCount = 0;
+
+	/*Minions*/
+
+
+
  public:
 	UPROPERTY(EditAnywhere,BlueprintReadOnly, Category = "Combat")
 	TObjectPtr<USkeletalMeshComponent>Weapon;
@@ -112,6 +120,8 @@ protected:
 	TArray<FTaggedMontage>GetAttackMontages_Implementation();
 	UNiagaraSystem*GetBloodEffect_Implementation();
 	FTaggedMontage GetTaggedMontageByTag_Implementation(const FGameplayTag& MontageTag);
+	int32 GetMinionCount_Implementation();
+	void IncrementalMinionCount_Implementation(int32 Amount);
 	/*CombatInterface*/
 
 

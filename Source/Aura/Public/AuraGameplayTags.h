@@ -93,6 +93,7 @@ public:
 	*
 	*/
 	FGameplayTag Abilities_Attack;
+	FGameplayTag Abilities_Summon;
 
 	/*
 	*CombatSocket Tag

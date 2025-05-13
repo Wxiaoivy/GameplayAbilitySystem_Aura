@@ -32,4 +32,7 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Summoning")
 	float MaxSpawnDistance; // 最大生成距离
+
+	UFUNCTION(BlueprintPure)
+	TSubclassOf<APawn> GetRandomMinionClass();
 };

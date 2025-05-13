@@ -31,11 +31,18 @@ TArray<FVector> UAuraSummonAbility::GetSpawnLocations()
 
 
 		// 调试绘制：
-		DrawDebugSphere(GetWorld(), ChosenSpawnLocation, 18.f, 12.f, FColor::Green, false, 3.f);// 在生成位置绘制绿色球体(半径18，细分12，持续3秒)	
-		UKismetSystemLibrary::DrawDebugArrow(GetAvatarActorFromActorInfo(), Location, Location + Direction * MaxSpawnDistance, 4.f, FLinearColor::Blue, 3.f);// 从施法者位置到最大距离绘制蓝色箭头(粗细4，持续3秒)
+	//	DrawDebugSphere(GetWorld(), ChosenSpawnLocation, 18.f, 12.f, FColor::Green, false, 3.f);// 在生成位置绘制绿色球体(半径18，细分12，持续3秒)	
+	//	UKismetSystemLibrary::DrawDebugArrow(GetAvatarActorFromActorInfo(), Location, Location + Direction * MaxSpawnDistance, 4.f, FLinearColor::Blue, 3.f);// 从施法者位置到最大距离绘制蓝色箭头(粗细4，持续3秒)
 
-		DrawDebugSphere(GetWorld(), Location + Direction * MinSpawnDistance, 5.f, 12.f, FColor::Red, false, 3.f);// 在最小距离位置绘制红色小球
-		DrawDebugSphere(GetWorld(), Location + Direction * MaxSpawnDistance, 5.f, 12.f, FColor::Red, false, 3.f);// 在最大距离位置绘制红色小球
+	//	DrawDebugSphere(GetWorld(), Location + Direction * MinSpawnDistance, 5.f, 12.f, FColor::Red, false, 3.f);// 在最小距离位置绘制红色小球
+	//	DrawDebugSphere(GetWorld(), Location + Direction * MaxSpawnDistance, 5.f, 12.f, FColor::Red, false, 3.f);// 在最大距离位置绘制红色小球
+	//
 	}
 	return SpawnLocations; // 返回所有生成位置的数组
+}
+
+TSubclassOf<APawn> UAuraSummonAbility::GetRandomMinionClass()
+{
+	const int32 Selection = FMath::RandRange(0, MinionClasses.Num()-1);
+	return MinionClasses[Selection];
 }

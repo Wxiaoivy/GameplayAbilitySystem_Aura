@@ -27,7 +27,7 @@ protected:
 
 
 	UFUNCTION(BlueprintCallable)
-	void SpawnProjectile(const FVector& ProjectileTargetLocation,const FGameplayTag& CombatSocket);
+	void SpawnProjectile(const FVector& ProjectileTargetLocation,const FGameplayTag& CombatSocket,bool bOverridePitch = false,float PitchOverride = 0.f);
 
 
 

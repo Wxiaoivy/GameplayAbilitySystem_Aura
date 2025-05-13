@@ -107,6 +107,16 @@ void AAuraCharacterBase::die()
 	MulticastHandleDeath();
 }
 
+int32 AAuraCharacterBase::GetMinionCount_Implementation()
+{
+	return MinionCount;
+}
+
+void AAuraCharacterBase::IncrementalMinionCount_Implementation(int32 Amount)
+{
+	MinionCount += Amount;
+}
+
 FTaggedMontage AAuraCharacterBase::GetTaggedMontageByTag_Implementation(const FGameplayTag& MontageTag)
 {
 	for (FTaggedMontage TaggedMontage:AttackMontages)
