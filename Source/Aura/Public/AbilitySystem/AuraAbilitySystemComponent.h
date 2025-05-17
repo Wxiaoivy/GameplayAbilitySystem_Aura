@@ -11,7 +11,8 @@
 
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FEffectAssetTag, const FGameplayTagContainer& /*AssetTag*/)
-
+DECLARE_MULTICAST_DELEGATE_OneParam(FAbilitiesGiven, UAuraAbilitySystemComponent*)//声明一个多播委托，当技能系统完成初始技能（Startup Abilities）分配时，通知所有订阅者
+DECLARE_DELEGATE_OneParam(FForEachAbility, const FGameplayAbilitySpec&)//定义一个委托类型，用于遍历每个技能（FGameplayAbilitySpec），供外部自定义处理逻辑。
 /**
  * 
  */
@@ -31,6 +32,15 @@ public:
 
 	void AbilityInputTagHeld(const FGameplayTag& InputTag);
     void AbilityInputTagReleased(const FGameplayTag& InputTag);
+
+	FAbilitiesGiven AbilitiesGivenDelegate;
+
+	bool bStartupAbilitiesGiven = false;
+
+	void ForEachAbility(const FForEachAbility& Delegate);
+
+	static FGameplayTag GetAbilityTagFormSpec(const FGameplayAbilitySpec& AbilitySpec);
+	static FGameplayTag GetInputTagFormSpec(const FGameplayAbilitySpec& AbilitySpec);
 
 
 protected:

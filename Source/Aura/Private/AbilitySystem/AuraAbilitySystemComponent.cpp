@@ -2,6 +2,7 @@
 
 
 #include "AbilitySystem/AuraAbilitySystemComponent.h"
+#include "AuraLogChannels.h"
 
 UAuraAbilitySystemComponent::UAuraAbilitySystemComponent()
 {
@@ -30,6 +31,9 @@ void UAuraAbilitySystemComponent::AddCharacterAbilities(const TArray<TSubclassOf
 			AbilitySpec.DynamicAbilityTags.AddTag(AuraGameplayAbility->StartupInputTag);
 			//将能力实例（AbilitySpec）添加到角色的 AbilitySystemComponent 中。
 			GiveAbility(AbilitySpec);
+			
+			bStartupAbilitiesGiven = true;
+			AbilitiesGivenDelegate.Broadcast(this);
 		}
 		                    
 
@@ -106,5 +110,50 @@ void UAuraAbilitySystemComponent::EffectApplied(UAbilitySystemComponent* Ability
 	// 从效果规范中获取所有的资产标签，并将它们存储在TagContainer中。
 	EffectSpec.GetAllAssetTags(TagContainer);
 	EffectAssetTag.Broadcast(TagContainer);//广播代理到WidgetController（发送数据）
+}
+
+void UAuraAbilitySystemComponent::ForEachAbility(const FForEachAbility& Delegate)
+{
+
+
+	FScopedAbilityListLock ActiveScopeLock(*this);//FScopedAbilityListLock 是 UE 提供的 RAII（资源获取即初始化）锁，用于 线程安全。防止在遍历过程中技能列表被修改（如技能被移除或添加）。
+	for (const FGameplayAbilitySpec& AbilitySpec : GetActivatableAbilities())
+	{
+		if (!Delegate.ExecuteIfBound(AbilitySpec))
+		{
+			UE_LOG(LogAura, Error, TEXT("Failed to execute delegate in %hs"), __FUNCTION__);
+		}
+	}
+
+}
+
+FGameplayTag UAuraAbilitySystemComponent::GetAbilityTagFormSpec(const FGameplayAbilitySpec& AbilitySpec)
+{
+
+	if (AbilitySpec.Ability)
+	{
+		//从技能标签中提取属于 "Abilities" 分类的标签（如 "Abilities.Fireball"）。
+		for (FGameplayTag Tag : AbilitySpec.Ability.Get()->AbilityTags)
+		{
+			if (Tag.MatchesTag(FGameplayTag::RequestGameplayTag(FName("Abilities"))))
+			{
+				return Tag;// 返回匹配 "Abilities" 父标签的Tag
+			}
+		}
+	}
+	return FGameplayTag();
+}
+
+FGameplayTag UAuraAbilitySystemComponent::GetInputTagFormSpec(const FGameplayAbilitySpec& AbilitySpec)
+{
+	//从动态标签中提取输入绑定标签（如 "Input.Q"）
+	for (FGameplayTag InputTag : AbilitySpec.DynamicAbilityTags)
+	{
+		if (InputTag.MatchesTag((FGameplayTag::RequestGameplayTag(FName("Input")))))
+		{
+			return InputTag;// 返回匹配 "Input" 父标签的Tag
+		}
+	}
+	return FGameplayTag();
 }
 
