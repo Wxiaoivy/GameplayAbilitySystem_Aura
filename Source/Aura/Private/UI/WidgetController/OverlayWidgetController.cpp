@@ -62,7 +62,7 @@ void UOverlayWidgetController::BindCallbacksToDependencies()
 
 	if (UAuraAbilitySystemComponent* AuraASC = Cast<UAuraAbilitySystemComponent>(AbilitySystemComponent))
 	{
-		//处理技能系统的是否初始化的两种情况
+		//根据技能系统是否完成初始化（bStartupAbilitiesGiven），选择立即更新UI或等待初始化完成后再更新。
 		if (AuraASC->bStartupAbilitiesGiven)//检查 AuraASC 的 bStartupAbilitiesGiven 标志是否为 true,bStartupAbilitiesGiven 是 UAuraAbilitySystemComponent 中的一个布尔成员变量，
 			                                //用于标记是否已经初始化了角色的初始技能（Startup Abilities）。如果为 true，说明技能已经初始化完成。
          {

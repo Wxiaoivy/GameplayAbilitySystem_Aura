@@ -46,5 +46,5 @@ public:
 protected:
 	void EffectApplied(UAbilitySystemComponent* AbilitySystemComponent, const FGameplayEffectSpec& EffectSpec, FActiveGameplayEffectHandle ActiveEffectHandle);
 
-	
+	virtual void OnRep_ActivateAbilities()override;
 };

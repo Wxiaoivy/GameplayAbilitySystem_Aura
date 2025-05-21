@@ -149,11 +149,23 @@ FGameplayTag UAuraAbilitySystemComponent::GetInputTagFormSpec(const FGameplayAbi
 	//从动态标签中提取输入绑定标签（如 "Input.Q"）
 	for (FGameplayTag InputTag : AbilitySpec.DynamicAbilityTags)
 	{
-		if (InputTag.MatchesTag((FGameplayTag::RequestGameplayTag(FName("Input")))))
+		if (InputTag.MatchesTag((FGameplayTag::RequestGameplayTag(FName("InputTag")))))
 		{
 			return InputTag;// 返回匹配 "Input" 父标签的Tag
 		}
 	}
 	return FGameplayTag();
+}
+
+void UAuraAbilitySystemComponent::OnRep_ActivateAbilities()
+{
+	Super::OnRep_ActivateAbilities();
+
+	if (!bStartupAbilitiesGiven)//bStartupAbilitiesGiven 是一个普通变量（非复制变量），因此：服务器设置为 true 不会自动同步到客户端。客户端需要在 自己的执行环境 中独立设置 bStartupAbilitiesGiven
+	{
+		//ActivateAbilities 被复制到客户端 → 触发 OnRep_ActivateAbilities。此时客户端的 bStartupAbilitiesGiven 仍是默认值 false（因为未同步）。客户端需要 主动检测 并标记 bStartupAbilitiesGiven = true
+		bStartupAbilitiesGiven = true;//防御性检查 (if (!bStartupAbilitiesGiven)) 是多人游戏编程的黄金法则，确保逻辑健壮性。这种设计是虚幻引擎 GAS 的常见模式，适用于所有需要“首次数据就绪”通知的场景。
+		AbilitiesGivenDelegate.Broadcast(this);
+	}
 }
 
