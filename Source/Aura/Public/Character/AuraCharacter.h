@@ -31,6 +31,15 @@ public:
 
 	/*Player Interface*/
 	 void AddToXP_Implementation(int32 InXP);
+	 int32 GetXP_Implementation()const;
+	 int32 FindLevelForXP_Implementation(int32 InXP)const;
+	 void LevelUp_Implementation();
+	 void AddToSpellPoints_Implementation(int32 InSpellPoints);
+	 void AddToPlayerLevel_Implementation(int32 InPlayerLevel);
+	 void AddToAttributePoints_Implementation(int32 InAttributePoints);
+	 int32 GetAttributePointsReward_Implementation(int32 Level);
+	 int32 GetSpellPointsReward_Implementation(int32 Level);
+
 	/*End Player Interface*/
 
 	/*Combat Interface*/
