@@ -86,6 +86,7 @@ void AAuraCharacterBase::AddCharacterAbilities()
 	if (!HasAuthority())return;
 	//这里调用AuraAbilitySystemComponent的AddCharacterAbilities（）这个函数。
 	AuraASC->AddCharacterAbilities(StartupAbilities);
+	AuraASC->AddCharacterPassiveAbilities(StartupPassiveAbilities);
 }
 
 
@@ -105,6 +106,11 @@ void AAuraCharacterBase::die()
 	//由服务器触发
 	//Weapon->DetachFromComponent(FDetachmentTransformRules(EDetachmentRule::KeepWorld, true));
 	MulticastHandleDeath();
+}
+
+ECharacterClass AAuraCharacterBase::GetCharacterClass_Implementation()
+{
+	return CharacterClass;
 }
 
 int32 AAuraCharacterBase::GetMinionCount_Implementation()

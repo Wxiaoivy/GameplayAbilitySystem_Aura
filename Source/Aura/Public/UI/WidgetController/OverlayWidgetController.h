@@ -72,6 +72,9 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "GAS|Message")
 	FAbilityInfoSignature AbilityInfoDelegate;
 
+	UPROPERTY(BlueprintAssignable, Category = "GAS|XP")
+	FOnAttributeChangedSignature OnXPPercentChangedDelegate;
+
 protected:
 
 	//FOnAttributeChangeData 是一个自定义的结构体或类，专门设计用于传递属性变化的信息。
@@ -101,7 +104,7 @@ protected:
 	template<typename T>
 	T* GetDataTableRowByTag(UDataTable* DataTable, const FGameplayTag& Tag);
 
-
+	void OnXPChange(int32 NewXP)const;
 
 }; 
 

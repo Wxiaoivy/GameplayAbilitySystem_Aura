@@ -8,8 +8,10 @@
 #include "AbilitySystem/AuraAbilitySystemComponent.h"
 #include "AbilitySystemInterface.h"
 #include "AbilitySystem/AuraAttributeSet.h"
+#include "AbilitySystem/Data/LevelUpInfo.h"
 #include "AuraPlayerState.generated.h"
 
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnPlayerStatChanged, int32/*StatValue*/)
 /**
  * 
  */
@@ -21,10 +23,25 @@ class AURA_API AAuraPlayerState : public APlayerState, public IAbilitySystemInte
 public:
 
 	AAuraPlayerState();
-
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps)const override;
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
+    UAttributeSet*GetAttributeSet() const { return AttributeSet; }
 
-	UAttributeSet*GetAttributeSet() const { return AttributeSet; }
+	FOnPlayerStatChanged OnXPChangedDelegate;
+	FOnPlayerStatChanged OnLevelChangedDelegate;
+
+	FORCEINLINE int32 GetPlayerLevel() const  { return Level; }
+	FORCEINLINE int32 GetXP()const { return XP; }
+
+	void AddToXP(int32 InXP);
+	void AddToLevel(int32 InLevel);
+
+	void SetXP(int32 InXP);
+	void SetLevel(int32 InLevel);
+
+	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly)
+	TObjectPtr<ULevelUpInfo> LevelUpInfo;
+
 
 protected:
 
@@ -34,16 +51,20 @@ protected:
 	UPROPERTY()
 	TObjectPtr <UAttributeSet>AttributeSet;
 
-	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps)const override;
+private:
 
-
-	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_Level, Category = "Character Defualt Value")
+	UPROPERTY(VisibleAnywhere, ReplicatedUsing = OnRep_Level)
 	int32 Level = 1;
 
+	UPROPERTY(VisibleAnywhere, ReplicatedUsing = OnRep_XP)
+	int32 XP = 1;
 
 	UFUNCTION()
 	void OnRep_Level(int32 OldLevel) ;
-public:
-	int32 GetPlayerLevel()const;
+
+	UFUNCTION()
+	void OnRep_XP(int32 OldXP);
+
+	
 
 };

@@ -42,6 +42,13 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 	GameplayTags.Attribute_Secondary_MaxHealth = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Attribute.Secondary.MaxHealth"), FString("Maximum amount of Health obtainable"));
 	GameplayTags.Attribute_Secondary_MaxMana = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Attribute.Secondary.MaxMana"), FString("Maximum amount of Mana obtainable"));
 
+	/*
+	*Meta Attribute
+	*
+	*/
+	GameplayTags.Attribute_Meta_IncomingXP = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Attribute.Meta.IncomingXP"), FString("Incoming XP Meta Attribute "));
+
+
 
 	/*
 	*Input Tag

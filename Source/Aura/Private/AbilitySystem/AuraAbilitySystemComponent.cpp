@@ -53,6 +53,17 @@ void UAuraAbilitySystemComponent::AddCharacterAbilities(const TArray<TSubclassOf
 		//如果能力需要特定的激活条件（如按键触发），则不需要调用 GiveAbilityAndActivateOnce。
 	}
 }
+void UAuraAbilitySystemComponent::AddCharacterPassiveAbilities(const TArray<TSubclassOf<UGameplayAbility>>& StartupPassiveAbilities)
+{
+	for (const TSubclassOf<UGameplayAbility>AbilityClass : StartupPassiveAbilities)
+	{
+		//FGameplayAbilitySpec: 是 Gameplay Ability System (GAS) 中用来描述能力实例的结构体。
+		// AbilityClass: 当前循环中的能力类。
+		// 1 : 表示能力的等级（Level），这里设置为 1。
+		FGameplayAbilitySpec AbilitySpec = FGameplayAbilitySpec(AbilityClass, 1);
+		GiveAbilityAndActivateOnce(AbilitySpec);
+	}
+}
 
 //这个函数被AuraPlayerController的同名函数调用
 void UAuraAbilitySystemComponent::AbilityInputTagHeld(const FGameplayTag& InputTag)
@@ -168,4 +179,6 @@ void UAuraAbilitySystemComponent::OnRep_ActivateAbilities()
 		AbilitiesGivenDelegate.Broadcast(this);
 	}
 }
+
+
 

@@ -34,9 +34,8 @@ public:
 	/*End Enemy Interface*/
 
 	/*Combat Interface*/
-	virtual int32 GetPlayerLevel() override;
+	int32 GetPlayerLevel_Implementation();
 	virtual void die()override;
-	
 	/*End Combat Interface*/
 
 	virtual void PossessedBy(AController* NewController)override;//PossessedBy()是角色被控制器接管时自动触发；（角色出生，重生，控制器变更都会触发）
@@ -72,8 +71,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "CharacterClassDefaultInfo")
 	int32 Level = 1;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "CharacterClassDefaultInfo")
-	ECharacterClass CharacterClass = ECharacterClass::Warrior;
+	
 
 	
 

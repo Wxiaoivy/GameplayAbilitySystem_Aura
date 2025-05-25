@@ -36,8 +36,12 @@ float UMMC_MaxHealth::CalculateBaseMagnitude_Implementation(const FGameplayEffec
 
 	// 尝试将 Spec 的上下文中的源对象转换为 ICombatInterface 接口指针。
     // ICombatInterface 是一个接口，用于提供战斗相关的功能，比如获取玩家等级。
-	ICombatInterface* CombatInterface = Cast<ICombatInterface>(Spec.GetContext().GetSourceObject());
-	const int32 PlayerLevel = CombatInterface->GetPlayerLevel();
+	int32 PlayerLevel = 0;
+	if (Spec.GetContext().GetSourceObject()->Implements<UCombatInterface>())
+	{
+		ICombatInterface::Execute_GetPlayerLevel(Spec.GetContext().GetSourceObject());
+	}
+	
 
 	//自定义MaxHealth算式，并返回该计算的值
 	float MaxHealth= 80.f + 2.5 * Vigor + 10.f * PlayerLevel;

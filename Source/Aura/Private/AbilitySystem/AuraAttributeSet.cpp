@@ -3,6 +3,7 @@
 
 #include "AbilitySystem/AuraAttributeSet.h"
 #include "Player/AuraPlayerController.h"
+#include "Interaction/PlayerInterface.h"
 
 UAuraAttributeSet::UAuraAttributeSet()
 {
@@ -249,6 +250,7 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 					{
 						CombatInterface->die();
 					}
+					SendXPEvent(Props);
 			}
 			else
 			{
@@ -295,7 +297,40 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 
 		}
 	}
+	if (Data.EvaluatedData.Attribute == GetIncomingXPAttribute())
+	{
+		const float LocalIncomingXP = GetIncomingXP();//获取当前的XP值
+
+		SetIncomingXP(0);//立即将XP属性重置为0(为下一次到来的XP做准备)
+
+		if (Props.SourceCharacter->Implements<UPlayerInterface>())
+		{
+			IPlayerInterface::Execute_AddToXP(Props.SourceCharacter,LocalIncomingXP);
+		}
+	}
 }
+
+void UAuraAttributeSet::SendXPEvent(const FEffectProperties& Props)
+{
+	
+	if (Props.TargetCharacter->Implements<UCombatInterface>())//检查目标角色(Props.TargetCharacter)是否实现了ICombatInterface接口,ICombatInterface里面有2个函数可以获得等级和职业
+	{
+		const int32 TargetLevel = ICombatInterface::Execute_GetPlayerLevel(Props.TargetCharacter);//获取目标的等级(TargetLevel)和职业(TargetClass)这些信息将用于计算XPReward
+		const ECharacterClass TargetClass = ICombatInterface::Execute_GetCharacterClass(Props.TargetCharacter);//获取目标的等级(TargetLevel)和职业(TargetClass)这些信息将用于计算XPReward
+		const int32 XPReward = UAuraAbilitySystemLibrary::GetXPRewardForClassAndLevel(Props.TargetCharacter, TargetClass, TargetLevel);//调用一个静态函数GetXPRewardForClassAndLevel来计算经验值
+
+		//创建一个FGameplayEventData结构体Payload(事件数据)设置事件标签为"Attribute_Meta_IncomingXP"(表示"获得经验值"事件)设置事件数值(EventMagnitude)为计算出的经验值奖励
+		const FAuraGameplayTags& GameplayTags = FAuraGameplayTags().Get();
+		FGameplayEventData Payload;
+		Payload.EventTag = GameplayTags.Attribute_Meta_IncomingXP;
+		Payload.EventMagnitude = XPReward;
+
+		//这个Payload里的数据传递给蓝图GA_ListenForEvent执行后续SetByCallerMagenitude和ApplyEffectSpecToSelf的逻辑
+		UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(Props.SourceCharacter, GameplayTags.Attribute_Meta_IncomingXP, Payload);
+		//将创建的事件发送给源角色(Props.SourceCharacter，即击杀者)这个事件会被角色的AbilitySystemComponent接收并处理
+	}
+}
+
 
 // UAuraAttributeSet类的OnRep_Health函数实现
 // 这个函数会在Health属性在网络上被复制时被调用

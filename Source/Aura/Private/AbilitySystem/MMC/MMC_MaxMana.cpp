@@ -35,8 +35,11 @@ float UMMC_MaxMana::CalculateBaseMagnitude_Implementation(const FGameplayEffectS
 
 	// 尝试将 Spec 的上下文中的源对象转换为 ICombatInterface 接口指针。
 	// ICombatInterface 是一个接口，用于提供战斗相关的功能，比如获取玩家等级。
-	ICombatInterface* CombatInterface = Cast<ICombatInterface>(Spec.GetContext().GetSourceObject());
-	const int32 PlayerLevel = CombatInterface->GetPlayerLevel();
+	int32 PlayerLevel = 0;
+	if (Spec.GetContext().GetSourceObject()->Implements<UCombatInterface>())
+	{
+		ICombatInterface::Execute_GetPlayerLevel(Spec.GetContext().GetSourceObject());
+	}
 
 	//自定义MaxMana算式，并返回该计算的值
 	float MaxMana = 50.f + 2.5 * Int + 15.f * PlayerLevel;

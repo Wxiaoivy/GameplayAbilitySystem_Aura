@@ -53,8 +53,8 @@ public:
 		一个纯虚函数 GetCombatSocketLocation()（必须由 C++ 子类实现）。
 		一个默认实现 GetCombatSocketLocation_Implementation()（可选覆盖）。
 		一个全局执行函数 Execute_GetCombatSocketLocation(UObject * Object)（用于动态调用）。*/
-
-	virtual int32 GetPlayerLevel();
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	 int32 GetPlayerLevel();
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	FVector GetCombatSocketLocation(const FGameplayTag& MontageTag);
@@ -85,6 +85,10 @@ public:
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void IncrementalMinionCount(int32 Amount);
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	ECharacterClass GetCharacterClass();
+
 
 	virtual void die() = 0; //主要逻辑写在AuraCharacterBase里面的
 };

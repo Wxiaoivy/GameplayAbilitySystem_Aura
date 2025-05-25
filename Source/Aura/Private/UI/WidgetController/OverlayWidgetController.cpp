@@ -2,6 +2,7 @@
 
 
 #include "UI/WidgetController/OverlayWidgetController.h"
+#include "Player/AuraPlayerState.h"
 
 
 void UOverlayWidgetController::BroadCastInitialValues()
@@ -23,7 +24,15 @@ void UOverlayWidgetController::BindCallbacksToDependencies()
 {
 	//Super::BindCallbacksToDependencies();//这里可以不要Super  因为父类的实现部分是空白的
 
+	
+	
+	AAuraPlayerState* AuraPlayerState = CastChecked< AAuraPlayerState>(PlayerState);
+	AuraPlayerState->OnXPChangedDelegate.AddUObject(this, &UOverlayWidgetController::OnXPChange);
+
+
 	const UAuraAttributeSet* AuraAttributeSet = CastChecked< UAuraAttributeSet>(AttributeSet);
+
+
 
 	//我们正在获取一个用于监听当前生命值属性变化的委托。并将Lambda绑定到之前获取的委托上
 	//GetGameplayAttributeValueChangeDelegate（）是AbilitySystemComponent自带的一个函数。当有属性变化时，该代理会自动触发
@@ -129,5 +138,29 @@ void UOverlayWidgetController::OnInitializeStartupAbilities(UAuraAbilitySystemCo
 	);
 	// 遍历所有技能并执行委托
 	AuraASC->ForEachAbility(BroadcastDelegate);
+}
+
+void UOverlayWidgetController::OnXPChange(int32 NewXP) const
+{
+	const AAuraPlayerState* AuraPlayerState = CastChecked< AAuraPlayerState>(PlayerState);
+	const ULevelUpInfo* LevelUpInfo = AuraPlayerState->LevelUpInfo;
+	checkf(LevelUpInfo, TEXT("Unable to find LevelUpInfo,Please fill out AuraPlayerState Blueprint"));
+
+	const int32 Level = LevelUpInfo->FindLevelForXP(NewXP);
+	const int32 MaxLevel = LevelUpInfo->LevelUpInformation.Num()-1;
+
+	if (Level <= MaxLevel && Level > 0)
+	{
+		const int32 LevelUpRequirement = LevelUpInfo->LevelUpInformation[Level].LevelUpRequirement;
+		const int32 PreviousLevelUpRequirement = LevelUpInfo->LevelUpInformation[Level-1].LevelUpRequirement;
+
+		const int32 DeltaLevelRequirement = LevelUpRequirement - PreviousLevelUpRequirement;
+
+		const int32 XPForThisLevel = NewXP - PreviousLevelUpRequirement;
+
+		const float XPBarPercent = static_cast<float>(XPForThisLevel) / static_cast<float>(DeltaLevelRequirement);
+
+		OnXPPercentChangedDelegate.Broadcast(XPBarPercent);
+	}
 }
 

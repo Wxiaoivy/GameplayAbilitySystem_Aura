@@ -101,8 +101,18 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
     AActor* SourceAvatar = SourceASC ? SourceASC->GetAvatarActor() : nullptr;
     AActor* TargetAvatar = TargetASC ? TargetASC->GetAvatarActor() : nullptr;
 
-    ICombatInterface* SourceCombatInterface = Cast< ICombatInterface>(SourceAvatar);
-    ICombatInterface* TargetCombatInterface = Cast< ICombatInterface>(TargetAvatar);
+    int32 SourcePlayerLevel = 1;
+	if (SourceAvatar->Implements<UCombatInterface>())
+	{
+		SourcePlayerLevel = ICombatInterface::Execute_GetPlayerLevel(SourceAvatar);
+	}
+
+	int32 TargetPlayerLevel = 1;
+	if (TargetAvatar->Implements<UCombatInterface>())
+	{
+		TargetPlayerLevel = ICombatInterface::Execute_GetPlayerLevel(TargetAvatar);
+	}
+   // ICombatInterface* TargetCombatInterface = Cast< ICombatInterface>(TargetAvatar);
 
     const FGameplayEffectSpec& Spec = ExecutionParams.GetOwningSpec();
     /*SetBaseInfo*/
@@ -177,10 +187,10 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 
     //得到CurveTable中的各等级的Coefficient（下面两行是模板）（ArmorPenetrationCoefficient，EffectArmorCoefficient）
     FRealCurve* ArmorPenetrationCurve = CharacterClassInfo->DamageCalculationCoefficient->FindCurve(FName("ArmorPenetration"), FString());
-    float ArmorPenetrationCoefficient = ArmorPenetrationCurve->Eval(SourceCombatInterface->GetPlayerLevel());
+    float ArmorPenetrationCoefficient = ArmorPenetrationCurve->Eval(SourcePlayerLevel);
 
     FRealCurve* EffectArmorCurve = CharacterClassInfo->DamageCalculationCoefficient->FindCurve(FName("EffectArmor"), FString());
-    float EffectArmorCoefficient = ArmorPenetrationCurve->Eval(TargetCombatInterface->GetPlayerLevel());
+    float EffectArmorCoefficient = ArmorPenetrationCurve->Eval(TargetPlayerLevel);
     //得到CurveTable中的各等级的Coefficient（ArmorPenetrationCoefficient，EffectArmorCoefficient）
 
 
@@ -210,7 +220,7 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 
      //得到CurveTable中的各等级的Coefficient(CriticalHitResistanceCoefficient)
     FRealCurve* CriticalHitResistanceCurve = CharacterClassInfo->DamageCalculationCoefficient->FindCurve(FName("CriticalHitResistance"), FString());
-    float CriticalHitResistanceCoefficient = ArmorPenetrationCurve->Eval(TargetCombatInterface->GetPlayerLevel());
+    float CriticalHitResistanceCoefficient = ArmorPenetrationCurve->Eval(TargetPlayerLevel);
     //得到CurveTable中的各等级的Coefficient(CriticalHitResistanceCoefficient)
 
 

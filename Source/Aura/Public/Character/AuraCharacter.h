@@ -8,6 +8,7 @@
 #include "Player/AuraPlayerState.h"
 #include "Player/AuraPlayerController.h"
 #include "UI/HUD/AuraHUD.h"
+#include "Interaction/PlayerInterface.h"
 #include "AuraCharacter.generated.h"
 
 /**
@@ -16,7 +17,7 @@
 
 
 UCLASS()
-class AURA_API AAuraCharacter : public AAuraCharacterBase
+class AURA_API AAuraCharacter : public AAuraCharacterBase,public IPlayerInterface
 {
 	GENERATED_BODY()
 
@@ -28,8 +29,12 @@ public:
 	
 	virtual void OnRep_PlayerState()override;
 
+	/*Player Interface*/
+	 void AddToXP_Implementation(int32 InXP);
+	/*End Player Interface*/
+
 	/*Combat Interface*/
-	virtual int32 GetPlayerLevel()override;
+	int32 GetPlayerLevel_Implementation();
 	/*End Combat Interface*/
 
 private:

@@ -10,6 +10,7 @@
 #include "AbilitySystem/AuraAttributeSet.h"
 #include "Components/CapsuleComponent.h"
 #include "Aura/Aura.h"
+#include "AbilitySystem/Data/CharacterClassInfo.h"
 #include "AuraCharacterBase.generated.h"
 
 
@@ -93,7 +94,8 @@ protected:
 	int32 MinionCount = 0;
 
 	/*Minions*/
-
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "CharacterClassDefaultInfo")
+	ECharacterClass CharacterClass = ECharacterClass::Warrior;
 
 
  public:
@@ -122,6 +124,7 @@ protected:
 	FTaggedMontage GetTaggedMontageByTag_Implementation(const FGameplayTag& MontageTag);
 	int32 GetMinionCount_Implementation();
 	void IncrementalMinionCount_Implementation(int32 Amount);
+	ECharacterClass GetCharacterClass_Implementation();
 	/*CombatInterface*/
 
 
@@ -153,6 +156,9 @@ protected:
 private:
 	UPROPERTY(EditAnywhere, Category = "Abilities")
 	TArray<TSubclassOf<UGameplayAbility>>StartupAbilities;
+
+	UPROPERTY(EditAnywhere, Category = "Abilities")
+	TArray<TSubclassOf<UGameplayAbility>>StartupPassiveAbilities;
 
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	TObjectPtr<UAnimMontage>HitReactMontage;
