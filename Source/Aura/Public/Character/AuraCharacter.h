@@ -9,7 +9,11 @@
 #include "Player/AuraPlayerController.h"
 #include "UI/HUD/AuraHUD.h"
 #include "Interaction/PlayerInterface.h"
+#include <../../../../../../../Plugins/FX/Niagara/Source/Niagara/Public/NiagaraComponent.h>
 #include "AuraCharacter.generated.h"
+
+class USpringArmComponent;
+class UCameraComponent;
 
 /**
  * 
@@ -37,15 +41,29 @@ public:
 	 void AddToSpellPoints_Implementation(int32 InSpellPoints);
 	 void AddToPlayerLevel_Implementation(int32 InPlayerLevel);
 	 void AddToAttributePoints_Implementation(int32 InAttributePoints);
-	 int32 GetAttributePointsReward_Implementation(int32 Level);
-	 int32 GetSpellPointsReward_Implementation(int32 Level);
-
+	 int32 GetAttributePointsReward_Implementation(int32 Level)const;
+	 int32 GetSpellPointsReward_Implementation(int32 Level)const;
 	/*End Player Interface*/
 
 	/*Combat Interface*/
 	int32 GetPlayerLevel_Implementation();
 	/*End Combat Interface*/
 
+	UPROPERTY(VisibleAnywhere,BlueprintReadOnly)
+	TObjectPtr<UNiagaraComponent> LevelUpNiagaraComponent;
+
+	
+
 private:
+
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<USpringArmComponent> CameraBoom;
+
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<UCameraComponent> TopDownCameraComponent;
+
 	virtual void InitAbilityActorInfo()override;
+    
+	UFUNCTION(NetMulticast,Reliable)
+	void MulticastLevelupParticles()const;
 };

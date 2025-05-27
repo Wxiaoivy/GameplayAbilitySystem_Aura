@@ -314,7 +314,7 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 
 			if (NumLevelUps > 0)
 			{
-				const int32 AttributePointsReward = IPlayerInterface::Execute_GetAttributePointsReward(Props.SourceCharacter, CurrentLevel);//我觉得这里应该是传入NewLevel；
+				const int32 AttributePointsReward = IPlayerInterface::Execute_GetAttributePointsReward(Props.SourceCharacter, NewLevel);//我觉得这里应该是传入NewLevel；
 				const int32 SpellPointsReward = IPlayerInterface::Execute_GetSpellPointsReward(Props.SourceCharacter, CurrentLevel);
 
 				IPlayerInterface::Execute_AddToPlayerLevel(Props.SourceCharacter, NumLevelUps);
@@ -326,9 +326,6 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 
 				IPlayerInterface::Execute_LevelUp(Props.SourceCharacter);
 			}
-
-
-
 
 			IPlayerInterface::Execute_AddToXP(Props.SourceCharacter,LocalIncomingXP);
 		}

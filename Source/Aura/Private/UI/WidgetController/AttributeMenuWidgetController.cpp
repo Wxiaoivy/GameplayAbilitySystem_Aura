@@ -2,6 +2,7 @@
 
 
 #include "UI/WidgetController/AttributeMenuWidgetController.h"
+#include "Player/AuraPlayerState.h"
 
 void UAttributeMenuWidgetController::BroadCastInitialValues()
 {
@@ -22,6 +23,11 @@ void UAttributeMenuWidgetController::BroadCastInitialValues()
 		//代理广播传递Info
 		AttributeInfoDelegate.Broadcast(Info);
 	}
+	
+	AAuraPlayerState* AuraPlayerState = CastChecked< AAuraPlayerState>(PlayerState);
+	
+	OnAttributePointsChangedDelegateInController.Broadcast(AuraPlayerState->GetAttributePoints());
+	//OnAttributePointsChangedDelegateInController.Clear();//这行是我自己查AI加的 因为每次按菜单按钮初始化时  第二次会执行2次代理  第三次会执行3次代理，我这儿防止重复绑定。
 }
 
 	void UAttributeMenuWidgetController::BindCallbacksToDependencies()
@@ -40,4 +46,11 @@ void UAttributeMenuWidgetController::BroadCastInitialValues()
 				}
 			);
 		}
+		AAuraPlayerState* AuraPlayerState = CastChecked<AAuraPlayerState>(PlayerState);
+		AuraPlayerState->OnAttirbutePointsChangedDelegate.AddLambda
+		([this](int32 InPoints)
+			{
+				OnAttributePointsChangedDelegateInController.Broadcast(InPoints);
+			}
+		);
 	}
