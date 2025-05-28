@@ -54,3 +54,9 @@ void UAttributeMenuWidgetController::BroadCastInitialValues()
 			}
 		);
 	}
+
+	void UAttributeMenuWidgetController::UpgradeAttribute(const FGameplayTag& AttributeTag)
+	{
+		UAuraAbilitySystemComponent* AuraASC = CastChecked<UAuraAbilitySystemComponent>(AbilitySystemComponent);
+		AuraASC->UpgradeAttribute(AttributeTag);
+	}

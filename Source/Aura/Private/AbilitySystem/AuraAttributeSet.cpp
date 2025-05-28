@@ -321,14 +321,32 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 				IPlayerInterface::Execute_AddToAttributePoints(Props.SourceCharacter, AttributePointsReward);
 				IPlayerInterface::Execute_AddToSpellPoints(Props.SourceCharacter, SpellPointsReward);
 
-				SetHealth(GetMaxHealth());
-				SetMana(GetMaxMana());
+				bTopOffHealth = true; //当角色升级时，bTop0ffHealth和bTop0ffMana被设置为true（在升级逻辑中设置）,但只有在MaxHealth或MaxMana属性发生变化时，才会进入PostAttributeChange函数
+				bTopOffMana = true;
 
 				IPlayerInterface::Execute_LevelUp(Props.SourceCharacter);
 			}
 
 			IPlayerInterface::Execute_AddToXP(Props.SourceCharacter,LocalIncomingXP);
 		}
+	}
+}
+
+void UAuraAttributeSet::PostAttributeChange(const FGameplayAttribute& Attribute, float OldValue, float NewValue)
+{
+	Super::PostAttributeChange(Attribute, OldValue, NewValue);
+
+	//在函数内部，当检测到对应的属性变化且布尔值为true时，才会调用SetHealth()或SetMana()来补满数值
+	//这意味着如果升级时MaxHealth/MaxMana没有实际变化（比如最大值没有提升），PostAttributeChange不会被调用，血/蓝也就不会被补满。	 
+	if (Attribute == GetMaxHealthAttribute() && bTopOffHealth)
+    {
+		SetHealth(GetMaxHealth());
+		bTopOffHealth = false;
+    }
+	if (Attribute == GetMaxManaAttribute() && bTopOffMana)
+	{
+		SetMana(GetMaxMana());
+		bTopOffMana = false;
 	}
 }
 

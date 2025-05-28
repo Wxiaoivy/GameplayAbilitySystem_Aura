@@ -94,6 +94,7 @@ class AURA_API UAuraAttributeSet : public UAttributeSet
 	virtual void PreAttributeBaseChange(const FGameplayAttribute& Attribute, float& NewValue) const override;
 
 	virtual void PostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data)override;
+	virtual void PostAttributeChange(const FGameplayAttribute& Attribute, float OldValue, float NewValue)override;
 
 
 	//TStaticFuncPtr<FGameplayAttribute()>:这是前面定义的模板类型别名 TStaticFuncPtr 的具体实例化。
@@ -329,4 +330,7 @@ class AURA_API UAuraAttributeSet : public UAttributeSet
 private:
 	void SetEffectProperties(const FGameplayEffectModCallbackData& Data, FEffectProperties& Props)const;
 	void SendXPEvent(const FEffectProperties& Props);
+
+	bool bTopOffHealth = false;
+	bool bTopOffMana = false;
 };

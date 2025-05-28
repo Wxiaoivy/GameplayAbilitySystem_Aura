@@ -43,6 +43,8 @@ public:
 	 void AddToAttributePoints_Implementation(int32 InAttributePoints);
 	 int32 GetAttributePointsReward_Implementation(int32 Level)const;
 	 int32 GetSpellPointsReward_Implementation(int32 Level)const;
+	 int32 GetAttributePoints_Implementation()const;
+	 int32 GetSpellPoints_Implementation()const;
 	/*End Player Interface*/
 
 	/*Combat Interface*/

@@ -43,6 +43,11 @@ public:
 	static FGameplayTag GetAbilityTagFormSpec(const FGameplayAbilitySpec& AbilitySpec);
 	static FGameplayTag GetInputTagFormSpec(const FGameplayAbilitySpec& AbilitySpec);
 
+	void UpgradeAttribute(const FGameplayTag& AttributeTag);
+
+	UFUNCTION(Server,Reliable)
+	void SeverUpgradeAttribute(const FGameplayTag& AttributeTag);
+
 
 protected:
 	void EffectApplied(UAbilitySystemComponent* AbilitySystemComponent, const FGameplayEffectSpec& EffectSpec, FActiveGameplayEffectHandle ActiveEffectHandle);
