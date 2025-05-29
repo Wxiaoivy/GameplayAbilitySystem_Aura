@@ -128,16 +128,14 @@ void UAuraAbilitySystemComponent::EffectApplied(UAbilitySystemComponent* Ability
 void UAuraAbilitySystemComponent::ForEachAbility(const FForEachAbility& Delegate)
 {
 
-
 	FScopedAbilityListLock ActiveScopeLock(*this);//FScopedAbilityListLock 是 UE 提供的 RAII（资源获取即初始化）锁，用于 线程安全。防止在遍历过程中技能列表被修改（如技能被移除或添加）。
 	for (const FGameplayAbilitySpec& AbilitySpec : GetActivatableAbilities())
 	{
-		if (!Delegate.ExecuteIfBound(AbilitySpec))
+		if (!Delegate.ExecuteIfBound(AbilitySpec))//无论是否进入 if 块，ExecuteIfBound 都会先尝试执行代理。if 只是根据执行结果决定是否进入分支，不影响代理本身的执行。
 		{
 			UE_LOG(LogAura, Error, TEXT("Failed to execute delegate in %hs"), __FUNCTION__);
 		}
 	}
-
 }
 
 FGameplayTag UAuraAbilitySystemComponent::GetAbilityTagFormSpec(const FGameplayAbilitySpec& AbilitySpec)
