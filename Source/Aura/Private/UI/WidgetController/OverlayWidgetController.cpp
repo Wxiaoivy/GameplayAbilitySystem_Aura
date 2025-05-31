@@ -78,13 +78,13 @@ void UOverlayWidgetController::BindCallbacksToDependencies()
 		if (GetAuraASC()->bStartupAbilitiesGiven)//检查 AuraASC 的 bStartupAbilitiesGiven 标志是否为 true,bStartupAbilitiesGiven 是 UAuraAbilitySystemComponent 中的一个布尔成员变量，
 			                                //用于标记是否已经初始化了角色的初始技能（Startup Abilities）。如果为 true，说明技能已经初始化完成。
          {
-			 OnInitializeStartupAbilities();//如果技能已初始化，直接调用 OnInitializeStartupAbilities() 函数。这个函数可能是用来更新 UI（如技能栏、冷却时间显示等）或其他后续逻辑。
+			 BroadcastAbilityInfo();//如果技能已初始化，直接调用 OnInitializeStartupAbilities() 函数。这个函数可能是用来更新 UI（如技能栏、冷却时间显示等）或其他后续逻辑。
          }
 		 else
 		 {
 			 //如果技能未初始化（bStartupAbilitiesGiven 为 false），则通过 AbilitiesGivenDelegate 绑定一个委托。
 			 //当 AuraASC 完成技能初始化后，会自动触发 OnInitializeStartupAbilities。
-			GetAuraASC()->AbilitiesGivenDelegate.AddUObject(this, &UOverlayWidgetController::OnInitializeStartupAbilities);
+			GetAuraASC()->AbilitiesGivenDelegate.AddUObject(this, &UOverlayWidgetController::BroadcastAbilityInfo);
 		 }
 
 
@@ -120,28 +120,28 @@ void UOverlayWidgetController::BindCallbacksToDependencies()
 
 }
 
-void UOverlayWidgetController::OnInitializeStartupAbilities()//当技能初始化完成后，遍历所有技能，收集其标签和输入信息，并通过动态多播委托 AbilityInfoDelegate 通知UI更新。
-{
-	if (!GetAuraASC()->bStartupAbilitiesGiven)return;// 确保技能已初始化
-
-
-	// 定义Lambda委托，处理每个技能
-	FForEachAbility BroadcastDelegate;
-	BroadcastDelegate.BindLambda
-	(   [this](const FGameplayAbilitySpec& AbilitySpec)
-		{
-			// 1. 根据技能标签查找UI所需的信息（如图标、描述）
-			FAuraAbilityInfo Info = AbilityInfo->FindAbilityInfoForTag(GetAuraASC()->GetAbilityTagFormSpec(AbilitySpec));
-			// 2. 绑定输入标签
-			Info.InputTag = GetAuraASC()->GetInputTagFormSpec(AbilitySpec);
-			// 3. 广播到UI更新
-			AbilityInfoDelegate.Broadcast(Info);
-
-		}
-	);
-	// 遍历所有技能并执行委托
-	GetAuraASC()->ForEachAbility(BroadcastDelegate);
-}
+//void UOverlayWidgetController::OnInitializeStartupAbilities()//当技能初始化完成后，遍历所有技能，收集其标签和输入信息，并通过动态多播委托 AbilityInfoDelegate 通知UI更新。
+//{
+//	if (!GetAuraASC()->bStartupAbilitiesGiven)return;// 确保技能已初始化
+//
+//
+//	// 定义Lambda委托，处理每个技能
+//	FForEachAbility BroadcastDelegate;
+//	BroadcastDelegate.BindLambda
+//	(   [this](const FGameplayAbilitySpec& AbilitySpec)
+//		{
+//			// 1. 根据技能标签查找UI所需的信息（如图标、描述）
+//			FAuraAbilityInfo Info = AbilityInfo->FindAbilityInfoForTag(GetAuraASC()->GetAbilityTagFormSpec(AbilitySpec));
+//			// 2. 绑定输入标签
+//			Info.InputTag = GetAuraASC()->GetInputTagFormSpec(AbilitySpec);
+//			// 3. 广播到UI更新
+//			AbilityInfoDelegate.Broadcast(Info);
+//
+//		}
+//	);
+//	// 遍历所有技能并执行委托
+//	GetAuraASC()->ForEachAbility(BroadcastDelegate);
+//}
 
 void UOverlayWidgetController::OnXPChange(int32 NewXP) 
 {

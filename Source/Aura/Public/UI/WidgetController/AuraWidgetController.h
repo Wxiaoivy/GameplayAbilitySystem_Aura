@@ -8,6 +8,8 @@
 
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnStatChangedSignature, int32, NewValue);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAbilityInfoSignature, const FAuraAbilityInfo&, Info);//声明一个蓝图可绑定的动态委托，用于将技能信息（FAuraAbilityInfo）广播到UI（如技能图标、冷却时间）。
+
 
 class UAbilitySystemComponent;
 class UAttributeSet;
@@ -15,6 +17,7 @@ class AAuraPlayerController;
 class AAuraPlayerState;
 class UAuraAbilitySystemComponent;
 class UAuraAttributeSet;
+class UAbilityInfo;
 
 
 USTRUCT(BlueprintType)
@@ -58,6 +61,14 @@ public:
 	virtual void BroadCastInitialValues();
 
 	virtual void BindCallbacksToDependencies();
+
+	virtual void BroadcastAbilityInfo();
+
+	UPROPERTY(BlueprintAssignable, Category = "GAS|Message")
+	FAbilityInfoSignature AbilityInfoDelegate;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Widget Data")
+	TObjectPtr<UAbilityInfo>AbilityInfo;
 
 protected:
 

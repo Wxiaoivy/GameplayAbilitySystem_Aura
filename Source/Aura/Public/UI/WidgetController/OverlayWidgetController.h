@@ -36,7 +36,6 @@ struct FUIWidgetRow : public FTableRowBase
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAttributeChangedSignature, float, NewValue);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMessageWidgetRowSignature, FUIWidgetRow, Row);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAbilityInfoSignature, const FAuraAbilityInfo&, Info);//声明一个蓝图可绑定的动态委托，用于将技能信息（FAuraAbilityInfo）广播到UI（如技能图标、冷却时间）。
 
 /**
  * 
@@ -69,9 +68,6 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "GAS|Message")
 	FMessageWidgetRowSignature MessageWidgetRowDelegate;
 
-	UPROPERTY(BlueprintAssignable, Category = "GAS|Message")
-	FAbilityInfoSignature AbilityInfoDelegate;
-
 	UPROPERTY(BlueprintAssignable, Category = "GAS|XP")
 	FOnAttributeChangedSignature OnXPPercentChangedDelegate;
 
@@ -96,11 +92,10 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Widget Data")
 	TObjectPtr<UDataTable>MessageWidgetDataTable;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Widget Data")
-	TObjectPtr<UAbilityInfo>AbilityInfo;
 
 
-	void OnInitializeStartupAbilities();
+
+	//void OnInitializeStartupAbilities();
 
 
 	//这里的T表示无论什么类型的DataTable;是个模板函数，可以从任何类型的DataTable获取信息。
