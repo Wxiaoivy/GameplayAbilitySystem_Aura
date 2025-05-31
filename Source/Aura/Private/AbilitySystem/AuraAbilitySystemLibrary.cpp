@@ -2,6 +2,7 @@
 
 
 #include "AbilitySystem/AuraAbilitySystemLibrary.h"
+#include "UI/HUD/AuraHUD.h"
 
 
 UOverlayWidgetController* UAuraAbilitySystemLibrary::GetOverlayWidgetController(const UObject* WorldContextObject)

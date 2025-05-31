@@ -35,7 +35,7 @@ void UAuraAbilitySystemComponent::AddCharacterAbilities(const TArray<TSubclassOf
 			GiveAbility(AbilitySpec);
 			
 			bStartupAbilitiesGiven = true;
-			AbilitiesGivenDelegate.Broadcast(this);
+			AbilitiesGivenDelegate.Broadcast();
 		}
 		                    
 
@@ -176,7 +176,7 @@ void UAuraAbilitySystemComponent::OnRep_ActivateAbilities()
 	{
 		//ActivateAbilities 被复制到客户端 → 触发 OnRep_ActivateAbilities。此时客户端的 bStartupAbilitiesGiven 仍是默认值 false（因为未同步）。客户端需要 主动检测 并标记 bStartupAbilitiesGiven = true
 		bStartupAbilitiesGiven = true;//防御性检查 (if (!bStartupAbilitiesGiven)) 是多人游戏编程的黄金法则，确保逻辑健壮性。这种设计是虚幻引擎 GAS 的常见模式，适用于所有需要“首次数据就绪”通知的场景。
-		AbilitiesGivenDelegate.Broadcast(this);
+		AbilitiesGivenDelegate.Broadcast();
 	}
 }
 

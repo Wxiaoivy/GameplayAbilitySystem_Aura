@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "Kismet/GameplayStatics.h"
-#include "UI/HUD/AuraHUD.h"
+//#include "UI/HUD/AuraHUD.h"
 #include "Player/AuraPlayerState.h"
 #include "AbilitySystem/Data/CharacterClassInfo.h"
 #include "Game/AuraGameModeBase.h"
@@ -17,7 +17,7 @@
  */
 
 class UOverlayWidgetController;
-
+class AAuraHUD;
 
 UCLASS()
 class AURA_API UAuraAbilitySystemLibrary : public UBlueprintFunctionLibrary

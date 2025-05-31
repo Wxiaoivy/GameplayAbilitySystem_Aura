@@ -11,6 +11,10 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnStatChangedSignature, int32, NewV
 
 class UAbilitySystemComponent;
 class UAttributeSet;
+class AAuraPlayerController;
+class AAuraPlayerState;
+class UAuraAbilitySystemComponent;
+class UAuraAttributeSet;
 
 
 USTRUCT(BlueprintType)
@@ -75,4 +79,28 @@ protected:
 	// 只读属性，存储属性集对象。
 	UPROPERTY(BlueprintReadOnly, Category = "WidgetController")
 	TObjectPtr<UAttributeSet>AttributeSet;
+
+	// 只读属性，存储玩家控制器对象。
+	UPROPERTY(BlueprintReadOnly, Category = "WidgetController")
+	TObjectPtr<AAuraPlayerController>AuraPlayerController;
+
+
+	// 只读属性，存储玩家状态对象。
+	UPROPERTY(BlueprintReadOnly, Category = "WidgetController")
+	TObjectPtr<AAuraPlayerState>AuraPlayerState;
+
+
+	// 只读属性，存储能力系统组件对象。
+	UPROPERTY(BlueprintReadOnly, Category = "WidgetController")
+	TObjectPtr<UAuraAbilitySystemComponent>AuraAbilitySystemComponent;
+
+
+	// 只读属性，存储属性集对象。
+	UPROPERTY(BlueprintReadOnly, Category = "WidgetController")
+	TObjectPtr<UAuraAttributeSet>AuraAttributeSet;
+
+	AAuraPlayerController* GetAuraPC();
+	AAuraPlayerState* GetAuraPS();
+	UAuraAbilitySystemComponent* GetAuraASC();
+	UAuraAttributeSet* GetAuraAS();
 };

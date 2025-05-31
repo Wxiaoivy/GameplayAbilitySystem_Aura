@@ -100,14 +100,14 @@ protected:
 	TObjectPtr<UAbilityInfo>AbilityInfo;
 
 
-	void OnInitializeStartupAbilities(UAuraAbilitySystemComponent* AuraASC);
+	void OnInitializeStartupAbilities();
 
 
 	//这里的T表示无论什么类型的DataTable;是个模板函数，可以从任何类型的DataTable获取信息。
 	template<typename T>
 	T* GetDataTableRowByTag(UDataTable* DataTable, const FGameplayTag& Tag);
 
-	void OnXPChange(int32 NewXP)const;
+	void OnXPChange(int32 NewXP);
 
 }; 
 
