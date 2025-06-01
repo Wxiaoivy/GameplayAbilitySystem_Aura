@@ -4,42 +4,86 @@
 #include "AbilitySystem/AuraAbilitySystemLibrary.h"
 #include "UI/HUD/AuraHUD.h"
 
+//返回一个布尔值(true/false)
+
+//接受三个参数：
+//WorldContextObject - 用于获取游戏世界的上下文
+//OutWCParams - 输出的控件参数(引用传递，可以直接修改)
+//OutAuraHUD - 输出的HUD对象(引用传递)
+bool UAuraAbilitySystemLibrary::MakeWidgetControllerParams(const UObject* WorldContextObject, FWidgetControllerParams& OutWCParams, AAuraHUD*& OutAuraHUD)
+{
+
+	if (APlayerController* PC = UGameplayStatics::GetPlayerController(WorldContextObject, 0))//尝试获取玩家控制器(PlayerController)
+	{
+		OutAuraHUD = Cast<AAuraHUD>(PC->GetHUD()); //从玩家控制器获取HUD(PC->GetHUD())并尝试转换为AAuraHUD类型
+		if (OutAuraHUD)//检查是否成功获取了AuraHUD
+		{
+			AAuraPlayerState* PS = PC->GetPlayerState<AAuraPlayerState>();//从玩家控制器获取玩家状态(PlayerState)并转换为AAuraPlayerState类型
+			UAbilitySystemComponent* ASC = PS->GetAbilitySystemComponent();//从玩家状态获取能力系统组件(Ability System Component)
+			UAttributeSet* AS = PS->GetAttributeSet(); //从玩家状态获取属性集(Attribute Set)
+
+			//将获取到的各个组件和对象赋值给输出参数OutWCParams的相应字段
+			OutWCParams.AbilitySystemComponent = ASC;
+			OutWCParams.AttributeSet = AS;
+			OutWCParams.PlayerController = PC;
+			OutWCParams.PlayerState = PS;
+
+			return true;//如果一切顺利，返回true表示成功
+		}
+	}
+	return false;//如果任何一步失败，最终返回false
+}
 
 UOverlayWidgetController* UAuraAbilitySystemLibrary::GetOverlayWidgetController(const UObject* WorldContextObject)
 {
-	if (APlayerController* PC = UGameplayStatics::GetPlayerController(WorldContextObject,0))
+	FWidgetControllerParams WCParams;//声明两个局部变量：WCParams - 控件参数结构体   AuraHUD - HUD指针，初始化为nullptr
+	AAuraHUD* AuraHUD = nullptr;
+	if (MakeWidgetControllerParams(WorldContextObject, WCParams, AuraHUD))//调用第一个函数MakeWidgetControllerParams来填充参数,如果返回true(成功)，进入if块
 	{
-		if (AAuraHUD* AuraHUD = Cast<AAuraHUD>(PC->GetHUD()))
-		{
-			AAuraPlayerState* PS = PC->GetPlayerState<AAuraPlayerState>();
-			UAbilitySystemComponent* ASC = PS->GetAbilitySystemComponent();
-			UAttributeSet* AS = PS->GetAttributeSet();
-			const FWidgetControllerParams WidgetControllerParams(PC, PS, ASC, AS);
-			return AuraHUD->GetOverlayWidgetController(WidgetControllerParams);
-
-		}
+		return AuraHUD->GetOverlayWidgetController(WCParams);//调用AuraHUD的GetOverlayWidgetController方法，传入准备好的参数,返回获取到的覆盖控件
 	}
-	return nullptr;
+	return nullptr;//如果失败，返回空指针
+
+	//上面这部分和下面注销掉的代码实现一个功能，功能是一样的。
+
+	//if (APlayerController* PC = UGameplayStatics::GetPlayerController(WorldContextObject,0))
+	//{
+	//	if (AAuraHUD* AuraHUD = Cast<AAuraHUD>(PC->GetHUD()))
+	//	{
+	//		AAuraPlayerState* PS = PC->GetPlayerState<AAuraPlayerState>();
+	//		UAbilitySystemComponent* ASC = PS->GetAbilitySystemComponent();
+	//		UAttributeSet* AS = PS->GetAttributeSet();
+	//		const FWidgetControllerParams WidgetControllerParams(PC, PS, ASC, AS);
+	//		return AuraHUD->GetOverlayWidgetController(WidgetControllerParams);
+
+	//	}
+	//}
 }
 
 UAttributeMenuWidgetController* UAuraAbilitySystemLibrary::GetAttributeMenuWidgetController(const UObject* WorldContextObject)
 {
 
-	if (APlayerController* PC = UGameplayStatics::GetPlayerController(WorldContextObject, 0))
+	FWidgetControllerParams WCParams;//声明两个局部变量：WCParams - 控件参数结构体   AuraHUD - HUD指针，初始化为nullptr
+	AAuraHUD* AuraHUD = nullptr;
+	if (MakeWidgetControllerParams(WorldContextObject, WCParams, AuraHUD))//调用第一个函数MakeWidgetControllerParams来填充参数,如果返回true(成功)，进入if块
 	{
-		if (AAuraHUD* AuraHUD = Cast<AAuraHUD>(PC->GetHUD()))
-		{
-			AAuraPlayerState* PS = PC->GetPlayerState<AAuraPlayerState>();
-			UAbilitySystemComponent* ASC = PS->GetAbilitySystemComponent();
-			UAttributeSet* AS = PS->GetAttributeSet();
-			const FWidgetControllerParams WidgetControllerParams(PC, PS, ASC, AS);
-			return AuraHUD->GetAttributeMenuWidgetController(WidgetControllerParams);
-
-		}
+		return AuraHUD->GetAttributeMenuWidgetController(WCParams);//调用AuraHUD的GetOverlayWidgetController方法，传入准备好的参数,返回获取到的覆盖控件
 	}
-	return nullptr;
+	return nullptr;//如果失败，返回空指针
 
 }
+
+USpellMenuWidgetController* UAuraAbilitySystemLibrary::GetSpellMenuWidgetController(const UObject* WorldContextObject)
+{
+	FWidgetControllerParams WCParams;//声明两个局部变量：WCParams - 控件参数结构体   AuraHUD - HUD指针，初始化为nullptr
+	AAuraHUD* AuraHUD = nullptr;
+	if (MakeWidgetControllerParams(WorldContextObject, WCParams, AuraHUD))//调用第一个函数MakeWidgetControllerParams来填充参数,如果返回true(成功)，进入if块
+	{
+		return AuraHUD->GetSpellMenuWidgetController(WCParams);//调用AuraHUD的GetOverlayWidgetController方法，传入准备好的参数,返回获取到的覆盖控件
+	}
+	return nullptr;//如果失败，返回空指针
+}
+
 //InitializeDefaultAttributes应该在服务器完成 所以应该检查权威 HasAuthority()
 const void UAuraAbilitySystemLibrary::InitializeDefaultAttributes(const UObject* WorldContextObject, ECharacterClass CharacterClass, float Level, UAbilitySystemComponent* ASC)
 {

@@ -13,7 +13,7 @@
 class UAuraUserWidget;
 class UAbilityInfo;
 class UAuraAbilitySystemComponent;
-USTRUCT(BlueprintType)
+USTRUCT(BlueprintType, Blueprintable)
 struct FUIWidgetRow : public FTableRowBase
 {
 	GENERATED_BODY()
