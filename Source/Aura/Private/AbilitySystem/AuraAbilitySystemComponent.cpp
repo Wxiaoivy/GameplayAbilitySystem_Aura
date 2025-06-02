@@ -31,8 +31,10 @@ void UAuraAbilitySystemComponent::AddCharacterAbilities(const TArray<TSubclassOf
 			//AbilitySpec.DynamicAbilityTags: 是能力实例的动态标签集合，用于存储与能力相关的标签。
 			//AuraGameplayAbility->StartupInputTag: 是 UAuraGameplayAbility 中定义的输入标签，表示该能力对应的输入（如按键）。
 			AbilitySpec.DynamicAbilityTags.AddTag(AuraGameplayAbility->StartupInputTag);
+			AbilitySpec.DynamicAbilityTags.AddTag(FAuraGameplayTags::Get().Abilities_Status_Equipped);
 			//将能力实例（AbilitySpec）添加到角色的 AbilitySystemComponent 中。
 			GiveAbility(AbilitySpec);
+
 			
 			bStartupAbilitiesGiven = true;
 			AbilitiesGivenDelegate.Broadcast();
@@ -167,6 +169,21 @@ FGameplayTag UAuraAbilitySystemComponent::GetInputTagFormSpec(const FGameplayAbi
 	}
 	return FGameplayTag();
 }
+
+
+FGameplayTag UAuraAbilitySystemComponent::GetStatusTagFormSpec(const FGameplayAbilitySpec& AbilitySpec)
+{
+	//从动态标签中提取Status标签（如 "Abilities.Status.Lock"）
+	for (FGameplayTag StatusTag : AbilitySpec.DynamicAbilityTags)
+	{
+		if (StatusTag.MatchesTag((FGameplayTag::RequestGameplayTag(FName("Abilities.Status")))))
+		{
+			return StatusTag;// 返回匹配 "Abilities.Status" 父标签的Tag
+		}
+	}
+	return FGameplayTag();
+}
+
 
 void UAuraAbilitySystemComponent::OnRep_ActivateAbilities()
 {
