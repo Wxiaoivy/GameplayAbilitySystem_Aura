@@ -5,6 +5,10 @@
 #include "AuraLogChannels.h"
 #include "Interaction/PlayerInterface.h"
 #include <../../../../../../../Plugins/Runtime/GameplayAbilities/Source/GameplayAbilities/Public/AbilitySystemBlueprintLibrary.h>
+#include <../../../../../../../Plugins/Runtime/GameplayAbilities/Source/GameplayAbilities/Public/GameplayAbilitySpec.h>
+#include "AuraGameplayTags.h"
+#include "AbilitySystem/Data/AbilityInfo.h"
+#include "AbilitySystem/AuraAbilitySystemLibrary.h"
 
 UAuraAbilitySystemComponent::UAuraAbilitySystemComponent()
 {
@@ -185,6 +189,42 @@ FGameplayTag UAuraAbilitySystemComponent::GetStatusTagFormSpec(const FGameplayAb
 }
 
 
+FGameplayAbilitySpec* UAuraAbilitySystemComponent::GetSpecFromAbilityTag(const FGameplayTag& AbilityTag)
+{
+	FScopedAbilityListLock ActiveScopeLoc(*this);//创建一个作用域锁，确保在遍历技能列表时不会被其他线程修改  这是线程安全措施
+	for (auto AbilitySpec:GetActivatableAbilities())//遍历所有可激活的技能GetActivatableAbilities() 返回的是当前 已经通过 GiveAbility() 
+		                                            //赋予 给 AbilitySystemComponent (ASC) 并且 可以被激活 的技能列表。
+	{
+		for (auto Tag : AbilitySpec.Ability.Get()->AbilityTags)//遍历当前技能的标签列表(AbilityTags),每个技能可以有多个标签
+		{
+			if (Tag.MatchesTag(AbilityTag))//检查当前标签是否与传入的标签匹配
+			{
+				return &AbilitySpec;//如果找到匹配标签的技能，返回该技能的指针
+			}
+		}
+	}
+	return nullptr;//遍历完所有技能都没找到匹配的，返回空指针
+}
+
+void UAuraAbilitySystemComponent::UpdateAbilityStatus(int32 Level)//这个函数检查玩家的等级，如果满足条件（Level >= Info.LevelRequirement），
+                                                                  //并且技能 还没有被赋予（GetSpecFromAbilityTag(Info.AbilityTag) == nullptr），才会调用 GiveAbility() 赋予新技能。
+                                                                  //这样，新技能就会被添加到 GetActivatableAbilities() 的列表里，之后就可以激活它了。
+{
+	UAbilityInfo* AbilityInfo = UAuraAbilitySystemLibrary::GetAbilityInfo(GetAvatarActor());//获取能力信息数据资产(DataAsset) GetAbilityInfo()是自定义的辅助函数，用于获取技能信息
+	for (const auto Info : AbilityInfo->AbilityInformation)//遍历所有定义的技能信息,Info是包含技能定义的结构体
+	{
+		if (!Info.AbilityTag.IsValid())continue;//跳过无效标签的技能
+		if(Level<Info.LevelRequirement)continue;//如果玩家等级不满足技能等级要求，跳过	
+		if (GetSpecFromAbilityTag(Info.AbilityTag) == nullptr)//检查玩家是否还没有这个技能(使用前面定义的GetSpecFromAbilityTag函数)
+	    {
+			FGameplayAbilitySpec AbilitySpec = FGameplayAbilitySpec(Info.Ability, 1);//创建新的技能规格,Info.Ability是技能类,1是技能等级
+			AbilitySpec.DynamicAbilityTags.AddTag(FAuraGameplayTags::Get().Abilities_Status_Eligible);//给技能添加动态标签"Eligible"(合格/可用)
+			GiveAbility(AbilitySpec);//将技能赋予玩家
+			MarkAbilitySpecDirty(AbilitySpec);//标记技能规格为"脏"，确保同步(网络游戏中很重要),强制服务器复制给客户端
+	    }
+	}
+}
+
 void UAuraAbilitySystemComponent::OnRep_ActivateAbilities()
 {
 	Super::OnRep_ActivateAbilities();
@@ -222,4 +262,6 @@ void UAuraAbilitySystemComponent::SeverUpgradeAttribute_Implementation(const FGa
 	}
 
 }
+
+
 

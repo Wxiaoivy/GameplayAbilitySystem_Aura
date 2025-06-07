@@ -8,6 +8,8 @@
 #include "AbilitySystem/Abilities/AuraGameplayAbility.h"
 #include "AuraAbilitySystemComponent.generated.h"
 
+struct FGameplayAbilitySpec;
+
 
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FEffectAssetTag, const FGameplayTagContainer& /*AssetTag*/)
@@ -44,6 +46,10 @@ public:
 	static FGameplayTag GetInputTagFormSpec(const FGameplayAbilitySpec& AbilitySpec);
 	static FGameplayTag GetStatusTagFormSpec(const FGameplayAbilitySpec& AbilitySpec);
 
+	FGameplayAbilitySpec* GetSpecFromAbilityTag(const FGameplayTag& AbilityTag);
+
+
+	void UpdateAbilityStatus(int32 Level);
 	void UpgradeAttribute(const FGameplayTag& AttributeTag);
 
 	UFUNCTION(Server,Reliable)
