@@ -10,6 +10,8 @@
  * 
  */
 class UCharacterClassInfo;
+class UAbilityInfo;
+
 UCLASS()
 class AURA_API AAuraGameModeBase : public AGameModeBase
 {
@@ -18,5 +20,11 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "CharacterClassDefaultInfo")
 	TObjectPtr<UCharacterClassInfo>CharacterClassInfo;
+
+	UPROPERTY(EditDefaultsOnly, Category = "AbilityInfo")
+	TObjectPtr<UAbilityInfo>AbilityInfo;
+
+
+
 
 };
