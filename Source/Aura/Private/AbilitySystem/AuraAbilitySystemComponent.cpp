@@ -221,9 +221,16 @@ void UAuraAbilitySystemComponent::UpdateAbilityStatus(int32 Level)//这个函数检查
 			AbilitySpec.DynamicAbilityTags.AddTag(FAuraGameplayTags::Get().Abilities_Status_Eligible);//给技能添加动态标签"Eligible"(合格/可用)
 			GiveAbility(AbilitySpec);//将技能赋予玩家
 			MarkAbilitySpecDirty(AbilitySpec);//标记技能规格为"脏"，确保同步(网络游戏中很重要),强制服务器复制给客户端
+			ClientUpdateAbilityStatus(Info.AbilityTag, FAuraGameplayTags::Get().Abilities_Status_Eligible);
 	    }
 	}
 }
+
+void UAuraAbilitySystemComponent::ClientUpdateAbilityStatus_Implementation(const FGameplayTag& AbilityTag, const FGameplayTag& StatusTag)
+{
+	AbilityStatusChanged.Broadcast(AbilityTag, StatusTag);
+}
+
 
 void UAuraAbilitySystemComponent::OnRep_ActivateAbilities()
 {
@@ -236,6 +243,8 @@ void UAuraAbilitySystemComponent::OnRep_ActivateAbilities()
 		AbilitiesGivenDelegate.Broadcast();
 	}
 }
+
+
 
 void UAuraAbilitySystemComponent::UpgradeAttribute(const FGameplayTag& AttributeTag)
 {
