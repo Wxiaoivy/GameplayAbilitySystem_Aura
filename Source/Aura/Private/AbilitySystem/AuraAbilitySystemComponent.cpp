@@ -221,7 +221,10 @@ void UAuraAbilitySystemComponent::UpdateAbilityStatus(int32 Level)//这个函数检查
 			AbilitySpec.DynamicAbilityTags.AddTag(FAuraGameplayTags::Get().Abilities_Status_Eligible);//给技能添加动态标签"Eligible"(合格/可用)
 			GiveAbility(AbilitySpec);//将技能赋予玩家
 			MarkAbilitySpecDirty(AbilitySpec);//标记技能规格为"脏"，确保同步(网络游戏中很重要),强制服务器复制给客户端
-			ClientUpdateAbilityStatus(Info.AbilityTag, FAuraGameplayTags::Get().Abilities_Status_Eligible);
+			ClientUpdateAbilityStatus(Info.AbilityTag, FAuraGameplayTags::Get().Abilities_Status_Eligible);//Client 表示这个函数只会在 服务器调用，
+			                                                                                               //然后在 owning client（拥有这个组件的客户端）上执行。
+			                                                                                               //服务器不会执行这个函数，它只是通过网络让客户端执行。
+			                                                                                               //这种设计是典型的 "服务器授权，客户端表现" 模式，服务器控制逻辑，客户端负责更新 UI 或视觉效果。
 	    }
 	}
 }

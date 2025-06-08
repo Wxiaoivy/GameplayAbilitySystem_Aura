@@ -18,4 +18,7 @@ public:
 	virtual void BroadCastInitialValues()override;
 
 	virtual void BindCallbacksToDependencies()override;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnStatChangedSignature OnSpellPointsChangedDelegateOnController;
 };
