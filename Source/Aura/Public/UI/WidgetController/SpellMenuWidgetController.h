@@ -45,6 +45,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SpellGlobeSelected(const FGameplayTag& AbilityTag); // 法术球被选中时调用的函数，可以在蓝图中调用
 
+	UFUNCTION(BlueprintCallable)
+	void SpendPointButtonPressed();
+
  private:
 	 //静态辅助函数，FORCENOINLINE告诉编译器不要内联这个函数
 	 // - AbilityStatus: 能力当前状态标签

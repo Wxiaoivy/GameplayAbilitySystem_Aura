@@ -15,7 +15,7 @@ struct FGameplayAbilitySpec;
 DECLARE_MULTICAST_DELEGATE_OneParam(FEffectAssetTag, const FGameplayTagContainer& /*AssetTag*/)
 DECLARE_MULTICAST_DELEGATE(FAbilitiesGiven)//声明一个多播委托，当技能系统完成初始技能（Startup Abilities）分配时，通知所有订阅者
 DECLARE_DELEGATE_OneParam(FForEachAbility, const FGameplayAbilitySpec&)//定义一个委托类型，用于遍历每个技能（FGameplayAbilitySpec），供外部自定义处理逻辑。
-DECLARE_MULTICAST_DELEGATE_TwoParams(FAbilityStatusChanged,const FGameplayTag& /*AbilityTag*/, const FGameplayTag& /*StatusTag*/)
+DECLARE_MULTICAST_DELEGATE_ThreeParams(FAbilityStatusChanged,const FGameplayTag& /*AbilityTag*/, const FGameplayTag& /*StatusTag*/,int32 /*AbilityLevel*/)
 /**
  * 
  */
@@ -57,6 +57,9 @@ public:
 	UFUNCTION(Server,Reliable)
 	void SeverUpgradeAttribute(const FGameplayTag& AttributeTag);
 
+	UFUNCTION(Server, Reliable)
+	void SeverSpendSpellPoint(const FGameplayTag& AbilityTag);
+
 
 protected:
 	void EffectApplied(UAbilitySystemComponent* AbilitySystemComponent, const FGameplayEffectSpec& EffectSpec, FActiveGameplayEffectHandle ActiveEffectHandle);
@@ -64,5 +67,5 @@ protected:
 	virtual void OnRep_ActivateAbilities()override;
 
 	UFUNCTION(Client,Reliable)
-	void ClientUpdateAbilityStatus(const FGameplayTag& AbilityTag, const FGameplayTag& StatusTag);
+	void ClientUpdateAbilityStatus(const FGameplayTag& AbilityTag, const FGameplayTag& StatusTag,int32 AbilityLevel);
 };

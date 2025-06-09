@@ -78,7 +78,7 @@ void UAuraProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLocati
 
 		for (auto& Pair : UAuraDamageGameplayAbility::DamageTypesMap)
 		{
-			const float ScaledDamage = Pair.Value.GetValueAtLevel(10/*GetAbilityLevel()*/);
+			const float ScaledDamage = Pair.Value.GetValueAtLevel(GetAbilityLevel());
 			
 			UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(EffectSpecHandle, Pair.Key, ScaledDamage);//将数值与特定的GameplayTag关联存储
 			//SetByCaller 是一种动态数值传递方式，允许在 Gameplay Effect 执行时传入变量值，而不是硬编码在数据资产里。

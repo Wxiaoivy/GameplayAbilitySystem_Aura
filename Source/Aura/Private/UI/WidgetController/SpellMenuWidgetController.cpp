@@ -17,10 +17,22 @@ void USpellMenuWidgetController::BroadCastInitialValues()
 
 void USpellMenuWidgetController::BindCallbacksToDependencies()
 {
+	//状态同步完整性：确保任何可能影响按钮状态的变化都会触发UI更新
+
+	/*关注点分离：
+
+		AbilityStatusChanged处理能力状态变化
+
+		OnSpellPointsChanged处理资源变化
+
+		一致性保证：无论变化来自哪个系统，UI都能保持正确状态
+
+		最小化更新：只有当选中能力的状态或法术点数变化时才更新按钮*/
+
 
 	// 绑定到能力系统组件的AbilityStatusChanged委托
 	GetAuraASC()->AbilityStatusChanged.AddLambda
-	([this](const FGameplayTag& AbilityTag, const FGameplayTag& StatusTag)
+	([this](const FGameplayTag& AbilityTag, const FGameplayTag& StatusTag,int32 NewLevel)
 		{
 			if (SelectedAbility.Ability.MatchesTagExact(AbilityTag))
 			{
@@ -88,6 +100,14 @@ void USpellMenuWidgetController::SpellGlobeSelected(const FGameplayTag& AbilityT
 	ShouldEnableButtons(StatusTag, SpellPoints, bEnableSpendPointsButton, bEnableEquipButton);// 调用辅助函数确定按钮状态
 	SpellGlobeSelectedDelegate.Broadcast(bEnableSpendPointsButton, bEnableEquipButton); // 广播按钮状态给UI
 
+}
+
+void USpellMenuWidgetController::SpendPointButtonPressed()
+{
+	if (GetAuraASC())
+	{
+		GetAuraASC()->SeverSpendSpellPoint(SelectedAbility.Ability);
+	}
 }
 
 // 静态辅助函数，根据能力状态和法术点数决定按钮状态

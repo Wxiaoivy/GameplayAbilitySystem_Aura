@@ -221,17 +221,90 @@ void UAuraAbilitySystemComponent::UpdateAbilityStatus(int32 Level)//这个函数检查
 			AbilitySpec.DynamicAbilityTags.AddTag(FAuraGameplayTags::Get().Abilities_Status_Eligible);//给技能添加动态标签"Eligible"(合格/可用)
 			GiveAbility(AbilitySpec);//将技能赋予玩家
 			MarkAbilitySpecDirty(AbilitySpec);//标记技能规格为"脏"，确保同步(网络游戏中很重要),强制服务器复制给客户端
-			ClientUpdateAbilityStatus(Info.AbilityTag, FAuraGameplayTags::Get().Abilities_Status_Eligible);//Client 表示这个函数只会在 服务器调用，
-			                                                                                               //然后在 owning client（拥有这个组件的客户端）上执行。
-			                                                                                               //服务器不会执行这个函数，它只是通过网络让客户端执行。
-			                                                                                               //这种设计是典型的 "服务器授权，客户端表现" 模式，服务器控制逻辑，客户端负责更新 UI 或视觉效果。
+			ClientUpdateAbilityStatus(Info.AbilityTag, FAuraGameplayTags::Get().Abilities_Status_Eligible,1);//Client 表示这个函数只会在 服务器调用，
+			                                                                                                                 //然后在 owning client（拥有这个组件的客户端）上执行。
+			                                                                                                                 //服务器不会执行这个函数，它只是通过网络让客户端执行。
+			                                                                                                                 //这种设计是典型的 "服务器授权，客户端表现" 模式，服务器控制逻辑，客户端负责更新 UI 或视觉效果。
 	    }
 	}
 }
 
-void UAuraAbilitySystemComponent::ClientUpdateAbilityStatus_Implementation(const FGameplayTag& AbilityTag, const FGameplayTag& StatusTag)
+void UAuraAbilitySystemComponent::ClientUpdateAbilityStatus_Implementation(const FGameplayTag& AbilityTag, const FGameplayTag& StatusTag, int32 AbilityLevel)
 {
-	AbilityStatusChanged.Broadcast(AbilityTag, StatusTag);
+	AbilityStatusChanged.Broadcast(AbilityTag, StatusTag,AbilityLevel);
+}
+
+void UAuraAbilitySystemComponent::SeverSpendSpellPoint_Implementation(const FGameplayTag& AbilityTag)
+{
+	if (FGameplayAbilitySpec* AbilitySpec = GetSpecFromAbilityTag(AbilityTag))//通过能力标签查找对应的FGameplayAbilitySpec,AbilitySpec包含能力的运行时信息（等级、标签等）,如果找不到对应规格，直接返回
+	{
+		if (GetAvatarActor()->Implements<UPlayerInterface>())
+		{
+			/*GetAvatarActor()：获取拥有这个能力系统的角色
+				检查角色是否实现了UPlayerInterface接口
+				通过接口调用AddToSpellPoints，参数为 - 1表示扣除1点
+				这是典型的Unreal接口调用方式*/
+			IPlayerInterface::Execute_AddToSpellPoints(GetAvatarActor(), -1);
+		}
+
+		const FAuraGameplayTags GameplayTags = FAuraGameplayTags::Get();//获取游戏标签单例
+		FGameplayTag StatusTag = GetStatusTagFormSpec(*AbilitySpec);//从能力规格中获取当前状态标签
+		if (StatusTag.MatchesTagExact(GameplayTags.Abilities_Status_Eligible))//如果能力当前是"符合条件"状态：	
+		{
+			AbilitySpec->DynamicAbilityTags.RemoveTag(GameplayTags.Abilities_Status_Eligible);//移除"Eligible"标签
+			AbilitySpec->DynamicAbilityTags.AddTag(GameplayTags.Abilities_Status_Unlocked);//添加"Unlocked"标签
+			StatusTag = GameplayTags.Abilities_Status_Unlocked;//更新本地状态标签变量
+
+			//这表示花费点数将符合条件的能力解锁
+		}
+		else if (StatusTag.MatchesTagExact(GameplayTags.Abilities_Status_Equipped)|| StatusTag.MatchesTagExact(GameplayTags.Abilities_Status_Unlocked))//处理"已装备"或"已解锁"状态的能力,如果能力已经是"已装备"或"已解锁"状态：
+		{
+			AbilitySpec->Level += 1;// 直接提升能力等级 这表示花费点数用于升级已有能力
+		}
+		ClientUpdateAbilityStatus(AbilityTag, StatusTag, AbilitySpec->Level);//调用客户端RPC通知状态更新 参数包括：能力标签,新状态标签,新等级.  确保客户端与服务器同步
+		MarkAbilitySpecDirty(*AbilitySpec);//通知能力系统该规格已修改,对于网络同步很重要，确保变更被复制
+	}
+	/*状态转换逻辑
+		这个函数实现了以下状态转换逻辑：
+
+		从符合条件到已解锁：
+		当花费点数在"Eligible"状态时
+		状态变化：Eligible → Unlocked
+		典型应用：解锁新能力
+
+
+		能力升级：
+		当花费点数在"Unlocked"或"Equipped"状态时
+		直接增加能力等级
+		典型应用：强化已有能力
+
+
+		网络同步流程:
+
+		客户端发起花费点数请求
+		服务器执行此函数：
+		扣除点数
+		修改能力状态
+		通过RPC通知客户端
+		客户端收到更新后同步UI
+
+		设计要点:
+
+		服务器权威：
+		所有关键操作都在服务器执行
+		客户端只能通过RPC请求
+
+		状态驱动：
+		根据当前状态决定不同行为
+		使用GameplayTag灵活表示状态
+
+		网络效率：
+		只同步必要的变更
+		使用MarkDirty优化同步
+
+		扩展性：
+		通过接口与玩家状态交互
+		容易添加新的状态处理*/
 }
 
 
