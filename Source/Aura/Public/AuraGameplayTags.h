@@ -98,6 +98,7 @@ public:
 	*Abilities Tag
 	*
 	*/
+	FGameplayTag Abilities_None;
 	FGameplayTag Abilities_Attack;
 	FGameplayTag Abilities_Summon;
 

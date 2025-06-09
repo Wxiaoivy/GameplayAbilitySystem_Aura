@@ -192,10 +192,10 @@ FGameplayTag UAuraAbilitySystemComponent::GetStatusTagFormSpec(const FGameplayAb
 FGameplayAbilitySpec* UAuraAbilitySystemComponent::GetSpecFromAbilityTag(const FGameplayTag& AbilityTag)
 {
 	FScopedAbilityListLock ActiveScopeLoc(*this);//创建一个作用域锁，确保在遍历技能列表时不会被其他线程修改  这是线程安全措施
-	for (auto AbilitySpec:GetActivatableAbilities())//遍历所有可激活的技能GetActivatableAbilities() 返回的是当前 已经通过 GiveAbility() 
+	for (FGameplayAbilitySpec& AbilitySpec:GetActivatableAbilities())//遍历所有可激活的技能GetActivatableAbilities() 返回的是当前 已经通过 GiveAbility() 
 		                                            //赋予 给 AbilitySystemComponent (ASC) 并且 可以被激活 的技能列表。
 	{
-		for (auto Tag : AbilitySpec.Ability.Get()->AbilityTags)//遍历当前技能的标签列表(AbilityTags),每个技能可以有多个标签
+		for (FGameplayTag Tag : AbilitySpec.Ability.Get()->AbilityTags)//遍历当前技能的标签列表(AbilityTags),每个技能可以有多个标签
 		{
 			if (Tag.MatchesTag(AbilityTag))//检查当前标签是否与传入的标签匹配
 			{
