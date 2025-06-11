@@ -48,6 +48,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SpendPointButtonPressed();
 
+	UFUNCTION(BlueprintCallable)
+	void GlobeDeselected();
+
  private:
 	 //静态辅助函数，FORCENOINLINE告诉编译器不要内联这个函数
 	 // - AbilityStatus: 能力当前状态标签

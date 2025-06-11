@@ -361,7 +361,19 @@ bool UAuraAbilitySystemComponent::GetDescriptionByAbilityTag(const FGameplayTag&
 		}
 	}
 	const UAbilityInfo* AbilityInfo = UAuraAbilitySystemLibrary::GetAbilityInfo(GetAvatarActor());
-	OutDescription = UAuraGameplayAbility::GetLockedDescription(AbilityInfo->FindAbilityInfoForTag(AbilityTag).LevelRequirement);
+	if (!AbilityTag.IsValid()|| AbilityTag.MatchesTagExact(FAuraGameplayTags::Get().Abilities_None))//这里因为升级时SpellPoint产生变化 触发OnSpellPointsChangedDelegate代理事件，
+		                                                                                            //GetAuraASC()->GetDescriptionByAbilityTag(SelectedAbility.Ability, Description, NextLevelDescription);
+		                                                                                            //SelectedAbility里面的Ability初始化的默认值是Abilities_None，
+																									//所以这里就算没有选择法术球，这个AbilityTag也是Abilities_None,所以会在升级时莫名其妙有Description
+		                                                                                            //所以用这个if来避免
+	{
+		OutDescription = FString();
+	}
+	else
+	{
+		OutDescription = UAuraGameplayAbility::GetLockedDescription(AbilityInfo->FindAbilityInfoForTag(AbilityTag).LevelRequirement);
+	}
+
 	OutNextLevelDescription = FString();
 	return false;
 }
