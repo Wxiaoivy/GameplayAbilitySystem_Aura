@@ -50,6 +50,8 @@ public:
 
 	FGameplayAbilitySpec* GetSpecFromAbilityTag(const FGameplayTag& AbilityTag);
 
+	bool GetDescriptionByAbilityTag(const FGameplayTag& AbilityTag, FString& OutDescription, FString& OutNextLevelDescription);
+
 
 	void UpdateAbilityStatus(int32 Level);
 	void UpgradeAttribute(const FGameplayTag& AttributeTag);

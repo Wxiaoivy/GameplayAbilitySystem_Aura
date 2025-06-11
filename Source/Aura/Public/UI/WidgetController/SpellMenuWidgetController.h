@@ -12,7 +12,7 @@
 
 // 声明一个动态多播委托，可以广播给多个接收者，能在蓝图中使用
 // 这个委托用来通知法术球体被选中时两个按钮的状态
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FSpellGlobeSelectedSignature, bool, bSpendPointsButtonEnabled, bool, bEquipButtonEnabled);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FSpellGlobeSelectedSignature, bool, bSpendPointsButtonEnabled, bool, bEquipButtonEnabled, FString, CurrentLevelDescription, FString, NextLevelDescription);
 /**
  * 
  */

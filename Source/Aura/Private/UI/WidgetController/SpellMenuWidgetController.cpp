@@ -34,14 +34,17 @@ void USpellMenuWidgetController::BindCallbacksToDependencies()
 	GetAuraASC()->AbilityStatusChanged.AddLambda
 	([this](const FGameplayTag& AbilityTag, const FGameplayTag& StatusTag,int32 NewLevel)
 		{
-			if (SelectedAbility.Ability.MatchesTagExact(AbilityTag))
+			if (SelectedAbility.Ability.MatchesTagExact(AbilityTag))//检查当前变化的能力是否是我们选中的能力(SelectedAbility)
 			{
-				//当选中的能力状态发生变化时，立即更新UI按钮状态, 为了保证状态同步完整性：确保任何可能影响按钮状态的变化都会触发UI更新（选择法术球时，能力状态变化时，法术点变化时）
+				//如果是选中的能力，更新它的状态为新的状态  为了保证状态同步完整性：确保任何可能影响按钮状态的变化都会触发UI更新（选择法术球时，能力状态变化时，法术点变化时）
 				SelectedAbility.Status = StatusTag;
 				bool bEnableSpendPointsButton = false;// 初始化花费点数按钮状态
 				bool bEnableEquipButton = false;// 初始化装备按钮状态
 				ShouldEnableButtons(StatusTag, CurrentSpellPoints, bEnableSpendPointsButton, bEnableEquipButton);// 调用辅助函数确定按钮状态
-				SpellGlobeSelectedDelegate.Broadcast(bEnableSpendPointsButton, bEnableEquipButton); // 广播按钮状态给UI
+				FString Description;//声明两个字符串变量，用来存储当前等级描述和下一等级的描述
+				FString NextLevelDescription;
+				GetAuraASC()->GetDescriptionByAbilityTag(AbilityTag, Description, NextLevelDescription);//获取当前能力和下一等级的描述文本
+				SpellGlobeSelectedDelegate.Broadcast(bEnableSpendPointsButton, bEnableEquipButton,Description,NextLevelDescription); // 广播按钮状态和描述内容给UI
 
 			}
 			if (AbilityInfo)// 确保能力信息数据有效
@@ -57,16 +60,18 @@ void USpellMenuWidgetController::BindCallbacksToDependencies()
 	(            [this](int32 SpellPoints)
 		{
 			OnSpellPointsChangedDelegateOnController.Broadcast(SpellPoints);// 当法术点数变化时，广播新值
-			CurrentSpellPoints = SpellPoints;
-
+			
 			//作用：当法术点数变化时，重新评估按钮状态。为了保证状态同步完整性：确保任何可能影响按钮状态的变化都会触发UI更新（选择法术球时，能力状态变化时，法术点变化时）
 			//即使能力状态没变，点数变化可能改变按钮可用性
 			//例如：点数从0变为1，现在可以花费点数升级能力
-
+			CurrentSpellPoints = SpellPoints;
 			bool bEnableSpendPointsButton = false;// 初始化花费点数按钮状态
 			bool bEnableEquipButton = false;// 初始化装备按钮状态
 			ShouldEnableButtons(SelectedAbility.Status, CurrentSpellPoints, bEnableSpendPointsButton, bEnableEquipButton);// 调用辅助函数确定按钮状态
-			SpellGlobeSelectedDelegate.Broadcast(bEnableSpendPointsButton, bEnableEquipButton); // 广播按钮状态给UI
+			FString Description;
+			FString NextLevelDescription;
+			GetAuraASC()->GetDescriptionByAbilityTag(SelectedAbility.Ability, Description, NextLevelDescription);
+			SpellGlobeSelectedDelegate.Broadcast(bEnableSpendPointsButton, bEnableEquipButton, Description, NextLevelDescription);// 广播按钮状态和描述内容给UI
 		}
 	);
 }
@@ -98,7 +103,10 @@ void USpellMenuWidgetController::SpellGlobeSelected(const FGameplayTag& AbilityT
 	bool bEnableSpendPointsButton = false;// 初始化花费点数按钮状态
 	bool bEnableEquipButton = false;// 初始化装备按钮状态
 	ShouldEnableButtons(StatusTag, SpellPoints, bEnableSpendPointsButton, bEnableEquipButton);// 调用辅助函数确定按钮状态
-	SpellGlobeSelectedDelegate.Broadcast(bEnableSpendPointsButton, bEnableEquipButton); // 广播按钮状态给UI
+	FString Description;
+	FString NextLevelDescription;
+	GetAuraASC()->GetDescriptionByAbilityTag(AbilityTag, Description, NextLevelDescription);
+	SpellGlobeSelectedDelegate.Broadcast(bEnableSpendPointsButton, bEnableEquipButton, Description, NextLevelDescription); // 广播按钮状态和描述内容给UI
 
 }
 
