@@ -212,7 +212,7 @@ void UAuraAbilitySystemComponent::UpdateAbilityStatus(int32 Level)//这个函数检查
                                                                   //这样，新技能就会被添加到 GetActivatableAbilities() 的列表里，之后就可以激活它了。
 {
 	UAbilityInfo* AbilityInfo = UAuraAbilitySystemLibrary::GetAbilityInfo(GetAvatarActor());//获取能力信息数据资产(DataAsset) GetAbilityInfo()是自定义的辅助函数，用于获取技能信息
-	for (const FAuraAbilityInfo Info : AbilityInfo->AbilityInformation)//遍历所有定义的技能信息,Info是包含技能定义的结构体
+	for (FAuraAbilityInfo Info : AbilityInfo->AbilityInformation)//遍历所有定义的技能信息,Info是包含技能定义的结构体
 	{
 		if (!Info.AbilityTag.IsValid())continue;//跳过无效标签的技能
 		if(Level<Info.LevelRequirement)continue;//如果玩家等级不满足技能等级要求，跳过	
