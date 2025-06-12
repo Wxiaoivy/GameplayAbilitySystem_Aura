@@ -74,6 +74,8 @@ void USpellMenuWidgetController::BindCallbacksToDependencies()
 			SpellGlobeSelectedDelegate.Broadcast(bEnableSpendPointsButton, bEnableEquipButton, Description, NextLevelDescription);// 广播按钮状态和描述内容给UI
 		}
 	);
+
+	GetAuraASC()->AbilityEquipped.AddUObject(this, &USpellMenuWidgetController::OnAbilityEquipped);
 }
 
 void USpellMenuWidgetController::SpellGlobeSelected(const FGameplayTag& AbilityTag)// 处理法术球被选中的逻辑
@@ -147,6 +149,51 @@ void USpellMenuWidgetController::EquipButtonPressed()
 	const FGameplayTag AbilityType = AbilityInfo->FindAbilityInfoForTag(SelectedAbility.Ability).AbilityType;
 	WaitForEquipDelegate.Broadcast(AbilityType);
 	bWaitingForEquipSelection = true;
+
+	FAuraGameplayTags GameplayTags = FAuraGameplayTags::Get();
+	const FGameplayTag SelectedStatus = GetAuraASC()->GetStatusFromAbilityTag(SelectedAbility.Ability);
+	if (SelectedStatus.MatchesTagExact(GameplayTags.Abilities_Status_Equipped))
+	{
+		SelectedSlot = GetAuraASC()->GetInputTagFromAbilityTag(SelectedAbility.Ability);
+	}
+}
+
+void USpellMenuWidgetController::SpellRowGlobePressed(const FGameplayTag& SlotTag, const FGameplayTag& AbilityType)
+{
+	if (!bWaitingForEquipSelection)return;
+	const FGameplayTag& SelectedAbilityType = AbilityInfo->FindAbilityInfoForTag(SelectedAbility.Ability).AbilityType;
+	if (!SelectedAbilityType.MatchesTagExact(AbilityType))return;
+	
+	GetAuraASC()->SeverEquipAbility(SelectedAbility.Ability, SlotTag);
+}
+
+void USpellMenuWidgetController::OnAbilityEquipped(
+	const FGameplayTag& AbilityTag,   // 被装备的技能（如 "Ability.Fire.Firebolt"）
+	const FGameplayTag& Status,       // 技能的新状态（如 "Status.Equipped"）
+	const FGameplayTag& Slot,         // 技能绑定的输入槽（如 "Input.LMB"）
+	const FGameplayTag& PreviousSlot  // 之前绑定的槽位（可能为空）       //调用时机：当玩家在技能菜单中将某个技能拖拽到快捷键栏（如鼠标左键）时触发。
+) 
+{
+	
+	bWaitingForEquipSelection = false; // 标记“技能选择流程”结束（比如关闭技能选择弹窗）
+
+	//关键步骤：清空旧绑定 → 2. 设置新绑定 → 3. 通知UI更新。
+	//第一次广播 (LastSlotInfo)：清空旧槽位。
+	//第二次广播(Info)：更新新槽位。
+	const FAuraGameplayTags& GameplayTags = FAuraGameplayTags::Get();
+	FAuraAbilityInfo LastSlotInfo;
+	LastSlotInfo.StatusTag = GameplayTags.Abilities_Status_Unlocked;// 标记旧槽位为“可装备”(这个我不太能理解）
+	LastSlotInfo.InputTag = PreviousSlot; // 记录旧槽位（如 "Input.LMB"）
+	LastSlotInfo.AbilityTag = GameplayTags.Abilities_None; // 清空技能(在蓝图里把Abilities_None的法术球都设为透明，）
+	AbilityInfoDelegate.Broadcast(LastSlotInfo);// 如果之前有技能绑定在 PreviousSlot（如鼠标左键原本绑定了火球术），现在需要 清空它。广播 LastSlotInfo 告诉UI：“这个槽位现在空了，可以显示默认图标”。
+
+	FAuraAbilityInfo Info = AbilityInfo->FindAbilityInfoForTag(AbilityTag);// 查找技能数据
+	Info.StatusTag = Status;// 更新状态（如 "Equipped"）
+	Info.InputTag = Slot; // 更新绑定的输入槽（如 "Input.LMB"）
+	AbilityInfoDelegate.Broadcast(Info);// 通知UI更新  更新新装备的技能信息（如显示火球术图标到鼠标左键栏位）。广播 Info 告诉UI：“这个槽位现在绑定了新技能”。
+
+	StopWaitingForEquipDelegate.Broadcast(AbilityInfo->FindAbilityInfoForTag(AbilityTag).AbilityType); //通知其他系统（如技能菜单UI）：“装备流程已完成”，可以关闭等待状态或刷新界面。
+
 }
 
 // 静态辅助函数，根据能力状态和法术点数决定按钮状态

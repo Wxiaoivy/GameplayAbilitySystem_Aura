@@ -207,6 +207,25 @@ FGameplayAbilitySpec* UAuraAbilitySystemComponent::GetSpecFromAbilityTag(const F
 	return nullptr;//遍历完所有技能都没找到匹配的，返回空指针
 }
 
+FGameplayTag UAuraAbilitySystemComponent::GetStatusFromAbilityTag(const FGameplayTag& AbilityTag)
+{
+	if (const FGameplayAbilitySpec* Spec = GetSpecFromAbilityTag(AbilityTag))
+	{
+		return GetStatusTagFormSpec(*Spec);
+	}
+	return FGameplayTag();
+}
+
+
+FGameplayTag UAuraAbilitySystemComponent::GetInputTagFromAbilityTag(const FGameplayTag& AbilityTag)
+{
+	if (const FGameplayAbilitySpec* Spec = GetSpecFromAbilityTag(AbilityTag))
+	{
+		return GetInputTagFormSpec(*Spec);
+	}
+	return FGameplayTag();
+}
+
 void UAuraAbilitySystemComponent::UpdateAbilityStatus(int32 Level)//这个函数检查玩家的等级，如果满足条件（Level >= Info.LevelRequirement），
                                                                   //并且技能 还没有被赋予（GetSpecFromAbilityTag(Info.AbilityTag) == nullptr），才会调用 GiveAbility() 赋予新技能。
                                                                   //这样，新技能就会被添加到 GetActivatableAbilities() 的列表里，之后就可以激活它了。
@@ -378,4 +397,87 @@ bool UAuraAbilitySystemComponent::GetDescriptionByAbilityTag(const FGameplayTag&
 	return false;
 }
 
+void UAuraAbilitySystemComponent::SeverEquipAbility_Implementation(const FGameplayTag& AbilityTag, const FGameplayTag& Slot)
+{
+	if (FGameplayAbilitySpec* AbilitySpec = GetSpecFromAbilityTag(AbilityTag))
+	{
+		const FAuraGameplayTags& GameplayTags = FAuraGameplayTags::Get();
+		const FGameplayTag& PrevSlot = GetInputTagFormSpec(*AbilitySpec);
+		const FGameplayTag& Status = GetStatusTagFormSpec(*AbilitySpec);
+
+
+		const bool bStatusValid = Status == GameplayTags.Abilities_Status_Equipped || Status == GameplayTags.Abilities_Status_Unlocked;
+		if (bStatusValid)
+		{
+			ClearAbilityOfSlot(Slot);
+			ClearSlot(AbilitySpec);
+			AbilitySpec->DynamicAbilityTags.AddTag(Slot);
+
+			if (Status.MatchesTagExact(GameplayTags.Abilities_Status_Unlocked))
+			{
+				AbilitySpec->DynamicAbilityTags.RemoveTag(GameplayTags.Abilities_Status_Unlocked);
+				AbilitySpec->DynamicAbilityTags.AddTag(GameplayTags.Abilities_Status_Equipped);
+			}
+			MarkAbilitySpecDirty(*AbilitySpec);
+			ClientEquipAbility(AbilityTag, Status, Slot, PrevSlot);
+		}
+	}
+}
+
+void UAuraAbilitySystemComponent::ClearSlot(FGameplayAbilitySpec* Spec)//能力携带的InputTag
+{
+	// 1. 获取该技能当前绑定的输入槽（如 "Input.LMB"）
+	const FGameplayTag Slot = GetInputTagFormSpec(*Spec);
+	// 2. 从 DynamicAbilityTags 中移除这个槽位 Tag
+	Spec->DynamicAbilityTags.RemoveTag(Slot);
+	// 3. 标记该技能为“脏数据”（需要同步到客户端）
+	MarkAbilitySpecDirty(*Spec);
+}
+
+void UAuraAbilitySystemComponent::ClearAbilityOfSlot(const FGameplayTag& Slot)
+{
+	// 1. 锁定技能列表（防止遍历时被修改）
+	FScopedAbilityListLock ActiveScopeLock(*this);
+	// 2. 遍历所有可激活的技能
+	for (FGameplayAbilitySpec& Spec : GetActivatableAbilities())
+	{
+		// 3. 如果技能绑定了目标槽位（Slot），则清除绑定
+		if (AbilityHasSlot(&Spec,Slot))
+		{
+			ClearSlot(&Spec);
+		}
+	}
+
+	/*4. 整体流程示例
+		假设玩家将 火球术 从 鼠标左键（Input.LMB） 解绑：
+		调用 ClearAbilityOfSlot(Input.LMB)：
+		遍历所有技能，找到绑定 Input.LMB 的技能（如火球术）。
+		调用 ClearSlot 移除 Input.LMB 的 Tag。
+
+		ClearSlot 内部：
+		从 DynamicAbilityTags 中移除 Input.LMB。
+		标记技能为“脏数据”，同步到客户端。
+
+		结果：
+		按下鼠标左键不再触发火球术。*/
+}
+
+bool UAuraAbilitySystemComponent::AbilityHasSlot(FGameplayAbilitySpec* Spec, const FGameplayTag& Slot)
+{
+	// 遍历技能的所有动态 Tag
+	for (FGameplayTag Tag : Spec->DynamicAbilityTags)
+	{
+		// 如果找到完全匹配的槽位 Tag，返回 true
+		if (Tag.MatchesTagExact(Slot))
+		{
+			return true;
+		}
+	}
+	return false;// 未找到匹配的 Tag
+}
+
+void UAuraAbilitySystemComponent::ClientEquipAbility(const FGameplayTag& AbilityTag, const FGameplayTag& Status, const FGameplayTag& Slot, const FGameplayTag& PreviousSlot)
+{
+	AbilityEquipped.Broadcast(AbilityTag, Status, Slot, PreviousSlot);
+}
 

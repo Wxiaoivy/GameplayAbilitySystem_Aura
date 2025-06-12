@@ -62,6 +62,11 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void EquipButtonPressed();
 
+	UFUNCTION(BlueprintCallable)
+	void SpellRowGlobePressed(const FGameplayTag& SlotTag,const FGameplayTag& AbilityType);
+
+	void OnAbilityEquipped(const FGameplayTag& AbilityTag, const FGameplayTag& Status, const FGameplayTag& Slot, const FGameplayTag& PreviousSlot);
+
  private:
 	 //静态辅助函数，FORCENOINLINE告诉编译器不要内联这个函数
 	 // - AbilityStatus: 能力当前状态标签
@@ -74,4 +79,6 @@ public:
 	 int32 CurrentSpellPoints = 0;
 
 	 bool bWaitingForEquipSelection = false;
+
+	 FGameplayTag SelectedSlot;
 };
