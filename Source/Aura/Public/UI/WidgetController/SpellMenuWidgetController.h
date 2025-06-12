@@ -13,6 +13,8 @@
 // 声明一个动态多播委托，可以广播给多个接收者，能在蓝图中使用
 // 这个委托用来通知法术球体被选中时两个按钮的状态
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FSpellGlobeSelectedSignature, bool, bSpendPointsButtonEnabled, bool, bEquipButtonEnabled, FString, CurrentLevelDescription, FString, NextLevelDescription);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FWaitForEquipSelectionSignature, const FGameplayTag&, AbilityType);
+
 /**
  * 
  */
@@ -41,6 +43,12 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FSpellGlobeSelectedSignature SpellGlobeSelectedDelegate;// 法术球选中委托
 
+	UPROPERTY(BlueprintAssignable)
+	FWaitForEquipSelectionSignature WaitForEquipDelegate;
+
+	UPROPERTY(BlueprintAssignable)
+	FWaitForEquipSelectionSignature StopWaitingForEquipDelegate;
+
 
 	UFUNCTION(BlueprintCallable)
 	void SpellGlobeSelected(const FGameplayTag& AbilityTag); // 法术球被选中时调用的函数，可以在蓝图中调用
@@ -50,6 +58,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void GlobeDeselected();
+
+	UFUNCTION(BlueprintCallable)
+	void EquipButtonPressed();
 
  private:
 	 //静态辅助函数，FORCENOINLINE告诉编译器不要内联这个函数
@@ -61,4 +72,6 @@ public:
 
 	 FSelectedAbility SelectedAbility = { FAuraGameplayTags::Get().Abilities_None,FAuraGameplayTags::Get().Abilities_Status_Lock };//初始化这个结构体，每当选择法术球时都要重新设置该结构体
 	 int32 CurrentSpellPoints = 0;
+
+	 bool bWaitingForEquipSelection = false;
 };
