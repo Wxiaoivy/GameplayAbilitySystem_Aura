@@ -160,11 +160,11 @@ void USpellMenuWidgetController::EquipButtonPressed()
 
 void USpellMenuWidgetController::SpellRowGlobePressed(const FGameplayTag& SlotTag, const FGameplayTag& AbilityType)
 {
-	if (!bWaitingForEquipSelection)return;
-	const FGameplayTag& SelectedAbilityType = AbilityInfo->FindAbilityInfoForTag(SelectedAbility.Ability).AbilityType;
-	if (!SelectedAbilityType.MatchesTagExact(AbilityType))return;
+	if (!bWaitingForEquipSelection)return; //bWaitingForEquipSelection 是一个布尔值，表示 玩家是否已经按下EquipButton技能正在装备技能中。如果为 false，说明当前没有技能待装备，直接返回。
+	const FGameplayTag& SelectedAbilityType = AbilityInfo->FindAbilityInfoForTag(SelectedAbility.Ability).AbilityType;//electedAbility 是之前玩家选择的技能
+	if (!SelectedAbilityType.MatchesTagExact(AbilityType))return;// SelectedAbilityType 是该技能的类型（如 "Ability.Type.Offensive"）。如果 技能类型不匹配（比如试图把火焰技能放到只允许冰霜技能的槽位），则直接返回，不允许装备。
 	
-	GetAuraASC()->SeverEquipAbility(SelectedAbility.Ability, SlotTag);
+	GetAuraASC()->SeverEquipAbility(SelectedAbility.Ability, SlotTag);//通知服务器执行装备逻辑：调用 SeverEquipAbility RPC，让服务器处理技能绑定和同步。
 }
 
 void USpellMenuWidgetController::OnAbilityEquipped(
@@ -182,10 +182,17 @@ void USpellMenuWidgetController::OnAbilityEquipped(
 	//第二次广播(Info)：更新新槽位。
 	const FAuraGameplayTags& GameplayTags = FAuraGameplayTags::Get();
 	FAuraAbilityInfo LastSlotInfo;
-	LastSlotInfo.StatusTag = GameplayTags.Abilities_Status_Unlocked;// 标记旧槽位为“可装备”(这个我不太能理解）
+	LastSlotInfo.StatusTag = GameplayTags.Abilities_Status_Unlocked;// 标记旧槽位为“可装备”(这个我不太能理解 我觉得只是把这些技能槽只设为可装备和已装备两种。 可装备就是还没有技能在里面为Abilities_Status_Unlocked和Abilities_None
 	LastSlotInfo.InputTag = PreviousSlot; // 记录旧槽位（如 "Input.LMB"）
 	LastSlotInfo.AbilityTag = GameplayTags.Abilities_None; // 清空技能(在蓝图里把Abilities_None的法术球都设为透明，）
 	AbilityInfoDelegate.Broadcast(LastSlotInfo);// 如果之前有技能绑定在 PreviousSlot（如鼠标左键原本绑定了火球术），现在需要 清空它。广播 LastSlotInfo 告诉UI：“这个槽位现在空了，可以显示默认图标”。
+
+	/*PreviousSlot 如果为空：说明技能之前未被绑定到任何槽位，因此不需要清理旧绑定。   蓝图（EquipGlobe）里面在接收AbilityInfo时就会先判断Input是否匹配，这里为空所以不匹配， 就不会执行后续逻辑了。
+		广播的 LastSlotInfo：虽然不需要清理，但代码仍会广播一个“伪”清除消息，其内容为：
+		InputTag = PreviousSlot（空标签）
+		AbilityTag = Abilities_None（显式标记“无技能”）
+		StatusTag = Abilities_Status_Unlocked（槽位状态设为“可装备”）*/
+
 
 	FAuraAbilityInfo Info = AbilityInfo->FindAbilityInfoForTag(AbilityTag);// 查找技能数据
 	Info.StatusTag = Status;// 更新状态（如 "Equipped"）

@@ -117,7 +117,7 @@ void UOverlayWidgetController::BindCallbacksToDependencies()
 
 	}
 
-
+	GetAuraASC()->AbilityEquipped.AddUObject(this, &UOverlayWidgetController::OnAbilityEquipped);
 }
 
 //void UOverlayWidgetController::OnInitializeStartupAbilities()//当技能初始化完成后，遍历所有技能，收集其标签和输入信息，并通过动态多播委托 AbilityInfoDelegate 通知UI更新。
@@ -165,4 +165,26 @@ void UOverlayWidgetController::OnXPChange(int32 NewXP)
 		OnXPPercentChangedDelegate.Broadcast(XPBarPercent);
 	}
 }
+void UOverlayWidgetController::OnAbilityEquipped(const FGameplayTag& AbilityTag, const FGameplayTag& Status, const FGameplayTag& Slot, const FGameplayTag& PreviousSlot)
+{
+	//关键步骤：清空旧绑定 → 2. 设置新绑定 → 3. 通知UI更新。
+	//第一次广播 (LastSlotInfo)：清空旧槽位。
+	//第二次广播(Info)：更新新槽位。
+	const FAuraGameplayTags& GameplayTags = FAuraGameplayTags::Get();
+	FAuraAbilityInfo LastSlotInfo;
+	LastSlotInfo.StatusTag = GameplayTags.Abilities_Status_Unlocked;// 标记旧槽位为“可装备”(这个我不太能理解 我觉得只是把这些技能槽只设为可装备和已装备两种。 可装备就是还没有技能在里面为Abilities_Status_Unlocked和Abilities_None
+	LastSlotInfo.InputTag = PreviousSlot; // 记录旧槽位（如 "Input.LMB"）
+	LastSlotInfo.AbilityTag = GameplayTags.Abilities_None; // 清空技能(在蓝图里把Abilities_None的法术球都设为透明，）
+	AbilityInfoDelegate.Broadcast(LastSlotInfo);// 如果之前有技能绑定在 PreviousSlot（如鼠标左键原本绑定了火球术），现在需要 清空它。广播 LastSlotInfo 告诉UI：“这个槽位现在空了，可以显示默认图标”。
 
+	/*PreviousSlot 如果为空：说明技能之前未被绑定到任何槽位，因此不需要清理旧绑定。   蓝图（EquipGlobe）里面在接收AbilityInfo时就会先判断Input是否匹配，这里为空所以不匹配， 就不会执行后续逻辑了。
+		广播的 LastSlotInfo：虽然不需要清理，但代码仍会广播一个“伪”清除消息，其内容为：
+		InputTag = PreviousSlot（空标签）
+		AbilityTag = Abilities_None（显式标记“无技能”）
+		StatusTag = Abilities_Status_Unlocked（槽位状态设为“可装备”）*/
+
+	FAuraAbilityInfo Info = AbilityInfo->FindAbilityInfoForTag(AbilityTag);// 查找技能数据
+	Info.StatusTag = Status;// 更新状态（如 "Equipped"）
+	Info.InputTag = Slot; // 更新绑定的输入槽（如 "Input.LMB"）
+	AbilityInfoDelegate.Broadcast(Info);// 通知UI更新  更新新装备的技能信息（如显示火球术图标到鼠标左键栏位）。广播 Info 告诉UI：“这个槽位现在绑定了新技能”。
+}

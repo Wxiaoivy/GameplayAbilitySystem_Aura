@@ -402,24 +402,25 @@ void UAuraAbilitySystemComponent::SeverEquipAbility_Implementation(const FGamepl
 	if (FGameplayAbilitySpec* AbilitySpec = GetSpecFromAbilityTag(AbilityTag))
 	{
 		const FAuraGameplayTags& GameplayTags = FAuraGameplayTags::Get();
-		const FGameplayTag& PrevSlot = GetInputTagFormSpec(*AbilitySpec);
-		const FGameplayTag& Status = GetStatusTagFormSpec(*AbilitySpec);
+		const FGameplayTag& PrevSlot = GetInputTagFormSpec(*AbilitySpec);//PrevSlot：技能之前绑定的槽位（如果没有绑定，可能是空标签）。
+		const FGameplayTag& Status = GetStatusTagFormSpec(*AbilitySpec);//Status：技能当前的状态（Equipped 已装备 / Unlocked 可装备）。
 
 
-		const bool bStatusValid = Status == GameplayTags.Abilities_Status_Equipped || Status == GameplayTags.Abilities_Status_Unlocked;
+		const bool bStatusValid = Status == GameplayTags.Abilities_Status_Equipped || Status == GameplayTags.Abilities_Status_Unlocked;//只有 Equipped（已装备）或 Unlocked（可装备） 的技能才能被重新绑定。
 		if (bStatusValid)
 		{
-			ClearAbilityOfSlot(Slot);
-			ClearSlot(AbilitySpec);
-			AbilitySpec->DynamicAbilityTags.AddTag(Slot);
+			ClearAbilityOfSlot(Slot);//清除目标槽位（Slot）上 已经绑定的其他技能（避免一个槽位绑定多个技能）。
+			ClearSlot(AbilitySpec);//清除当前技能（AbilitySpec）之前绑定的槽位（PrevSlot）
+			AbilitySpec->DynamicAbilityTags.AddTag(Slot);//将新槽位（Slot）绑定到当前技能。
 
 			if (Status.MatchesTagExact(GameplayTags.Abilities_Status_Unlocked))
 			{
+				//如果技能之前是 Unlocked（可装备但未装备），则将其状态改为 Equipped（已装备）。
 				AbilitySpec->DynamicAbilityTags.RemoveTag(GameplayTags.Abilities_Status_Unlocked);
 				AbilitySpec->DynamicAbilityTags.AddTag(GameplayTags.Abilities_Status_Equipped);
 			}
-			MarkAbilitySpecDirty(*AbilitySpec);
-			ClientEquipAbility(AbilityTag, Status, Slot, PrevSlot);
+			MarkAbilitySpecDirty(*AbilitySpec);//确保服务器和客户端同步技能数据。
+			ClientEquipAbility(AbilityTag, Status, Slot, PrevSlot);//ClientEquipAbility 是一个 客户端 RPC，通知客户端更新 UI（如技能栏图标）。
 		}
 	}
 }
@@ -476,7 +477,7 @@ bool UAuraAbilitySystemComponent::AbilityHasSlot(FGameplayAbilitySpec* Spec, con
 	return false;// 未找到匹配的 Tag
 }
 
-void UAuraAbilitySystemComponent::ClientEquipAbility(const FGameplayTag& AbilityTag, const FGameplayTag& Status, const FGameplayTag& Slot, const FGameplayTag& PreviousSlot)
+void UAuraAbilitySystemComponent::ClientEquipAbility_Implementation(const FGameplayTag& AbilityTag, const FGameplayTag& Status, const FGameplayTag& Slot, const FGameplayTag& PreviousSlot)
 {
 	AbilityEquipped.Broadcast(AbilityTag, Status, Slot, PreviousSlot);
 }

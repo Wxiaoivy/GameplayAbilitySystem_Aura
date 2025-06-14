@@ -74,6 +74,8 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "GAS|Level")
 	FOnStatChangedSignature OnPlayerLevelChangedDelegate;
 
+	void OnAbilityEquipped(const FGameplayTag& AbilityTag, const FGameplayTag& Status, const FGameplayTag& Slot, const FGameplayTag& PreviousSlot);
+
 protected:
 
 	//FOnAttributeChangeData 是一个自定义的结构体或类，专门设计用于传递属性变化的信息。

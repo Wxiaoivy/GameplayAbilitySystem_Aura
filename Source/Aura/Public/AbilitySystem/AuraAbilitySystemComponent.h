@@ -70,6 +70,7 @@ public:
 	UFUNCTION(Server, Reliable)
 	void SeverEquipAbility(const FGameplayTag& AbilityTag, const FGameplayTag& Slot);
 
+	UFUNCTION(Client, Reliable)//老师忘写这个了宏了
 	void ClientEquipAbility(const FGameplayTag& AbilityTag, const FGameplayTag& Status, const FGameplayTag& Slot, const FGameplayTag& PreviousSlot);
 
 	void ClearSlot(FGameplayAbilitySpec* Spec);
