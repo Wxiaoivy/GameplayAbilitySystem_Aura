@@ -2,6 +2,8 @@
 
 
 #include "AbilitySystem/Abilities/AuraProjectileSpell.h"
+#include "AuraAbilityTypes.h"
+#include "AbilitySystem/AuraAbilitySystemLibrary.h"
 //#include "Kismet/KismetSystemLibrary.h"
 
 void UAuraProjectileSpell::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
@@ -55,43 +57,8 @@ void UAuraProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLocati
 			ESpawnActorCollisionHandlingMethod::AlwaysSpawn // 碰撞处理方式:表示无论是否有碰撞，都会生成Actor。即使生成位置有其他物体阻挡，抛射物也会被生成。
 		);
 
-
-		const UAbilitySystemComponent* SourceASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetAvatarActorFromActorInfo());
-		FGameplayEffectContextHandle EffectContextHandle = SourceASC->MakeEffectContext();
-
-		//补充EffectContext的信息
-		EffectContextHandle.SetAbility(this);
-		EffectContextHandle.AddSourceObject(Projectile);
-		TArray<TWeakObjectPtr<AActor>> Actors; 
-		Actors.Add(Projectile); 
-		EffectContextHandle.AddActors(Actors);
-		FHitResult HitResult; 
-		HitResult.Location = ProjectileTargetLocation; 
-		EffectContextHandle.AddHitResult(HitResult);
-		//补充EffectContext的信息
-
-		const FGameplayEffectSpecHandle EffectSpecHandle = SourceASC->MakeOutgoingSpec(DamageEffectClass,GetAbilityLevel(), EffectContextHandle);
-
-
-
-		FAuraGameplayTags GameplayTags = FAuraGameplayTags::Get();
-
-	
-		const float ScaledDamage = Damage.GetValueAtLevel(GetAbilityLevel());
-
-		UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(EffectSpecHandle, DamageType, ScaledDamage);//将数值与特定的GameplayTag关联存储
-		//SetByCaller 是一种动态数值传递方式，允许在 Gameplay Effect 执行时传入变量值，而不是硬编码在数据资产里。
-		//给某个技能效果（EffectSpec）动态绑定一个伤害值（50），这个伤害值可以在运行时被修改（比如受技能等级、属性加成等影响）。
-		//例如：
-		// 火球术的伤害可能受 法术强度（Spell Power） 影响，可以使用 SetByCaller 方式动态计算最终伤害。
-		// 治疗技能的治疗量可能受 治疗加成（Healing Bonus） 影响，也可以用这种方式动态调整。
-
-
-		EffectContextHandle.AddInstigator(GetOwningActorFromActorInfo(), GetAvatarActorFromActorInfo());
-		EffectContextHandle.AddSourceObject(this);
-
-		Projectile->DamageEffectSpecHandle = EffectSpecHandle;
-
+		Projectile->DamageEffectParams = MakeDamgeEffectParamsFormClassDefaults();//这里的TargetActor暂时设为nullptr因为这里只是生成逻辑， 
+		                                                                                  //TargetActor应该在EffectActor的BeginOverlap再次设置。
 
 		Projectile->FinishSpawning(SpawnTransform);
 	}
