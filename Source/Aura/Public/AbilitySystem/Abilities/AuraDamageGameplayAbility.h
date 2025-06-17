@@ -7,6 +7,8 @@
 #include "Interaction/CombatInterface.h"
 #include "AuraDamageGameplayAbility.generated.h"
 
+struct FDamageEffectParams;
+
 /**
  * 
  */
@@ -20,7 +22,7 @@ class AURA_API UAuraDamageGameplayAbility : public UAuraGameplayAbility
 	UFUNCTION(BlueprintCallable,Category="Damage")
 	void CauseDamage(AActor* TargetActor);
 
-
+	FDamageEffectParams MakeDamgeEffectParamsFormClassDefaults(AActor* TargetActor)const;
 
 protected:
 
