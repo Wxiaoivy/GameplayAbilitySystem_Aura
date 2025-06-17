@@ -199,8 +199,9 @@ void USpellMenuWidgetController::OnAbilityEquipped(
 	Info.InputTag = Slot; // 更新绑定的输入槽（如 "Input.LMB"）
 	AbilityInfoDelegate.Broadcast(Info);// 通知UI更新  更新新装备的技能信息（如显示火球术图标到鼠标左键栏位）。广播 Info 告诉UI：“这个槽位现在绑定了新技能”。
 
-	StopWaitingForEquipDelegate.Broadcast(AbilityInfo->FindAbilityInfoForTag(AbilityTag).AbilityType); //通知其他系统（如技能菜单UI）：“装备流程已完成”，可以关闭等待状态或刷新界面。
-
+	StopWaitingForEquipDelegate.Broadcast(AbilityInfo->FindAbilityInfoForTag(AbilityTag).AbilityType); //通知其他系统（如技能菜单UI）：“装备流程已完成”，可以关闭等待状态或刷新界面。在蓝图SpellMenu里面绑定
+	SpellGlobeReassignedDelegate.Broadcast(AbilityTag);//在蓝图SpellGlobe_Button里面绑定
+	GlobeDeselected();
 }
 
 // 静态辅助函数，根据能力状态和法术点数决定按钮状态

@@ -64,7 +64,7 @@ public:
 
 	virtual void BroadcastAbilityInfo();
 
-	UPROPERTY(BlueprintAssignable, Category = "GAS|Message")
+	UPROPERTY(BlueprintAssignable, BlueprintReadOnly, Category = "GAS|Message")
 	FAbilityInfoSignature AbilityInfoDelegate;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Widget Data")
