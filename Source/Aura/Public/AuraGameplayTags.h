@@ -49,6 +49,29 @@ public:
 	FGameplayTag Attribute_Resistance_Arcane;
 	FGameplayTag Attribute_Resistance_Physical;
 
+	/*
+	*Damage Tag
+	*
+	*/
+	FGameplayTag Damage;
+	FGameplayTag Damage_Fire;
+	FGameplayTag Damage_Lightning;
+	FGameplayTag Damage_Arcane;
+	FGameplayTag Damage_Physical;
+
+	/*
+	*Debuff Tag
+	*
+	*/
+	FGameplayTag Debuff_Burn;
+	FGameplayTag Debuff_Stun;
+	FGameplayTag Debuff_Arcane;
+	FGameplayTag Debuff_Physical;
+
+	FGameplayTag Debuff_Chance;
+	FGameplayTag Debuff_Damage;
+	FGameplayTag Debuff_Frequency;
+	FGameplayTag Debuff_Duration;
 
 	/*
 	*Meta Attribute
@@ -71,18 +94,11 @@ public:
 	FGameplayTag InputTag_Passive_2;
 
 
-	/*
-	*Damage Tag
-	*
-	*/
-	FGameplayTag Damage;
-	FGameplayTag Damage_Fire;
-	FGameplayTag Damage_Lightning;
-	FGameplayTag Damage_Arcane;
-	FGameplayTag Damage_Physical;
+	
 	
 
 	TMap<FGameplayTag, FGameplayTag>DamageTypesToResistance;
+	TMap<FGameplayTag, FGameplayTag>DamageTypesToDebuff;
 
 
 
