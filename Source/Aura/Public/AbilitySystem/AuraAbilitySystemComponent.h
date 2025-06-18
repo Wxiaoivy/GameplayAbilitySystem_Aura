@@ -39,7 +39,7 @@ public:
 		（3）与 GAS 架构兼容
 		FGameplayEffectContextHandle 是通用包装器，实际类型由项目决定。
 		其他 GAS 功能（如 GameplayCues、AttributeSet 回调）也能通过 GetContext() 访问你的派生类。*/
-	virtual FGameplayEffectContextHandle MakeEffectContext() const override;//AI说必须重写 MakeEffectContext() 以确保返回正确的派生类实例。老师没重写，我觉得该重写
+	/*virtual FGameplayEffectContextHandle MakeEffectContext() const override;*///AI说必须重写 MakeEffectContext() 以确保返回正确的派生类实例。老师没重写，我觉得该重写
 
 	void AbilityActorInfoSet();
 	

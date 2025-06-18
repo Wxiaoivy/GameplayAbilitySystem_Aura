@@ -16,11 +16,11 @@ UAuraAbilitySystemComponent::UAuraAbilitySystemComponent()
 
 }
 
-FGameplayEffectContextHandle UAuraAbilitySystemComponent::MakeEffectContext() const
-{
-	// 返回自定义的 FAuraGameplayEffectContext
-	return FGameplayEffectContextHandle(new FAuraGameplayEffectContext());
-}
+//FGameplayEffectContextHandle UAuraAbilitySystemComponent::MakeEffectContext() const
+//{
+//	// 返回自定义的 FAuraGameplayEffectContext
+//	return FGameplayEffectContextHandle(new FAuraGameplayEffectContext());
+//}
 
 //这个函数被AuraCharacterBase的同名函数调用
 void UAuraAbilitySystemComponent::AddCharacterAbilities(const TArray<TSubclassOf<UGameplayAbility>>& StartupAbilities)
