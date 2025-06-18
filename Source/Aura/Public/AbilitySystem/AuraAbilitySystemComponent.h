@@ -29,6 +29,18 @@ public:
 
 	UAuraAbilitySystemComponent();
 
+	//设计意图：为什么这样设计？
+	/*（1）扩展性
+		基类 FGameplayEffectContext 只提供基础功能（如来源、目标）。
+		派生类 FAuraGameplayEffectContext 可以添加项目专属数据（如 DamageType、DebuffParams）
+		（2）类型安全
+		通过重载 MakeEffectContext()，确保全局统一使用自定义类。
+		避免手动创建时的类型错误。
+		（3）与 GAS 架构兼容
+		FGameplayEffectContextHandle 是通用包装器，实际类型由项目决定。
+		其他 GAS 功能（如 GameplayCues、AttributeSet 回调）也能通过 GetContext() 访问你的派生类。*/
+	virtual FGameplayEffectContextHandle MakeEffectContext() const override;//AI说必须重写 MakeEffectContext() 以确保返回正确的派生类实例。老师没重写，我觉得该重写
+
 	void AbilityActorInfoSet();
 	
 	FEffectAssetTag EffectAssetTag;

@@ -44,28 +44,28 @@ bool FAuraGameplayEffectContext::NetSerialize(FArchive& Ar, UPackageMap* Map, bo
 		{
 			RepBits |= 1 << 8;
 		}
-		if (bIsSuccessfulDebuff)
-		{
-			RepBits |= 1 << 9;
-		}
-		if (DebuffDamage > 0)
-		{
-			RepBits |= 1 << 10;
-		}
-		if (DebuffDuration > 0)
-		{
-			RepBits |= 1 << 11;
-		}
-		if (DebuffFrequency > 0)
-		{
-			RepBits |= 1 << 12;
-		}
-		if (DamageType->IsValid())
-		{
-			RepBits |= 1 << 13;
-		}
+		//if (bIsSuccessfulDebuff)
+		//{
+		//	RepBits |= 1 << 9;
+		//}
+		//if (DebuffDamage > 0)
+		//{
+		//	RepBits |= 1 << 10;
+		//}
+		//if (DebuffDuration > 0)
+		//{
+		//	RepBits |= 1 << 11;
+		//}
+		//if (DebuffFrequency > 0)
+		//{
+		//	RepBits |= 1 << 12;
+		//}
+		//if (DamageType->IsValid())
+		//{
+		//	RepBits |= 1 << 13;
+		//}
 	}
-	Ar.SerializeBits(&RepBits, 14);//老师写的13  我觉得是14  因为是Length.
+	Ar.SerializeBits(&RepBits, 9);//老师写的13  我觉得是14  因为是Length.
 
 	if (RepBits & (1 << 0))
 	{
@@ -126,7 +126,7 @@ bool FAuraGameplayEffectContext::NetSerialize(FArchive& Ar, UPackageMap* Map, bo
 	{
 		Ar << bIsCriticalHit;
 	}
-	if (RepBits & (1 << 9))
+	/*if (RepBits & (1 << 9))
 	{
 		Ar << bIsSuccessfulDebuff;
 	}
@@ -152,7 +152,7 @@ bool FAuraGameplayEffectContext::NetSerialize(FArchive& Ar, UPackageMap* Map, bo
 			}
 		}
 		DamageType->NetSerialize(Ar, Map, bOutSuccess);
-	}
+	}*/
 	if (Ar.IsLoading())
 	{
 		AddInstigator(Instigator.Get(), EffectCauser.Get()); // Just to initialize InstigatorAbilitySystemComponent

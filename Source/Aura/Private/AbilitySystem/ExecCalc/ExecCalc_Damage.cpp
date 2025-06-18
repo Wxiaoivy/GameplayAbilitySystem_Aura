@@ -97,23 +97,25 @@ void UExecCalc_Damage::DeterminDebuff(const FGameplayEffectSpec& Spec, const FGa
 			ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(InTagsToCaptureDefs[ResistanceTag], EvaluateParameters, TargetDebuffResistance);//从目标的属性系统中捕获抗性值
 			TargetDebuffResistance = FMath::Max<float>(0, TargetDebuffResistance);//确保抗性值不会为负数（最小为 0）
 			const float EffectDebuffChance = SourceDebuffChange * (100 - TargetDebuffResistance) / 100;//最终概率 = 施法者基础概率 × (100 - 目标抗性) / 100
+
+
 			bool bDebuff = FMath::RandRange(1, 100) < EffectDebuffChance;
 			if (bDebuff)
 			{
-                //设置AuraAbilityTypes里面的FAuraGameplayEffectContext的各个变量的值。往Context里面补充Debuff信息,接下来就可以在AuraAttributeSet里面应用GE了。
-                FGameplayEffectContextHandle EffectContextHandle = Spec.GetContext();
+                ////设置AuraAbilityTypes里面的FAuraGameplayEffectContext的各个变量的值。往Context里面补充Debuff信息,接下来就可以在AuraAttributeSet里面应用GE了。
+                //FGameplayEffectContextHandle EffectContextHandle = Spec.GetContext();
 
-                UAuraAbilitySystemLibrary::SetIsSuccessfulDebuff(EffectContextHandle, true);
-                UAuraAbilitySystemLibrary::SetDamageType(EffectContextHandle, DamageType);
-                //FGameplayEffectContextHandle UAuraAbilitySystemLibrary::ApplyDamageEffect（）这个函数里面已经用了AssignTagSetByCallerMagnitude把Tag和值绑定配置在一起了。
-                const float DebuffDamage = Spec.GetSetByCallerMagnitude(GameplayTags.Debuff_Damage, false, -1.f);
-                const float DebuffDuration = Spec.GetSetByCallerMagnitude(GameplayTags.Debuff_Duration, false, -1.f);
-                const float DebuffFrequency = Spec.GetSetByCallerMagnitude(GameplayTags.Debuff_Frequency, false, -1.f);
+                //UAuraAbilitySystemLibrary::SetIsSuccessfulDebuff(EffectContextHandle, true);//这是原始伤害的Context,设置了IsSuccessfulDebuff，但是动态创建的DebuffEffectContext没有设置。
+                //UAuraAbilitySystemLibrary::SetDamageType(EffectContextHandle, DamageType);
+                ////FGameplayEffectContextHandle UAuraAbilitySystemLibrary::ApplyDamageEffect（）这个函数里面已经用了AssignTagSetByCallerMagnitude把Tag和值绑定配置在一起了。
+                //const float DebuffDamage = Spec.GetSetByCallerMagnitude(GameplayTags.Debuff_Damage, false, -1.f);
+                //const float DebuffDuration = Spec.GetSetByCallerMagnitude(GameplayTags.Debuff_Duration, false, -1.f);
+                //const float DebuffFrequency = Spec.GetSetByCallerMagnitude(GameplayTags.Debuff_Frequency, false, -1.f);
 
-                UAuraAbilitySystemLibrary::SetDebuffDamage(EffectContextHandle, DebuffDamage);
-                UAuraAbilitySystemLibrary::SetDebuffDuration(EffectContextHandle, DebuffDuration);
-                UAuraAbilitySystemLibrary::SetDebuffFrequency(EffectContextHandle, DebuffFrequency);
-                //设置AuraAbilityTypes里面的FAuraGameplayEffectContext的各个变量的值。往Context里面补充Debuff信息，接下来就可以在AuraAttributeSet里面应用GE了。
+                //UAuraAbilitySystemLibrary::SetDebuffDamage(EffectContextHandle, DebuffDamage);
+                //UAuraAbilitySystemLibrary::SetDebuffDuration(EffectContextHandle, DebuffDuration);
+                //UAuraAbilitySystemLibrary::SetDebuffFrequency(EffectContextHandle, DebuffFrequency);
+                ////设置AuraAbilityTypes里面的FAuraGameplayEffectContext的各个变量的值。往Context里面补充Debuff信息，接下来就可以在AuraAttributeSet里面应用GE了。
 			}
 		}
 	}

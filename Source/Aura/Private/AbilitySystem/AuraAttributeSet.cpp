@@ -227,6 +227,9 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 		SetMana(FMath::Clamp(GetMana(), 0.f, GetMaxMana()));
 	}
 	*/
+	//如果Target死亡了， 就跳过后续逻辑。
+	if (Props.TargetCharacter->Implements<UCombatInterface>() && ICombatInterface::Execute_IsDead(Props.TargetCharacter))return;
+	
 	//检查被修改的属性是否是"IncomingDamage"(传入伤害)
 	if (Data.EvaluatedData.Attribute == GetIncomingDamageAttribute())
 	{
@@ -339,16 +342,106 @@ void UAuraAttributeSet::HandleIncomingDamage(FEffectProperties& Props)
 				PC->ShowDamageNumber(LocalIncomingDamage, Props.TargetCharacter, bIsBlockedHit, bIsCriticalHit);
 			}
 		}
-		if (UAuraAbilitySystemLibrary::IsSuccessfulDebuff(Props.EffectContextHandle))
-		{
-			Debuff(Props);
-		}
+		//if (UAuraAbilitySystemLibrary::IsSuccessfulDebuff(Props.EffectContextHandle))
+		//{
+		//	/*动态创建的Debuff的EffectContext没有继承原始Context中的bIsSuccessfulDebuff标记，
+		//	那么后续的周期性伤害虽然会触发PostGameplayEffectExecute，但是不会满足 IsSuccessfulDebuff 条件，
+		//	从而不会触发二次Debuff。这种情况下，你的代码已经天然避免了循环触发，*/
+		//	Debuff(Props);
+		//}
 	}
 }
 
 void UAuraAttributeSet::Debuff(FEffectProperties& Props)
 {
+	//关键是理解：原始伤害和后续Debuff属于不同的效果实例，需要独立但关联的上下文管理。
+	/*必须这样做的原因
+		上下文隔离：
+		原始Context属于造成伤害的GameplayEffect
+		Debuff需要自己的独立Context（可能持续很长时间）
 
+		数据持久化：
+		Debuff可能持续10秒，期间原始Context早已销毁
+		必须将关键数据（DamageType）拷贝到新Context
+
+		效果链追溯：
+		保留伤害类型信息，便于后续：
+		显示正确的Debuff图标
+		计算抗性减免
+		触发对应的GameplayCue*/
+
+		/*数据需要经过：
+		首次存储：在Execution阶段存入原始Context （在ExecCalc_Damage中）在 ExecCalc_Damage 中计算后存入原始Context，供 AttributeSet 使用，
+		        （原始Context属于造成伤害的GameplayEffect，它储存了Debuff的数据，但是没使用，只是储存来供二次拷贝到新的Context）
+				 原始Context（来自造成非Debuff伤害的GameplayEffect）确实会存储Debuff相关数据，但它的核心作用仅仅是 临时暂存这些数据，供后续在创建独立的Debuff效果时 拷贝到新的Context中。
+		二次传递：创建持续效果时拷贝到新Context    （在这里）*/
+
+
+	////1. 获取游戏标签和创建效果上下文
+	//const FAuraGameplayTags& GameplayTags = FAuraGameplayTags::Get();
+	//FGameplayEffectContextHandle EffectContext = Props.SourceASC->MakeEffectContext();// 创建一个新的效果上下文（Context）
+	//EffectContext.AddSourceObject(Props.SourceAvatarActor);// 设置效果的来源对象（比如是哪个角色释放的这个Debuff）
+
+
+	////2.从原始Context中读取Debuff参数
+	//const FGameplayTag DamageType = UAuraAbilitySystemLibrary::GetDamageType(Props.EffectContextHandle);// 从造成伤害的原始Context中获取Debuff类型（比如火焰、中毒）
+	//const float DebuffDamage = UAuraAbilitySystemLibrary::GetDebuffDamage(Props.EffectContextHandle);// 读取Debuff的伤害值（比如每秒扣5点血）
+	//const float DebuffDuration = UAuraAbilitySystemLibrary::GetDebuffDuration(Props.EffectContextHandle);// 读取Debuff的持续时间（比如持续10秒）
+	//const float DebuffFrequency = UAuraAbilitySystemLibrary::GetDebuffFrequency(Props.EffectContextHandle);// 读取Debuff的触发频率（比如每1秒触发一次伤害）
+	//
+
+	////3. 动态创建Debuff效果（GameplayEffect）
+	////动态创建的Debuff的EffectContext没有继承原始Context中的bIsSuccessfulDebuff标记，
+	//// 那么后续的周期性伤害确实不会满足 IsSuccessfulDebuff 条件，从而不会触发二次Debuff。
+	//// 这种情况下，你的代码已经天然避免了循环触发，无需额外防护。
+	//FString DebuffName = FString::Printf(TEXT("DynamicDebuff_%s"), *DamageType.ToString());// 给这个动态创建的Debuff起个名字（比如"DynamicDebuff_Fire"）
+	//UGameplayEffect* Effect = NewObject<UGameplayEffect>(GetTransientPackage(), FName(DebuffName));// 创建一个新的GameplayEffect对象（临时存在内存中，不被保存到磁盘）
+
+
+	////4. 配置Debuff的基础属性
+	//Effect->DurationPolicy = EGameplayEffectDurationType::HasDuration;// 设置Debuff的持续时间类型为"有固定持续时间
+	//Effect->Period = DebuffFrequency;// 设置Debuff的触发间隔（比如每1秒触发一次）
+	//Effect->DurationMagnitude = FScalableFloat(DebuffDuration);// 设置Debuff的总持续时间（比如10秒)
+
+
+	////5. 添加标签和堆叠规则
+	////为动态创建的 Debuff 打上类型标签，实现 逻辑分类 和 行为触发。关键优势：通过标签系统将 Debuff 类型与游戏逻辑解耦，提升可维护性和扩展性。
+	//Effect->InheritableOwnedTagsContainer.AddTag(GameplayTags.DamageTypesToDebuff[DamageType]);// 告诉游戏这是一个“火焰Debuff”，用于触发通用逻辑
+
+	//Effect->StackingType = EGameplayEffectStackingType::AggregateBySource;    //1. AggregateBySource 的核心定义
+	//Effect->StackLimitCount = 1.f;                                            /*作用：
+	//// 设置同一个来源的Debuff最多叠加1层（防止同一个敌人反复触发导致无限叠加）        当多个相同类型的 GameplayEffect 由 不同的来源（Source） 应用时，GAS 会根据来源区分并独立管理它们的堆叠。
+	//																			关键特性：
+	//																			每个 独立的来源 可以拥有一个该效果的实例。
+	//																			同来源的重复应用会被合并（受 StackLimitCount 限制）。
+	//																			不同来源的效果会共存，各自独立计算持续时间和效果。*/
+	//
+	//
+	////6. 配置Debuff的数值修改器
+	////每次调用 Debuff() 函数：都会执行 NewObject<UGameplayEffect>()，生成一个全新的独立实例。Modifiers 数组初始为空：因此每次都需要重新走 Add() 流程。
+	//const int32 index = Effect->Modifiers.Num();//获取当前 GameplayEffect 中已有的修改器数量。
+	//Effect->Modifiers.Add(FGameplayModifierInfo());//向 Modifiers 数组末尾添加一个新的默认修改器。Add() 会扩展数组大小,
+	//FGameplayModifierInfo& ModifierInfo = Effect->Modifiers[index];	//为什么这样写：先获取当前数量（Num()），确保插入位置正确。添加后立即通过索引获取引用，避免后续反复查询数组。
+	//                                                                //每次触发新的Debuff时，确实会重新创建一个全新的 GameplayEffect 实例，其 Modifiers 数组会经历从 0 → 1 的添加过程。
+	//																//第一步：index 记录当前数组长度（此时为 0）。
+ //                                                                   //第二步：向数组添加一个默认构造的修改器（FGameplayModifierInfo()），数组变为[空修改器]，长度变为 1。
+	//	                                                            //第三步：通过之前记录的 index（值为 0）获取这个新添加的修改器的引用。(数组第一个元素Index为0，跟最先的Num一样）
+	//ModifierInfo.ModifierMagnitude = FScalableFloat(DebuffDamage);
+	//ModifierInfo.ModifierOp = EGameplayModOp::Additive;
+	//ModifierInfo.Attribute = GetIncomingDamageAttribute();
+
+
+	////7. 应用Debuff到目标
+	//if (FGameplayEffectSpec* MutableSpec = new FGameplayEffectSpec(Effect, EffectContext, 1.f))// 创建一个效果规格（Spec），包含效果的具体参数和上下文
+	//{
+	//	FAuraGameplayEffectContext* AuraContext = static_cast<FAuraGameplayEffectContext*>(MutableSpec->GetContext().Get());// 获取自定义的上下文，并存储伤害类型（用于后续抗性计算等）
+	//	TSharedPtr<FGameplayTag>DebuffDamageType = MakeShareable(new FGameplayTag(DamageType));
+	//	AuraContext->SetDamageType(DebuffDamageType);// 保留精确的伤害类型（Damage_Fire），
+	//	                                             //用于数值计算(Effect->InheritableOwnedTagsContainer.AddTag("Debuff.Fire"作用不同);
+ //
+	//	Props.TargetASC->ApplyGameplayEffectSpecToSelf(*MutableSpec);// 将Debuff应用到目标身上（触发周期性的属性修改）
+	//}
+	////初始伤害->触发Debuff->动态创建新GE->添加Modifier到空数组->应用GE到目标->持续时间结束->GE自动销毁
 }
 
 void UAuraAttributeSet::PostAttributeChange(const FGameplayAttribute& Attribute, float OldValue, float NewValue)
