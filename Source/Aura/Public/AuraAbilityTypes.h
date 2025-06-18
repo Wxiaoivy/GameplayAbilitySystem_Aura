@@ -65,9 +65,20 @@ public:
 
 	bool IsCriticalHit()const { return bIsCriticalHit; }
 	bool IsBlockHit()const { return bIsBlockHit; }
+	bool IsSuccessfulDebuff()const { return bIsSuccessfulDebuff; }
+	float GetDebuffDamage()const { return DebuffDamage; }
+	float GetDebuffDuration()const { return DebuffDuration; }
+	float GetDebuffFrequency()const { return DebuffFrequency; }
+	TSharedPtr<FGameplayTag> GetDamageType()const { return DamageType; }
+
 
 	void SetIsCriticalHit(bool InIsCriticalHit) {bIsCriticalHit = InIsCriticalHit;}
 	void SetIsBlockedHit(bool InIsBlockedHit) { bIsBlockHit = InIsBlockedHit; }
+	void SetIsSuccessfulDebuff(bool InIsSuccessfulDebuff) { bIsSuccessfulDebuff = InIsSuccessfulDebuff; }
+	void SetDebuffDamage(float InDebuffDamage) { DebuffDamage = InDebuffDamage; }
+	void SetDebuffDuration(float InDebuffDuration) { DebuffDuration = InDebuffDuration; }
+	void SetDebuffFrequency(float InDebuffFrequency) { DebuffFrequency = InDebuffFrequency; }
+	
 
 
 	//重写的函数（一） GetScriptStruct()
@@ -112,6 +123,19 @@ protected:
 	bool bIsCriticalHit = false;
 	/*这是自己自定义添加的变量，用于在EffectContext中补充信息*/
 
+	UPROPERTY()
+	bool bIsSuccessfulDebuff = false;
+
+	UPROPERTY()
+	float DebuffDamage = 0.f;
+
+	UPROPERTY()
+	float DebuffFrequency = 0.f;
+
+	UPROPERTY()
+	float DebuffDuration = 0.f;
+
+	TSharedPtr<FGameplayTag>DamageType;
 
 
 };
