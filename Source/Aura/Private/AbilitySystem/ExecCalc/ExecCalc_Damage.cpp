@@ -83,7 +83,7 @@ UExecCalc_Damage::UExecCalc_Damage()
 void UExecCalc_Damage::DeterminDebuff(const FGameplayEffectSpec& Spec, const FGameplayEffectCustomExecutionParameters& ExecutionParams, TMap<FGameplayTag, FGameplayEffectAttributeCaptureDefinition>& InTagsToCaptureDefs, FAggregatorEvaluateParameters& EvaluateParameters) const
 {
 	const FAuraGameplayTags GameplayTags = FAuraGameplayTags::Get();//存储项目中所有的GameplayTag（如伤害类型、Debuff类型等）。
-	for (TTuple<FGameplayTag, FGameplayTag>Pair : GameplayTags.DamageTypesToDebuff)//遍历所有可能的伤害类型，检查是否应该触发对应的 Debuff。
+	for (const TTuple<FGameplayTag, FGameplayTag>& Pair : GameplayTags.DamageTypesToDebuff)//遍历所有可能的伤害类型，检查是否应该触发对应的 Debuff。
 	{
 		const FGameplayTag& DamageType = Pair.Key;
 		const FGameplayTag& DebuffType = Pair.Value;
@@ -100,7 +100,20 @@ void UExecCalc_Damage::DeterminDebuff(const FGameplayEffectSpec& Spec, const FGa
 			bool bDebuff = FMath::RandRange(1, 100) < EffectDebuffChance;
 			if (bDebuff)
 			{
-                GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, FString("bDebuff"));
+                //设置AuraAbilityTypes里面的FAuraGameplayEffectContext的各个变量的值。往Context里面补充Debuff信息,接下来就可以在AuraAttributeSet里面应用GE了。
+                FGameplayEffectContextHandle EffectContextHandle = Spec.GetContext();
+
+                UAuraAbilitySystemLibrary::SetIsSuccessfulDebuff(EffectContextHandle, true);
+                UAuraAbilitySystemLibrary::SetDamageType(EffectContextHandle, DamageType);
+                //FGameplayEffectContextHandle UAuraAbilitySystemLibrary::ApplyDamageEffect（）这个函数里面已经用了AssignTagSetByCallerMagnitude把Tag和值绑定配置在一起了。
+                const float DebuffDamage = Spec.GetSetByCallerMagnitude(GameplayTags.Debuff_Damage, false, -1.f);
+                const float DebuffDuration = Spec.GetSetByCallerMagnitude(GameplayTags.Debuff_Duration, false, -1.f);
+                const float DebuffFrequency = Spec.GetSetByCallerMagnitude(GameplayTags.Debuff_Frequency, false, -1.f);
+
+                UAuraAbilitySystemLibrary::SetDebuffDamage(EffectContextHandle, DebuffDamage);
+                UAuraAbilitySystemLibrary::SetDebuffDuration(EffectContextHandle, DebuffDuration);
+                UAuraAbilitySystemLibrary::SetDebuffFrequency(EffectContextHandle, DebuffFrequency);
+                //设置AuraAbilityTypes里面的FAuraGameplayEffectContext的各个变量的值。往Context里面补充Debuff信息，接下来就可以在AuraAttributeSet里面应用GE了。
 			}
 		}
 	}

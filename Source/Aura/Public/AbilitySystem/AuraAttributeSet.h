@@ -330,6 +330,9 @@ class AURA_API UAuraAttributeSet : public UAttributeSet
 private:
 	void SetEffectProperties(const FGameplayEffectModCallbackData& Data, FEffectProperties& Props)const;
 	void SendXPEvent(const FEffectProperties& Props);
+	void HandleIncomingDamage(FEffectProperties& Props);
+	void HandleIncomingXP(FEffectProperties& Props);
+	void Debuff(FEffectProperties& Props);
 
 	bool bTopOffHealth = false;
 	bool bTopOffMana = false;

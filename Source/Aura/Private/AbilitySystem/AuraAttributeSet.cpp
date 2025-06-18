@@ -220,7 +220,6 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 	//if (Data.EvaluatedData.Attribute == GetHealthAttribute())
 	//{
 	//	SetHealth(FMath::Clamp(GetHealth(), 0.f, GetMaxHealth()));
-	//	UE_LOG(LogTemp, Warning, TEXT("Changed Health on %s,Health=%f"),*Props.TargetAvatarActor->GetName(),GetHealth())
 	//}
 
 	/*if (Data.EvaluatedData.Attribute == GetManaAttribute())
@@ -231,105 +230,125 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 	//检查被修改的属性是否是"IncomingDamage"(传入伤害)
 	if (Data.EvaluatedData.Attribute == GetIncomingDamageAttribute())
 	{
-		const float LocalIncomingDamage = GetIncomingDamage();//获取当前的伤害值
-
-		SetIncomingDamage(0);//立即将伤害属性重置为0(为下一次伤害做准备)
-
-		if (LocalIncomingDamage > 0)
-		{
-			const float NewHealth = GetHealth() - LocalIncomingDamage;//计算新的生命值(当前生命值减去伤害)
-
-			SetHealth(FMath::Clamp(NewHealth, 0.f, GetMaxHealth()));//使用FMath::Clamp确保生命值在0和最大值之间
-
-			const bool bFetal = NewHealth <= 0;//检查新生命值是否小于等于0(即是否死亡)
-
-			if (bFetal)
-			{
-				ICombatInterface* CombatInterface = Cast<ICombatInterface>(Props.TargetAvatarActor);
-					if (CombatInterface)
-					{
-						CombatInterface->die();
-					}
-					SendXPEvent(Props);
-			}
-			else
-			{
-				//如果没有死亡，则尝试激活带有"Effects_HitReact"标签的技能
-				//这会触发受击动画或其他受击反应逻辑
-				FGameplayTagContainer TagContainer;
-				TagContainer.AddTag(FAuraGameplayTags::Get().Effects_HitReact);
-				Props.TargetASC->TryActivateAbilitiesByTag(TagContainer);
-				//Data是引擎提供的原始回调数据，包含所有GameplayEffect执行的原始信息
-				// Props是开发者自定义的结构体，通过SetEffectProperties函数从Data中提取并组织成更易用的形式
-				
-				// 典型情况下，Props可能包含：
-
-					//目标ASC(AbilitySystemComponent)
-
-					//来源ASC
-
-					//目标Actor
-
-					//来源Actor
-
-					//效果规格(EffectSpec)等
-			}
-			bool bIsBlockedHit = UAuraAbilitySystemLibrary::IsBlockedHit(Props.EffectContextHandle);
-			bool bIsCriticalHit = UAuraAbilitySystemLibrary::IsCriticalHit(Props.EffectContextHandle);
-
-
-			if (Props.SourceCharacter != Props.TargetCharacter)
-			{
-			
-				if (AAuraPlayerController* PC = Cast<AAuraPlayerController>(Props.SourceCharacter->GetController()))
-					{
-						//对于玩家是攻击者(SourceCharacter)：当玩家攻击别人时，可能想在攻击目标身上显示造成的伤害数字
-					     PC->ShowDamageNumber(LocalIncomingDamage, Props.TargetCharacter, bIsBlockedHit, bIsCriticalHit);
-						 return;
-					}
-				if (AAuraPlayerController* PC = Cast<AAuraPlayerController>(Props.TargetCharacter->GetController()))
-					{  
-					    //对于玩家是受击者(TargetCharacter)：当玩家被攻击时，可能想在自己角色身上显示受到的伤害数字
-						PC->ShowDamageNumber(LocalIncomingDamage, Props.TargetCharacter, bIsBlockedHit, bIsCriticalHit);
-					}
-			}
-
-
-		}
+		HandleIncomingDamage(Props);
 	}
 	//Data.EvaluatedData.Attribute == GetIncomingXPAttribute() 表示：GAS 已经完成了对 IncomingXP 的修改，现在正在处理后续逻辑。GetIncomingXP() 读取的是 已经被 GameplayEffect 更新后的值。
 	if (Data.EvaluatedData.Attribute == GetIncomingXPAttribute())
 	{
-		const float LocalIncomingXP = GetIncomingXP();//获取当前的XP值
+		HandleIncomingXP(Props);
+	}
+}
 
-		SetIncomingXP(0);//立即将XP属性重置为0(为下一次到来的XP做准备)
+void UAuraAttributeSet::HandleIncomingXP(FEffectProperties& Props)
+{
+	const float LocalIncomingXP = GetIncomingXP();//获取当前的XP值
 
-		if (Props.SourceCharacter->Implements<UPlayerInterface>()&& Props.SourceCharacter->Implements<UCombatInterface>())
+	SetIncomingXP(0);//立即将XP属性重置为0(为下一次到来的XP做准备)
+
+	if (Props.SourceCharacter->Implements<UPlayerInterface>() && Props.SourceCharacter->Implements<UCombatInterface>())
+	{
+		const int32 CurrentLevel = ICombatInterface::Execute_GetPlayerLevel(Props.SourceCharacter);
+		const int32 CurrentXP = IPlayerInterface::Execute_GetXP(Props.SourceCharacter);
+
+		const int32 NewLevel = IPlayerInterface::Execute_FindLevelForXP(Props.SourceCharacter, CurrentXP + LocalIncomingXP);
+		const int32 NumLevelUps = NewLevel - CurrentLevel;
+
+		if (NumLevelUps > 0)
 		{
-			const int32 CurrentLevel = ICombatInterface::Execute_GetPlayerLevel(Props.SourceCharacter);
-			const int32 CurrentXP = IPlayerInterface::Execute_GetXP(Props.SourceCharacter);
+			const int32 AttributePointsReward = IPlayerInterface::Execute_GetAttributePointsReward(Props.SourceCharacter, NewLevel);//我觉得这里应该是传入NewLevel；
+			const int32 SpellPointsReward = IPlayerInterface::Execute_GetSpellPointsReward(Props.SourceCharacter, CurrentLevel);
 
-			const int32 NewLevel = IPlayerInterface::Execute_FindLevelForXP(Props.SourceCharacter, CurrentXP + LocalIncomingXP);
-			const int32 NumLevelUps = NewLevel - CurrentLevel;
+			IPlayerInterface::Execute_AddToPlayerLevel(Props.SourceCharacter, NumLevelUps);
+			IPlayerInterface::Execute_AddToAttributePoints(Props.SourceCharacter, AttributePointsReward);
+			IPlayerInterface::Execute_AddToSpellPoints(Props.SourceCharacter, SpellPointsReward);
 
-			if (NumLevelUps > 0)
+			bTopOffHealth = true; //当角色升级时，bTop0ffHealth和bTop0ffMana被设置为true（在升级逻辑中设置）,但只有在MaxHealth或MaxMana属性发生变化时，才会进入PostAttributeChange函数
+			bTopOffMana = true;
+
+			IPlayerInterface::Execute_LevelUp(Props.SourceCharacter);
+		}
+
+		IPlayerInterface::Execute_AddToXP(Props.SourceCharacter, LocalIncomingXP);
+	}
+}
+
+
+
+void UAuraAttributeSet::HandleIncomingDamage(FEffectProperties& Props)
+{
+	
+	const float LocalIncomingDamage = GetIncomingDamage();//获取当前的伤害值
+
+	SetIncomingDamage(0);//立即将伤害属性重置为0(为下一次伤害做准备)
+
+	if (LocalIncomingDamage > 0)
+	{
+		const float NewHealth = GetHealth() - LocalIncomingDamage;//计算新的生命值(当前生命值减去伤害)
+
+		SetHealth(FMath::Clamp(NewHealth, 0.f, GetMaxHealth()));//使用FMath::Clamp确保生命值在0和最大值之间
+
+		const bool bFetal = NewHealth <= 0;//检查新生命值是否小于等于0(即是否死亡)
+
+		if (bFetal)
+		{
+			ICombatInterface* CombatInterface = Cast<ICombatInterface>(Props.TargetAvatarActor);
+			if (CombatInterface)
 			{
-				const int32 AttributePointsReward = IPlayerInterface::Execute_GetAttributePointsReward(Props.SourceCharacter, NewLevel);//我觉得这里应该是传入NewLevel；
-				const int32 SpellPointsReward = IPlayerInterface::Execute_GetSpellPointsReward(Props.SourceCharacter, CurrentLevel);
-
-				IPlayerInterface::Execute_AddToPlayerLevel(Props.SourceCharacter, NumLevelUps);
-				IPlayerInterface::Execute_AddToAttributePoints(Props.SourceCharacter, AttributePointsReward);
-				IPlayerInterface::Execute_AddToSpellPoints(Props.SourceCharacter, SpellPointsReward);
-
-				bTopOffHealth = true; //当角色升级时，bTop0ffHealth和bTop0ffMana被设置为true（在升级逻辑中设置）,但只有在MaxHealth或MaxMana属性发生变化时，才会进入PostAttributeChange函数
-				bTopOffMana = true;
-
-				IPlayerInterface::Execute_LevelUp(Props.SourceCharacter);
+				CombatInterface->die();
 			}
+			SendXPEvent(Props);
+		}
+		else
+		{
+			//如果没有死亡，则尝试激活带有"Effects_HitReact"标签的技能
+			//这会触发受击动画或其他受击反应逻辑
+			FGameplayTagContainer TagContainer;
+			TagContainer.AddTag(FAuraGameplayTags::Get().Effects_HitReact);
+			Props.TargetASC->TryActivateAbilitiesByTag(TagContainer);
+			//Data是引擎提供的原始回调数据，包含所有GameplayEffect执行的原始信息
+			// Props是开发者自定义的结构体，通过SetEffectProperties函数从Data中提取并组织成更易用的形式
 
-			IPlayerInterface::Execute_AddToXP(Props.SourceCharacter,LocalIncomingXP);
+			// 典型情况下，Props可能包含：
+
+			//目标ASC(AbilitySystemComponent)
+
+			//来源ASC
+
+			//目标Actor
+
+			//来源Actor
+
+			//效果规格(EffectSpec)等
+		}
+		bool bIsBlockedHit = UAuraAbilitySystemLibrary::IsBlockedHit(Props.EffectContextHandle);
+		bool bIsCriticalHit = UAuraAbilitySystemLibrary::IsCriticalHit(Props.EffectContextHandle);
+
+
+		if (Props.SourceCharacter != Props.TargetCharacter)
+		{
+
+			if (AAuraPlayerController* PC = Cast<AAuraPlayerController>(Props.SourceCharacter->GetController()))
+			{
+				//对于玩家是攻击者(SourceCharacter)：当玩家攻击别人时，可能想在攻击目标身上显示造成的伤害数字
+				PC->ShowDamageNumber(LocalIncomingDamage, Props.TargetCharacter, bIsBlockedHit, bIsCriticalHit);
+				return;
+			}
+			if (AAuraPlayerController* PC = Cast<AAuraPlayerController>(Props.TargetCharacter->GetController()))
+			{
+				//对于玩家是受击者(TargetCharacter)：当玩家被攻击时，可能想在自己角色身上显示受到的伤害数字
+				PC->ShowDamageNumber(LocalIncomingDamage, Props.TargetCharacter, bIsBlockedHit, bIsCriticalHit);
+			}
+		}
+		if (UAuraAbilitySystemLibrary::IsSuccessfulDebuff(Props.EffectContextHandle))
+		{
+			Debuff(Props);
 		}
 	}
+}
+
+void UAuraAttributeSet::Debuff(FEffectProperties& Props)
+{
+
 }
 
 void UAuraAttributeSet::PostAttributeChange(const FGameplayAttribute& Attribute, float OldValue, float NewValue)
