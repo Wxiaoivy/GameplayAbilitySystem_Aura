@@ -3,12 +3,19 @@
 
 #include "AuraCharacterBase.h"
 #include <../../../../../../../Source/Runtime/Engine/Classes/Kismet/GameplayStatics.h>
+#include "AbilitySystem/Debuff/DebuffNiagaraComponent.h"
+
 
 // Sets default values
 AAuraCharacterBase::AAuraCharacterBase()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
+
+	BurnNiagaraComponent = CreateDefaultSubobject<UDebuffNiagaraComponent>("BurnNiagaraComponent");
+	BurnNiagaraComponent->SetupAttachment(GetRootComponent());
+	BurnNiagaraComponent->DebuffTag = FAuraGameplayTags::Get().Debuff_Burn;
+
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
 	GetCapsuleComponent()->SetGenerateOverlapEvents(false);//同一个Character里只能有一个Component去overlap一个GameplayEffect;(Mesh/Capsule)
 	GetMesh()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
@@ -108,6 +115,16 @@ void AAuraCharacterBase::die()
 	MulticastHandleDeath();
 }
 
+FOnASCRegistered AAuraCharacterBase::GetOnASCRegisteredDelegate()
+{
+	return OnASCRegisteredDelegate;
+}
+
+FOnDeath AAuraCharacterBase::GetOnDeathDelegate()
+{
+	return OnDeathDelegate;
+}
+
 ECharacterClass AAuraCharacterBase::GetCharacterClass_Implementation()
 {
 	return CharacterClass;
@@ -164,6 +181,7 @@ void AAuraCharacterBase::MulticastHandleDeath_Implementation()
 
 	Dissolve();
 	bIsDead = true;
+	OnDeathDelegate.Broadcast(this);
 
 }
 

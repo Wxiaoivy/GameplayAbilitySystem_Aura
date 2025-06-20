@@ -13,6 +13,8 @@
 #include "AbilitySystem/Data/CharacterClassInfo.h"
 #include "AuraCharacterBase.generated.h"
 
+class UDebuffNiagaraComponent;
+
 
 
 UCLASS(Abstract)
@@ -28,9 +30,6 @@ public:
 
 	TObjectPtr<UAttributeSet>GetAttributeSet() const { return AttributeSet; }
 
-	
-
-	
 
 	//NetMulticast：表示这是一个 多播 RPC，会在服务器调用后同步到所有客户端。
 	//Reliable：保证该 RPC 必定会执行（即使网络条件差，也会重试直到成功）。
@@ -125,8 +124,12 @@ protected:
 	int32 GetMinionCount_Implementation();
 	void IncrementalMinionCount_Implementation(int32 Amount);
 	ECharacterClass GetCharacterClass_Implementation();
+	virtual FOnASCRegistered GetOnASCRegisteredDelegate()override;
+	virtual FOnDeath GetOnDeathDelegate()override;
 	/*CombatInterface*/
 
+	FOnASCRegistered OnASCRegisteredDelegate;
+	FOnDeath OnDeathDelegate;
 
 	/*Dissolve Effect*/
 
@@ -147,6 +150,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
 	USoundBase* DeathSound;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
+	TObjectPtr<UDebuffNiagaraComponent>BurnNiagaraComponent;
 
 
 protected:

@@ -176,6 +176,7 @@ void AAuraEnemy::InitAbilityActorInfo()
 
 	AbilitySystemComponent->InitAbilityActorInfo(this, this);
 	Cast<UAuraAbilitySystemComponent>(AbilitySystemComponent)->AbilityActorInfoSet();
+	OnASCRegisteredDelegate.Broadcast(AbilitySystemComponent);
 	if (HasAuthority())
 	{
 		InitializeDefualtAttributes();

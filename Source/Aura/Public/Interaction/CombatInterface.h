@@ -6,7 +6,12 @@
 #include "UObject/Interface.h"
 #include "GameplayTagContainer.h"
 #include <../../../../../../../Plugins/FX/Niagara/Source/Niagara/Classes/NiagaraSystem.h>
+#include <../../../../../../../Plugins/Runtime/GameplayAbilities/Source/GameplayAbilities/Public/AbilitySystemComponent.h>
 #include "CombatInterface.generated.h"
+
+
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnASCRegistered, UAbilitySystemComponent*)
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDeath, AActor*, DeadActor);
 
 
 
@@ -91,4 +96,6 @@ public:
 
 
 	virtual void die() = 0; //主要逻辑写在AuraCharacterBase里面的
+	virtual FOnASCRegistered GetOnASCRegisteredDelegate() = 0;
+	virtual FOnDeath GetOnDeathDelegate() = 0;
 };

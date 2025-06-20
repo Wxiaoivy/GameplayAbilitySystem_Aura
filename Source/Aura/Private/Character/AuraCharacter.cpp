@@ -171,6 +171,7 @@ void AAuraCharacter::InitAbilityActorInfo()
 		InitializeDefualtAttributes();
 	
 	}
+	OnASCRegisteredDelegate.Broadcast(AbilitySystemComponent);
 	if (AAuraPlayerController* AuraPlayerController = Cast<AAuraPlayerController>(GetController()))
 	{
 		if (AAuraHUD* AuraHUD = Cast<AAuraHUD>(AuraPlayerController->GetHUD()))

@@ -443,7 +443,10 @@ void UAuraAttributeSet::Debuff(FEffectProperties& Props)
 		TSharedPtr<FGameplayTag>DebuffDamageType = MakeShareable(new FGameplayTag(DamageType));
 		AuraContext->SetDamageType(DebuffDamageType);// 保留精确的伤害类型（Damage_Fire），
 		                                             //用于数值计算(Effect->InheritableOwnedTagsContainer.AddTag("Debuff.Fire"作用不同);
- 
+		MutableSpec->DynamicGrantedTags.AddTag(FAuraGameplayTags::Get().Debuff_Burn);//自己加的 作用：向一个 GameplayEffectSpec 动态添加一个游戏标签（Debuff_Burn），
+		                                                                             //这个标签会在效果被应用时附加到目标身上。
+		                                                                             /*DynamicGrantedTags 里的标签会 直接附加到目标（Target）的 AbilitySystemComponent(ASC) 上。
+			                                                                          也就是说，目标会临时获得 Debuff_Burn 标签，直到效果结束。*/
 		Props.TargetASC->ApplyGameplayEffectSpecToSelf(*MutableSpec);// 将Debuff应用到目标身上（触发周期性的属性修改）
 	}
 	//初始伤害->触发Debuff->动态创建新GE->添加Modifier到空数组->应用GE到目标->持续时间结束->GE自动销毁
