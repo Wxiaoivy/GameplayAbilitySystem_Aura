@@ -51,6 +51,11 @@ struct FDamageEffectParams
 	UPROPERTY()
 	float DebuffDuration = 0.f;
 
+	UPROPERTY()
+	float DeathImpuseMagnitude = 0.f;
+
+	UPROPERTY()
+	FVector DeathImpuse = FVector::ZeroVector;
 
 };
 
@@ -61,6 +66,33 @@ struct FAuraGameplayEffectContext : public FGameplayEffectContext
 {
 	GENERATED_BODY()
 
+protected:
+
+	/*这是自己自定义添加的变量，用于在EffectContext中补充信息*/
+	UPROPERTY()
+	bool bIsBlockHit = false;
+
+	UPROPERTY()
+	bool bIsCriticalHit = false;
+	/*这是自己自定义添加的变量，用于在EffectContext中补充信息*/
+
+	UPROPERTY()
+	bool bIsSuccessfulDebuff = false;
+
+	UPROPERTY()
+	float DebuffDamage = 0.f;
+
+	UPROPERTY()
+	float DebuffFrequency = 0.f;
+
+	UPROPERTY()
+	float DebuffDuration = 0.f;
+
+	TSharedPtr<FGameplayTag>DamageType;
+
+	UPROPERTY()
+	FVector DeathImpuse = FVector::ZeroVector;
+
 public:
 
 	bool IsCriticalHit()const { return bIsCriticalHit; }
@@ -70,6 +102,7 @@ public:
 	float GetDebuffDuration()const { return DebuffDuration; }
 	float GetDebuffFrequency()const { return DebuffFrequency; }
 	TSharedPtr<FGameplayTag> GetDamageType()const { return DamageType; }
+	FVector GetDeathImpuse()const { return DeathImpuse; }
 
 
 	void SetIsCriticalHit(bool InIsCriticalHit) {bIsCriticalHit = InIsCriticalHit;}
@@ -79,7 +112,7 @@ public:
 	void SetDebuffDuration(float InDebuffDuration) { DebuffDuration = InDebuffDuration; }
 	void SetDebuffFrequency(float InDebuffFrequency) { DebuffFrequency = InDebuffFrequency; }
 	void SetDamageType(TSharedPtr<FGameplayTag> InDamageType) { DamageType = InDamageType; }
-
+	void SetDeathImpuse(const FVector& InImpuse) { DeathImpuse = InImpuse; }
 
 
 	//重写的函数（一） GetScriptStruct()
@@ -114,29 +147,6 @@ public:
 	virtual bool NetSerialize(FArchive& Ar, class UPackageMap* Map, bool& bOutSuccess)override;
 
 
-protected:
-
-	/*这是自己自定义添加的变量，用于在EffectContext中补充信息*/
-	UPROPERTY()
-	bool bIsBlockHit = false;
-
-	UPROPERTY()
-	bool bIsCriticalHit = false;
-	/*这是自己自定义添加的变量，用于在EffectContext中补充信息*/
-
-	UPROPERTY()
-	bool bIsSuccessfulDebuff = false;
-
-	UPROPERTY()
-	float DebuffDamage = 0.f;
-
-	UPROPERTY()
-	float DebuffFrequency = 0.f;
-
-	UPROPERTY()
-	float DebuffDuration = 0.f;
-
-	TSharedPtr<FGameplayTag>DamageType;
 
 
 };

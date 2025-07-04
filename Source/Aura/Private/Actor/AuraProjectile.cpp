@@ -82,8 +82,13 @@ void AAuraProjectile::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedCompon
 	{
 		//获取TargetASC:
 		//设置DamageEffectParams里面的TargetAbilitySystemComponent
+		//设置DamageEffectParams里面的DeathImpuse(死亡冲量向量)
 		if (UAbilitySystemComponent* TargetASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(OtherActor))
 		{
+			const FVector DeathImpuse = GetActorForwardVector() * DamageEffectParams.DeathImpuseMagnitude;
+			DamageEffectParams.DeathImpuse = DeathImpuse;
+			//先设置好DamageEffectParams.DeathImpuse ，然后在ApplyDamageEffect（）函数里会返回带有死亡冲量的ContextSpecHandle,Handle里的数据就会传递到AttributeSet里面使用
+
 			DamageEffectParams.TargetAbilitySystemComponent = TargetASC;
 			UAuraAbilitySystemLibrary::ApplyDamageEffect(DamageEffectParams);
 		}
