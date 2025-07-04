@@ -74,9 +74,9 @@ AAuraEnemy::AAuraEnemy()
 	GetCharacterMovement()->bOrientRotationToMovement = false;
 }
 
-void AAuraEnemy::die()
+void AAuraEnemy::die(const FVector& DeathImpuse)
 {
-	Super::die();
+	Super::die(DeathImpuse);
 	if (AuraAIController)
 	{
 		AuraAIController->GetBlackboardComponent()->SetValueAsBool(FName("Dead"), true);
@@ -91,8 +91,11 @@ void AAuraEnemy::BeginPlay()
 {
 	Super::BeginPlay();
 
+	if (GetCharacterMovement() && GetCharacterMovement()->HasBegunPlay())
+	{
+		GetCharacterMovement()->MaxWalkSpeed = BaseWalkSpeed;
+	}
 	
-	GetCharacterMovement()->MaxWalkSpeed = BaseWalkSpeed;
 	InitAbilityActorInfo();
 	if (HasAuthority())
 	{ 

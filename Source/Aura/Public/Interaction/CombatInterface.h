@@ -95,7 +95,7 @@ public:
 	ECharacterClass GetCharacterClass();
 
 
-	virtual void die() = 0; //主要逻辑写在AuraCharacterBase里面的
+	virtual void die(const FVector& DeathImpuse) = 0; //主要逻辑写在AuraCharacterBase里面的
 	virtual FOnASCRegistered GetOnASCRegisteredDelegate() = 0;
 	virtual FOnDeath GetOnDeathDelegate() = 0;
 };

@@ -41,9 +41,10 @@ public:
 
 		用 Reliable 确保关键逻辑不丢失。*/
 	UFUNCTION(NetMulticast,Reliable)
-	virtual void MulticastHandleDeath();
+	virtual void MulticastHandleDeath(const FVector& DeathImpuse);
 
 protected:
+
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
@@ -114,7 +115,7 @@ protected:
 	//	一个默认实现 GetCombatSocketLocation_Implementation()（可选覆盖）。
 	//	一个全局执行函数 Execute_GetCombatSocketLocation(UObject * Object)（用于动态调用）。
 	FVector GetCombatSocketLocation_Implementation(const FGameplayTag& MontageTag);//得到武器上面发射抛射物的Socket的位置
-	virtual void die()override;
+	virtual void die(const FVector& DeathImpuse)override;
 	UAnimMontage* GetHitReactMontage_Implementation();
 	bool IsDead_Implementation();
 	AActor* GetAvatar_Implementation();
@@ -153,6 +154,7 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
 	TObjectPtr<UDebuffNiagaraComponent>BurnNiagaraComponent;
+
 
 
 protected:

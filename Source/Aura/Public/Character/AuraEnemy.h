@@ -35,7 +35,7 @@ public:
 
 	/*Combat Interface*/
 	int32 GetPlayerLevel_Implementation();
-	virtual void die()override;
+	virtual void die(const FVector& DeathImpuse)override;
 	/*End Combat Interface*/
 
 	virtual void PossessedBy(AController* NewController)override;//PossessedBy()是角色被控制器接管时自动触发；（角色出生，重生，控制器变更都会触发）

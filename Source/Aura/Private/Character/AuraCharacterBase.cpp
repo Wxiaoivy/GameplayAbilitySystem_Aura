@@ -15,6 +15,7 @@ AAuraCharacterBase::AAuraCharacterBase()
 	BurnNiagaraComponent = CreateDefaultSubobject<UDebuffNiagaraComponent>("BurnNiagaraComponent");
 	BurnNiagaraComponent->SetupAttachment(GetRootComponent());
 	BurnNiagaraComponent->DebuffTag = FAuraGameplayTags::Get().Debuff_Burn;
+	
 
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
 	GetCapsuleComponent()->SetGenerateOverlapEvents(false);//同一个Character里只能有一个Component去overlap一个GameplayEffect;(Mesh/Capsule)
@@ -108,11 +109,12 @@ UAnimMontage* AAuraCharacterBase::GetHitReactMontage_Implementation()
 	return HitReactMontage;
 }
 
-void AAuraCharacterBase::die()
+void AAuraCharacterBase::die(const FVector& DeathImpuse)
 {
 	//由服务器触发
 	//Weapon->DetachFromComponent(FDetachmentTransformRules(EDetachmentRule::KeepWorld, true));
-	MulticastHandleDeath();
+	MulticastHandleDeath(DeathImpuse);
+
 }
 
 FOnASCRegistered AAuraCharacterBase::GetOnASCRegisteredDelegate()
@@ -162,7 +164,7 @@ UNiagaraSystem* AAuraCharacterBase::GetBloodEffect_Implementation()
 	return BloodEffect;
 }
 
-void AAuraCharacterBase::MulticastHandleDeath_Implementation()
+void AAuraCharacterBase::MulticastHandleDeath_Implementation(const FVector& DeathImpuse)
 {
 
 	UGameplayStatics::PlaySoundAtLocation(this, DeathSound, GetActorLocation(), GetActorRotation());
@@ -171,14 +173,17 @@ void AAuraCharacterBase::MulticastHandleDeath_Implementation()
 	Weapon->SetEnableGravity(true);
 	Weapon->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
 	Weapon->DetachFromComponent(FDetachmentTransformRules(EDetachmentRule::KeepWorld, true));
+	Weapon->AddImpulse(DeathImpuse * 0.1f, NAME_None, true);
 
 	GetMesh()->SetSimulatePhysics(true);
 	GetMesh()->SetEnableGravity(true);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
 	GetMesh()->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Block);
+	GetMesh()->AddImpulse(DeathImpuse, NAME_None, true);
 
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
+	AbilitySystemComponent->RemoveLooseGameplayTag(FAuraGameplayTags::Get().Debuff_Burn);//AI加的  因为死亡时DebuffTag没有消除所以不触发UDebuffNiagaraComponent::DebuffTagChanged 这里加了就好了
 	Dissolve();
 	bIsDead = true;
 	OnDeathDelegate.Broadcast(this);

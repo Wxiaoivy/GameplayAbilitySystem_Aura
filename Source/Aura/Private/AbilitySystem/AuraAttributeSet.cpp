@@ -297,7 +297,8 @@ void UAuraAttributeSet::HandleIncomingDamage(FEffectProperties& Props)
 			ICombatInterface* CombatInterface = Cast<ICombatInterface>(Props.TargetAvatarActor);
 			if (CombatInterface)
 			{
-				CombatInterface->die();
+				FVector DeathImpuse = UAuraAbilitySystemLibrary::GetDeathImpuse(Props.EffectContextHandle);
+				CombatInterface->die(DeathImpuse);
 			}
 			SendXPEvent(Props);
 		}

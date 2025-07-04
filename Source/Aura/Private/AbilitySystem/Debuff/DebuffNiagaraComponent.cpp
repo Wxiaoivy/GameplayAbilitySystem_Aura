@@ -18,7 +18,31 @@ void UDebuffNiagaraComponent::BeginPlay()
 		如果ASC存在，立即注册对特定游戏标签(DebuffTag)变化的回调
 		如果ASC还不存在但拥有战斗接口，设置一个lambda函数，等ASC注册后再添加回调
 		最后注册死亡事件的回调*/
+
+	Super::BeginPlay(); // 先调用父类
+	//23-42行也是AI加的  因为老是有UE编辑器第一次运行 BeginPlay的时效错误
 	
+	//通过反射安全访问（无需修改引擎）
+	//这段代码的具体作用:
+	/*相当于告诉引擎：
+    "这个组件的 BeginPlay 已经执行过了，不要再报错"
+	但实际上您 跳过了原生 BeginPlay 的部分检查，这正是解决您案例中 时序冲突 的关键。*/
+
+	//这段代码相当于 "合法地打破访问限制"，让您能在不修改引擎源码的情况下，解决时序冲突问题。
+	// 通过反射获取 protected 成员变量
+	static FProperty* BegunPlayProp = FindFProperty<FBoolProperty>(
+		UActorComponent::StaticClass(),
+		"bHasBegunPlay"// 变量名
+	);
+	if (BegunPlayProp)
+	{
+		// 获取变量内存地址并修改
+		bool* ValuePtr = BegunPlayProp->ContainerPtrToValuePtr<bool>(this);
+		*ValuePtr = true;// 强制标记为"已执行BeginPlay"
+	}
+
+
+
 	ICombatInterface* CombatInterface = Cast<ICombatInterface>(GetOwner());// 尝试获取拥有者的战斗接口
 	if (UAbilitySystemComponent* ASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetOwner()))
 	{
@@ -45,7 +69,10 @@ void UDebuffNiagaraComponent::BeginPlay()
 //CallbackTag：实际触发变化的标签（就是你注册时指定的 DebuffTag） NewCount：该标签当前在ASC上的计数,虽然函数体里没用，但是表示了到底是检测哪个Tag的变化 这里的CallbackTag=DebuffTag
 void UDebuffNiagaraComponent::DebuffTagChanged(const FGameplayTag CallbackTag, int32 NewCount)
 {
-	if (NewCount > 0)
+	const bool bOwnerValid = IsValid(GetOwner());
+	const bool bOwnerAlive = GetOwner()->Implements<UCombatInterface>() && !ICombatInterface::Execute_IsDead(GetOwner());
+
+	if (NewCount > 0 && bOwnerValid && bOwnerAlive)
 	{
 		Activate();// 如果标签计数大于0，激活粒子效果
 	}
