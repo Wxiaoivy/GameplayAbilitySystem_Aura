@@ -122,6 +122,7 @@ void UAuraFireBolt::SpawnProjectiles(const FVector& ProjectileTargetLocation, co
 
 
 	const FVector Forward = Rotation.Vector();
+	NumProjectiles = FMath::Min(MaxNumProjectiles, GetAbilityLevel());
 	TArray<FRotator>Rotations = UAuraAbilitySystemLibrary::EvenlySpaceRotators(Forward, FVector::UpVector, ProjectileSpread, NumProjectiles);
 	for (const FRotator&Rot: Rotations)
 	{
@@ -142,6 +143,20 @@ void UAuraFireBolt::SpawnProjectiles(const FVector& ProjectileTargetLocation, co
 
 		Projectile->DamageEffectParams = MakeDamgeEffectParamsFormClassDefaults();//这里的TargetActor暂时设为nullptr因为这里只是生成逻辑， 
 		//TargetActor应该在EffectActor的BeginOverlap再次设置。
+
+		if (HomingTarget&&HomingTarget->Implements<UCombatInterface>())
+		{
+			Projectile->ProjectileMovement->HomingTargetComponent = HomingTarget->GetRootComponent();
+		} 
+		else
+		{
+			Projectile->HomingTargetSceneComponent = NewObject<USceneComponent>(USceneComponent::StaticClass());
+			Projectile->HomingTargetSceneComponent->SetWorldLocation(ProjectileTargetLocation);
+			Projectile->ProjectileMovement->HomingTargetComponent = Projectile->HomingTargetSceneComponent;
+		}
+
+		Projectile->ProjectileMovement->HomingAccelerationMagnitude = FMath::RandRange(HomingAccelerationMin, HomingAccelerationMax);
+		Projectile->ProjectileMovement->bIsHomingProjectile = bLaunchHomingProjectiles;
 
 		Projectile->FinishSpawning(SpawnTransform);
 	}

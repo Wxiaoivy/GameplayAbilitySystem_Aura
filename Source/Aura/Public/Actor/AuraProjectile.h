@@ -34,6 +34,9 @@ public:
 	UPROPERTY(BlueprintReadWrite, meta = (ExposeOnSpawn = true))//ExposeOnSpawn:在 生成 Actor 或 Object 时，允许外部传入初始值（如初始位置、速度、生命值等）。
 	FDamageEffectParams  DamageEffectParams; 
 
+	UPROPERTY()
+	TObjectPtr<USceneComponent>HomingTargetSceneComponent;
+
 protected:
 
 	virtual void BeginPlay() override;
