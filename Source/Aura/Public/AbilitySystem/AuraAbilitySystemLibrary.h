@@ -126,6 +126,8 @@ public:
 
 	static int32 GetXPRewardForClassAndLevel(const UObject* WorldContextObject, ECharacterClass CharacterClass, int32 CharacterLevel);
 
+	static TArray<FRotator> EvenlySpaceRotators(const FVector& Forward, const FVector& Axis, float Spread, int32 NumRotators);
 
+	static TArray<FVector> EvenlRotateVectors(const FVector& Forward, const FVector& Axis, float Spread, int32 NumVectors);
 
 };

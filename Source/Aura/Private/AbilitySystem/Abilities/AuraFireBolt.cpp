@@ -2,6 +2,7 @@
 
 
 #include "AbilitySystem/Abilities/AuraFireBolt.h"
+#include "AbilitySystem/AuraAbilitySystemLibrary.h"
 
 FString UAuraFireBolt::GetDescription(int32 Level)
 {
@@ -118,25 +119,32 @@ void UAuraFireBolt::SpawnProjectiles(const FVector& ProjectileTargetLocation, co
 
 	FRotator Rotation = (ProjectileTargetLocation - SocketLocation).Rotation();
 	if (bOverridePitch)Rotation.Pitch = PitchOverride;
-	const FVector Forward = Rotation.Vector();
-	const FVector LeftOfSpread = Forward.RotateAngleAxis(-ProjectileSpread / 2.f, FVector::UpVector);
-	const FVector RightOfSpread = Forward.RotateAngleAxis(ProjectileSpread / 2.f, FVector::UpVector);
 
-	//NumProjectiles = FMath::Max(MaxNumProjectiles, GetAbilityLevel());
-	const float DeltaSpread = ProjectileSpread / (NumProjectiles - 1);
-	if (NumProjectiles > 1)
+
+	const FVector Forward = Rotation.Vector();
+	TArray<FRotator>Rotations = UAuraAbilitySystemLibrary::EvenlySpaceRotators(Forward, FVector::UpVector, ProjectileSpread, NumProjectiles);
+	for (const FRotator&Rot: Rotations)
 	{
-		for (int32 i = 0; i < NumProjectiles; i++)
-		{
-			const FVector Direction = LeftOfSpread.RotateAngleAxis(DeltaSpread * i, FVector::UpVector);
-			const FVector Start = SocketLocation + FVector(0, 0, 10);
-			UKismetSystemLibrary::DrawDebugArrow(GetAvatarActorFromActorInfo(), Start, Start + Direction * 100.f, 1.f, FLinearColor::Red, 120.f, 1.f);
-		}
-	} 
-	else
-	{
-		const FVector Start = SocketLocation + FVector(0, 0, 10);
-		UKismetSystemLibrary::DrawDebugArrow(GetAvatarActorFromActorInfo(), Start, Start + Forward	 * 100.f, 1.f, FLinearColor::Red, 120.f, 1.f);
+		FTransform SpawnTransform;//生成抛射物的位置，在ICombatInterface里实现
+		SpawnTransform.SetLocation(SocketLocation);
+		SpawnTransform.SetRotation(Rot.Quaternion());
+
+		AAuraProjectile* Projectile = GetWorld()->SpawnActorDeferred<AAuraProjectile>(
+			ProjectileClass, // 抛射物的类
+			SpawnTransform,// 抛射物的初始变换（位置、旋转、缩放） 
+			GetOwningActorFromActorInfo(), // 抛射物的所有者,武器是角色Actor的SkeletonMeshComponent,所有者必须是AActor 所以这里的所有者和引发者都是角色， 
+			//即使武器是一个AActor，逻辑上抛射物的行为（如伤害计算、销毁逻辑）仍然应该归属于角色，因为角色是更高层次的逻辑实体。
+			Cast<APawn>(GetOwningActorFromActorInfo()), // 抛射物的引发者（Instigator）      
+			//(在Gameplay Ability System中，GetOwningActorFromActorInfo()通常用于获取当前技能的施法者（Caster）。)
+
+			ESpawnActorCollisionHandlingMethod::AlwaysSpawn // 碰撞处理方式:表示无论是否有碰撞，都会生成Actor。即使生成位置有其他物体阻挡，抛射物也会被生成。
+		);
+
+		Projectile->DamageEffectParams = MakeDamgeEffectParamsFormClassDefaults();//这里的TargetActor暂时设为nullptr因为这里只是生成逻辑， 
+		//TargetActor应该在EffectActor的BeginOverlap再次设置。
+
+		Projectile->FinishSpawning(SpawnTransform);
 	}
+
 }
 
