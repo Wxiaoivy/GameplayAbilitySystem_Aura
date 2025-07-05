@@ -18,44 +18,53 @@ struct FDamageEffectParams
 
 	FDamageEffectParams(){}
 
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	TObjectPtr<UObject>WorldContextObject = nullptr;
 
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	TSubclassOf<UGameplayEffect>DamageGameplayEffectClass;
 
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	TObjectPtr<UAbilitySystemComponent>SourceAbilitySystemComponent;
 
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	TObjectPtr<UAbilitySystemComponent>TargetAbilitySystemComponent;
 
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	float BaseDamage = 0.f;
 
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	float AbilityLevel = 1.f;
 
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	FGameplayTag DamageType = FGameplayTag();
 
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	float DebuffChance = 0.f;
 
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	float DebuffDamage = 0.f;
 
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	float DebuffFrequency = 0.f;
 
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	float DebuffDuration = 0.f;
 
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	float DeathImpuseMagnitude = 0.f;
 
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	FVector DeathImpuse = FVector::ZeroVector;
+
+	UPROPERTY(BlueprintReadWrite)
+	float KnockBackMagnitude = 0.f;
+
+	UPROPERTY(BlueprintReadWrite)
+	float KnockBackChance = 0.f;
+
+	UPROPERTY(BlueprintReadWrite)
+	FVector KnockBackForce = FVector::ZeroVector;
 
 };
 
@@ -93,6 +102,9 @@ protected:
 	UPROPERTY()
 	FVector DeathImpuse = FVector::ZeroVector;
 
+	UPROPERTY()
+	FVector KnockBackForce = FVector::ZeroVector;
+
 public:
 
 	bool IsCriticalHit()const { return bIsCriticalHit; }
@@ -103,6 +115,7 @@ public:
 	float GetDebuffFrequency()const { return DebuffFrequency; }
 	TSharedPtr<FGameplayTag> GetDamageType()const { return DamageType; }
 	FVector GetDeathImpuse()const { return DeathImpuse; }
+	FVector GetKnockBackForce()const { return KnockBackForce; }
 
 
 	void SetIsCriticalHit(bool InIsCriticalHit) {bIsCriticalHit = InIsCriticalHit;}
@@ -113,7 +126,7 @@ public:
 	void SetDebuffFrequency(float InDebuffFrequency) { DebuffFrequency = InDebuffFrequency; }
 	void SetDamageType(TSharedPtr<FGameplayTag> InDamageType) { DamageType = InDamageType; }
 	void SetDeathImpuse(const FVector& InImpuse) { DeathImpuse = InImpuse; }
-
+	void SetKnockBackForce(const FVector& InKnockBackForce) { KnockBackForce = InKnockBackForce; }
 
 	//重写的函数（一） GetScriptStruct()
 	/** Returns the actual struct used for serialization, subclasses must override this! */

@@ -31,6 +31,22 @@ FDamageEffectParams UAuraDamageGameplayAbility::MakeDamgeEffectParamsFormClassDe
 	Params.DebuffFrequency = DebuffFrequency;
 	Params.DebuffDuration = DebuffDuration;
 	Params.DeathImpuseMagnitude = DeathImpuseMagnitude;
+	Params.KnockBackChance = KnockBackChance;
+	Params.KnockBackMagnitude = KnockBackMagnitude;
+	// 检查目标Actor是否有效
+	if (IsValid(TargetActor))
+	{
+		// 计算从施法者到目标的旋转角度
+		FRotator Rotation = (TargetActor->GetActorLocation() - GetAvatarActorFromActorInfo()->GetActorLocation()).Rotation();
+		// 将俯仰角固定为45度
+		Rotation.Pitch = 45.f;
+		// 获取指向目标的方向向量
+		const FVector ToTarget = Rotation.Vector();
+		// 设置死亡冲击力方向和大小
+		Params.DeathImpuse = ToTarget * DeathImpuseMagnitude;
+		// 设置击退力方向和大小
+		Params.KnockBackForce = ToTarget * KnockBackMagnitude;
+	}
 	return Params;
 }
 

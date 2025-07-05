@@ -64,12 +64,16 @@ bool FAuraGameplayEffectContext::NetSerialize(FArchive& Ar, UPackageMap* Map, bo
 		{
 			RepBits |= 1 << 13;
 		}
-		if (DeathImpuse.IsZero())
+		if (!DeathImpuse.IsZero())
 		{
 			RepBits |= 1 << 14;
 		}
+		if (!KnockBackForce.IsZero())
+		{
+			RepBits |= 1 << 15;
+		}
 	}
-	Ar.SerializeBits(&RepBits, 15);//老师写的13  我觉得是14  因为是Length.
+	Ar.SerializeBits(&RepBits, 16);//老师写的13  我觉得是14  因为是Length.
 
 	if (RepBits & (1 << 0))
 	{
@@ -160,6 +164,10 @@ bool FAuraGameplayEffectContext::NetSerialize(FArchive& Ar, UPackageMap* Map, bo
 	if (RepBits & (1 << 13))
 	{
 		DeathImpuse.NetSerialize(Ar, Map, bOutSuccess);//向量反序列化就是这样写的
+	}
+	if (RepBits & (1 << 14))
+	{
+		KnockBackForce.NetSerialize(Ar, Map, bOutSuccess);//向量反序列化就是这样写的
 	}
 	if (Ar.IsLoading())
 	{

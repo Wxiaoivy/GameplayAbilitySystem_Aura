@@ -323,6 +323,7 @@ void UAuraAttributeSet::HandleIncomingDamage(FEffectProperties& Props)
 			//来源Actor
 
 			//效果规格(EffectSpec)等
+			Props.TargetCharacter->LaunchCharacter(UAuraAbilitySystemLibrary::GetKnockBackForce(Props.EffectContextHandle), true, true);
 		}
 		bool bIsBlockedHit = UAuraAbilitySystemLibrary::IsBlockedHit(Props.EffectContextHandle);
 		bool bIsCriticalHit = UAuraAbilitySystemLibrary::IsCriticalHit(Props.EffectContextHandle);

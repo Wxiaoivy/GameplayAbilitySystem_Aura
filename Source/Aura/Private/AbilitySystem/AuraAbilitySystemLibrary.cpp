@@ -255,6 +255,16 @@ FVector UAuraAbilitySystemLibrary::GetDeathImpuse(const FGameplayEffectContextHa
 	return FVector::ZeroVector;
 }
 
+FVector UAuraAbilitySystemLibrary::GetKnockBackForce(const FGameplayEffectContextHandle& EffectContextHandle)
+{
+	if (const FAuraGameplayEffectContext* AuraContext = static_cast<const FAuraGameplayEffectContext*>(EffectContextHandle.Get()))
+	{
+		return AuraContext->GetKnockBackForce();
+	}
+
+	return FVector::ZeroVector;
+}
+
 void UAuraAbilitySystemLibrary::SetIsBlockedHit(UPARAM(ref)FGameplayEffectContextHandle& EffectContextHandle, bool InIsBlockedHit)
 {
 	if (FAuraGameplayEffectContext* AuraContext = static_cast<FAuraGameplayEffectContext*>(EffectContextHandle.Get()))
@@ -322,6 +332,14 @@ void UAuraAbilitySystemLibrary::SetDeathImpuse(FGameplayEffectContextHandle& Eff
 	}
 }
 
+void UAuraAbilitySystemLibrary::SetKnockBackForce(FGameplayEffectContextHandle& EffectContextHandle, const FVector& InKnockBackForce)
+{
+	if (FAuraGameplayEffectContext* AuraContext = static_cast<FAuraGameplayEffectContext*>(EffectContextHandle.Get()))
+	{
+		AuraContext->SetKnockBackForce(InKnockBackForce);
+	}
+}
+
 void UAuraAbilitySystemLibrary::GetLivePlayersWithinRadius(
 	const UObject* WorldContextObject,  // 用于获取World上下文的对象
 	TArray<AActor*>& OutOverlapingActors,  // 输出参数：存储符合条件的Actor数组
@@ -370,25 +388,48 @@ bool UAuraAbilitySystemLibrary::IsNotFriend(AActor* FirstActor, AActor* SecondAc
 	}
 }
 
+// 定义一个静态函数，用于应用伤害效果
 FGameplayEffectContextHandle UAuraAbilitySystemLibrary::ApplyDamageEffect(const FDamageEffectParams& DamageEffectParams)
 {
+	// 获取游戏标签单例
 	const FAuraGameplayTags GameplayTags = FAuraGameplayTags::Get();
+	// 从DamageEffectParams获取Avatar角色
 	const AActor* SourceAvatarActor = DamageEffectParams.SourceAbilitySystemComponent->GetAvatarActor();
-
+	// 创建效果上下文句柄
 	FGameplayEffectContextHandle EffectContextHandle = DamageEffectParams.SourceAbilitySystemComponent->MakeEffectContext();
+	// 添加上下文源对象(施法者)
 	EffectContextHandle.AddSourceObject(SourceAvatarActor);
+	// 设置死亡冲击力到上下文
 	SetDeathImpuse(EffectContextHandle, DamageEffectParams.DeathImpuse);
-
+	// 设置击退力到上下文
+	SetKnockBackForce(EffectContextHandle, DamageEffectParams.KnockBackForce);
+	// 创建游戏效果规格句柄，包含效果类、能力等级和上下文
 	FGameplayEffectSpecHandle SpecHandle = DamageEffectParams.SourceAbilitySystemComponent->
 	MakeOutgoingSpec(DamageEffectParams.DamageGameplayEffectClass, DamageEffectParams.AbilityLevel, EffectContextHandle);
 
+	// 设置基础伤害值(使用伤害类型作为标签)/设置Debuff触发几率/设置Debuff伤害值/ 设置Debuff触发频率/ 设置Debuff持续时间
 	UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, DamageEffectParams.DamageType, DamageEffectParams.BaseDamage);
 	UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, GameplayTags.Debuff_Chance, DamageEffectParams.DebuffChance);
 	UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, GameplayTags.Debuff_Damage, DamageEffectParams.DebuffDamage);
 	UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, GameplayTags.Debuff_Frequency, DamageEffectParams.DebuffFrequency);
 	UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, GameplayTags.Debuff_Duration, DamageEffectParams.DebuffDuration);
 
-	DamageEffectParams.TargetAbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data);
+	// 将游戏效果应用到目标能力系统组件
+	if (DamageEffectParams.TargetAbilitySystemComponent)
+	{
+		DamageEffectParams.TargetAbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data);
+	}
+	
+	// 返回效果上下文句柄
 	return EffectContextHandle;
+
+	/*关键点说明：
+
+		这个函数负责将配置好的伤害参数实际应用到目标上
+		使用了SetByCaller方式动态设置各种伤害参数值
+		通过游戏标签(GameplayTags)来标识不同类型的参数
+		包含了死亡冲击力和击退力的设置
+		最后将效果应用到目标的能力系统组件上
+		返回的效果上下文句柄可以用于后续的效果追踪或处理*/
 }
 

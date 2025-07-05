@@ -1,4 +1,3 @@
-// Copyright Ivy
 
 #pragma once
 
