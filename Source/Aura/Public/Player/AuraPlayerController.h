@@ -107,4 +107,7 @@ private:
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<UDamageTextComponent>DamageTextComponentClass;
 
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<UNiagaraSystem>ClickNiagaraSystem;
+
 };

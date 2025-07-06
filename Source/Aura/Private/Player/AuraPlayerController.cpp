@@ -2,6 +2,7 @@
 
 
 #include "Player/AuraPlayerController.h"
+#include <../../../../../../../Plugins/FX/Niagara/Source/Niagara/Public/NiagaraFunctionLibrary.h>
 
 AAuraPlayerController::AAuraPlayerController()
 {
@@ -149,6 +150,8 @@ void AAuraPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 			{
 				UE_LOG(LogTemp, Error, TEXT("NavPath is invalid or has no points!"));
 			}
+
+			UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ClickNiagaraSystem, CachedDestination);
 		}
 		FollowTime = 0.f;
 		bTargeting = false;
