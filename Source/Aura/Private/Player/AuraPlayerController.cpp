@@ -70,7 +70,11 @@ void AAuraPlayerController::SetupInputComponent()
 		AuraInputComponent->BindAction(ShiftAction, ETriggerEvent::Completed, this, &AAuraPlayerController::ShiftReleased);
 
 		AuraInputComponent->BindAbilityActions(InputConfig,this,&ThisClass::AbilityInputTagPressed, &ThisClass::AbilityInputTagReleased, &ThisClass::AbilityInputTagHeld);
+		//在 Aura 项目中，AuraInputComponent->BindAbilityActions() 负责将 输入动作（Input Actions） 绑定到三个核心回调函数：
 
+		//	AbilityInputTagPressed（按下时触发一次）
+		//	AbilityInputTagReleased（释放时触发一次）
+		//	AbilityInputTagHeld（按住时每帧触发）
 	}
 	else 
 	{
@@ -86,6 +90,7 @@ void AAuraPlayerController::AbilityInputTagPressed(FGameplayTag InputTag)
 		bTargeting = ThisActor ? true : false;
 		bAutoRunning = false;
 	}
+	if (GetASC())GetASC()->AbilityInputTagPressed(InputTag);
 }
 
 void AAuraPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)

@@ -79,23 +79,67 @@ void UAuraAbilitySystemComponent::AddCharacterPassiveAbilities(const TArray<TSub
 		GiveAbilityAndActivateOnce(AbilitySpec);
 	}
 }
-
-//这个函数被AuraPlayerController的同名函数调用
-void UAuraAbilitySystemComponent::AbilityInputTagHeld(const FGameplayTag& InputTag)
+//这个函数被AuraPlayerController的同名函数调用(每次单击时只调用一次能力输入标记按下)
+void UAuraAbilitySystemComponent::AbilityInputTagPressed(const FGameplayTag& InputTag)//AbilityInputTagPressed	按键按下瞬间	仅同步事件到服务器（不激活能力）
 {
+	//用途：
+	//	支持 WaitInputPress 节点（服务器需要知道“按下”事件）。
+	//	不涉及实际的能力激活（避免短按误触发）。
+	if (!InputTag.IsValid()) return;
+
+	for (auto& AbilitySpec : GetActivatableAbilities())
+	{
+		if (AbilitySpec.IsActive())
+		{           
+			// 关键：通知服务器输入释放事件（确保权威同步）
+			// 用途：支持蓝图节点如 `WaitInputPressed` 的服务器端检测
+			InvokeReplicatedEvent(EAbilityGenericReplicatedEvent::InputPressed, AbilitySpec.Handle, AbilitySpec.ActivationInfo.GetActivationPredictionKey());
+		}
+	}
+}
+
+
+//3. 典型应用场景
+//案例1：蓄力技能
+//玩家按下鼠标右键（Pressed）：
+//仅通知服务器“右键按下”，但不激活技能。
+//
+//玩家按住右键（Held）：
+//匹配标签后调用 AbilitySpecInputPressed，开始蓄力。
+//
+//玩家释放右键（Released）：
+//根据蓄力时间触发技能。
+//
+//案例2：瞬发技能
+//通过 Held 直接激活（即使按住时间很短），但标签匹配避免了误触其他能力。
+
+
+//这个函数被AuraPlayerController的同名函数调用(调用时机：在按键按住期间，每帧（Tick）都会被调用，直到按键释放。)
+void UAuraAbilitySystemComponent::AbilityInputTagHeld(const FGameplayTag& InputTag)//负责 实际的能力激活 和输入状态更新（通过 AbilitySpecInputPressed）。
+{
+	/*首次按下按键时，调用顺序为：
+		Pressed → Held（同一帧）
+		之后如果继续按住，每帧都会调用 Held。
+
+	典型用途：
+		激活瞬发技能（通过 TryActivateAbility 立即触发）。
+		处理蓄力 / 持续技能（通过每帧更新状态，如蓄力进度条）。*/
 	if (!InputTag.IsValid()) return;
 
 	for (auto& AbilitySpec : GetActivatableAbilities())
 	{
 		if (AbilitySpec.DynamicAbilityTags.HasTagExact(InputTag))
 		{
-			AbilitySpecInputPressed(AbilitySpec);
-
+			AbilitySpecInputPressed(AbilitySpec);// 更新输入状态（即使瞬发技能也需要）
+			// 关键点：如果技能未激活，就尝试激活
 			if (!AbilitySpec.IsActive())
 			{
-				TryActivateAbility(AbilitySpec.Handle);
+				TryActivateAbility(AbilitySpec.Handle);// 瞬发技能在此处立刻激活
 			}
 		}
+		//瞬发技能：TryActivateAbility 会立即执行 ActivateAbility，技能表现和 Pressed 无异。
+
+		//蓄力 / 持续技能：IsActive() 会返回 true，所以不会重复激活，而是进入 Held 逻辑（如蓄力进度更新）。
 	}
 }
 
@@ -106,13 +150,14 @@ void UAuraAbilitySystemComponent::AbilityInputTagReleased(const FGameplayTag& In
 
 	for (auto& AbilitySpec : GetActivatableAbilities())
 	{
-		if (AbilitySpec.DynamicAbilityTags.HasTagExact(InputTag))
+		if (AbilitySpec.DynamicAbilityTags.HasTagExact(InputTag) && AbilitySpec.IsActive())
 		{
-			AbilitySpecInputReleased(AbilitySpec);
-
+			AbilitySpecInputReleased(AbilitySpec); //本地立即响应（通过 AbilitySpecInputReleased）→ 保证操作的即时性（减少输入延迟）
+			// 关键：通知服务器输入释放事件（确保权威同步）
+			// 用途：支持蓝图节点如 `WaitInputRelease` 的服务器端检测
+			InvokeReplicatedEvent(EAbilityGenericReplicatedEvent::InputReleased, AbilitySpec.Handle, AbilitySpec.ActivationInfo.GetActivationPredictionKey());
 		}
 	}
-
 }
 
 void UAuraAbilitySystemComponent::AbilityActorInfoSet()
