@@ -20,7 +20,7 @@ public:
 	void StoreMouseDataInfo(const FHitResult& HitResult);
 	// 存储拥有者玩家控制器
 	UFUNCTION(BlueprintCallable)
-	void StoreOwnerPlayerController();
+	void StoreOwnerVariables();
 
 protected:
 	// 鼠标命中位置（可被蓝图读写）
@@ -36,5 +36,8 @@ protected:
 	// 因为有UPROPERTY()，所以是强引用，会阻止GC回收PlayerController
 	UPROPERTY(BlueprintReadWrite, Category = "Beam")
 	TObjectPtr<APlayerController>OwnerPlayerController;
+
+	UPROPERTY(BlueprintReadWrite, Category = "Beam")
+	TObjectPtr<ACharacter>OwnerCharacter;
 
 };

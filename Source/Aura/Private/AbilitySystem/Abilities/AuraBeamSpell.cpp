@@ -2,6 +2,7 @@
 
 
 #include "AbilitySystem/Abilities/AuraBeamSpell.h"
+#include <../../../../../../../Source/Runtime/Engine/Classes/GameFramework/Character.h>
 
 void UAuraBeamSpell::StoreMouseDataInfo(const FHitResult& HitResult)
 {
@@ -22,12 +23,12 @@ void UAuraBeamSpell::StoreMouseDataInfo(const FHitResult& HitResult)
 	}
 }
 
-void UAuraBeamSpell::StoreOwnerPlayerController()
+void UAuraBeamSpell::StoreOwnerVariables()
 {
 	if (CurrentActorInfo)
 	{
-		OwnerPlayerController = OwnerPlayerController = CurrentActorInfo->PlayerController.Get();
-
+		OwnerPlayerController = CurrentActorInfo->PlayerController.Get();
+		OwnerCharacter = Cast<ACharacter>(CurrentActorInfo->AvatarActor);
 		// CurrentActorInfo->PlayerController 是一个TWeakObjectPtr（弱指针）
 		// .Get()从弱指针获取裸指针(UObject*)
 		// 赋值给OwnerPlayerController（TObjectPtr强引用）会创建一个强引用关系
