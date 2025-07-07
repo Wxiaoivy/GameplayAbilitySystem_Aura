@@ -160,6 +160,15 @@ public:
 	FGameplayTag Montage_Attack_3;
 	FGameplayTag Montage_Attack_4;
 
+	/*
+	*Player Block Tag
+	*
+	*/
+	FGameplayTag Player_Block_InputPresssed;
+	FGameplayTag Player_Block_InputHeld;
+	FGameplayTag Player_Block_InputReleased;
+	FGameplayTag Player_Block_CursorTrace;
+
 private:
 	// 声明静态成员变量，存储单例实例
 	// 这个声明告诉编译器，这个类的所有实例共享一个 GameplayTags 变量。

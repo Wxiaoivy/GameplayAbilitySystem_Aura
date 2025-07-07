@@ -85,6 +85,10 @@ void AAuraPlayerController::SetupInputComponent()
 
 void AAuraPlayerController::AbilityInputTagPressed(FGameplayTag InputTag)
 {
+	if (GetASC()&&GetASC()->HasMatchingGameplayTag(FAuraGameplayTags::Get().Player_Block_InputPresssed))
+	{
+		return;
+	}
 	if (InputTag.MatchesTagExact(FAuraGameplayTags::Get().InputTag_RMB))
 	{
 		bTargeting = ThisActor ? true : false;
@@ -95,6 +99,10 @@ void AAuraPlayerController::AbilityInputTagPressed(FGameplayTag InputTag)
 
 void AAuraPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 {
+	if (GetASC() && GetASC()->HasMatchingGameplayTag(FAuraGameplayTags::Get().Player_Block_InputReleased))
+	{
+		return;
+	}
 	if (!InputTag.MatchesTagExact(FAuraGameplayTags::Get().InputTag_RMB))
 	{
 		if (GetASC())
@@ -155,8 +163,10 @@ void AAuraPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 			{
 				UE_LOG(LogTemp, Error, TEXT("NavPath is invalid or has no points!"));
 			}
-
-			UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ClickNiagaraSystem, CachedDestination);
+			if (GetASC() && GetASC()->HasMatchingGameplayTag(FAuraGameplayTags::Get().Player_Block_InputHeld))
+			{
+				UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ClickNiagaraSystem, CachedDestination);
+			}
 		}
 		FollowTime = 0.f;
 		bTargeting = false;
@@ -166,16 +176,25 @@ void AAuraPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 
 void AAuraPlayerController::AbilityInputTagHeld(FGameplayTag InputTag)
 {
+	// 检查1：如果ASC存在且当前有阻止输入持有的标签，则直接返回（关键点解释见下文）
+	if (GetASC() && GetASC()->HasMatchingGameplayTag(FAuraGameplayTags::Get().Player_Block_InputHeld))
+	{
+		return;// 直接退出，不处理任何输入
+	}
+	// 检查2：如果不是右键输入（RMB）的特殊情况
 	if (!InputTag.MatchesTagExact(FAuraGameplayTags::Get().InputTag_RMB))
 	{
 		if (GetASC())
 		{
+			// 普通输入直接传递给ASC处理
 			GetASC()->AbilityInputTagHeld(InputTag);
 		}
 		return;
 	}
+	// 右键输入的特殊处理分支
 	if (bTargeting||bShiftKeyDown)
 	{
+		// 处于瞄准状态或按住Shift时，当作普通能力输入处理
 		if (GetASC())
 		{
 			GetASC()->AbilityInputTagHeld(InputTag);
@@ -183,13 +202,16 @@ void AAuraPlayerController::AbilityInputTagHeld(FGameplayTag InputTag)
 	}
 	else
 	{
+		// 否则处理为移动输入（右键移动逻辑）
 		FollowTime += GetWorld()->GetDeltaSeconds();
-
+		// 获取光标下的命中位置
 		FHitResult Hit;
 		if (GetHitResultUnderCursor(ECC_Visibility, false, Hit))
 		{
+			// 缓存目标位置
 			CachedDestination = Hit.ImpactPoint;
 		}
+		// 控制Pawn向目标位置移动
 		if (APawn* ControlledPawn = GetPawn())
 		{
 			const FVector WorldDirection = (CachedDestination - ControlledPawn->GetActorLocation()).GetSafeNormal();
@@ -197,11 +219,27 @@ void AAuraPlayerController::AbilityInputTagHeld(FGameplayTag InputTag)
 		}
 		
 	}
+	/*设计逻辑时序：
+		按键按下 →Ability被激活 →ActivationOwnedTags 添加 Player_Block_InputHeld 标签 →后续输入被阻止,在技能解释（EndAbility)后该Tag才取消。
+		现在这个代码情况是技能激活时（GA_Electrocute）禁用所有输入
+	  潜在问题:
+			竞态条件：如果同一个帧内有多个输入（如快速连续按键），可能会在标签生效前漏过部分输入。
+			技能能否激活：Player_Block_InputHeld 是否会阻止自身的激活？取决于：
+			如果标签通过 AbilityTags 或 BlockAbilitiesWithTag 配置，可能会阻止自身。
+			如果是纯逻辑判断（如你的代码），则不会阻止自身（因为标签尚未添加）。
+	        直接用 Player_Block_InputHeld 全局阻止输入的方式确实会破坏蓄力技能的逻辑，因为蓄力技能需要持续接收输入事件（Held），而你的当前设计会在技能激活后立即阻止所有后续输入。
+
+	改进方案，根据项目需求选择：
+	方案1：区分输入阻止类型（推荐）
+		核心思想：不用全局标签阻止所有输入，而是分类控制。
+	方案2：动态标签管理
+        核心思想：在蓄力技能中动态控制标签的添加/移除。
+	方案3：白名单机制
+	    核心思想：允许特定技能的输入绕过阻止逻辑。*/
 }
 
 UAuraAbilitySystemComponent* AAuraPlayerController::GetASC()
 {
-
 	if (AuraAbilitySystemComponent== nullptr)
 	{
 		AuraAbilitySystemComponent = Cast<UAuraAbilitySystemComponent>(UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetPawn<APawn>()));
@@ -246,6 +284,14 @@ void AAuraPlayerController::AutoRun()
 
 void AAuraPlayerController::CursorTrace()
 {
+	if (GetASC()&&GetASC()->HasMatchingGameplayTag(FAuraGameplayTags::Get().Player_Block_CursorTrace))
+	{
+		if (LastActor)LastActor->UnHighlightActor();
+		if (ThisActor)ThisActor->UnHighlightActor();
+		LastActor = nullptr;
+		ThisActor = nullptr;
+		return;
+	}
 	// 定义一个FHitResult类型的变量CursorHit，用于存储光标追踪的结果。
 	FHitResult CursorHit;
 
