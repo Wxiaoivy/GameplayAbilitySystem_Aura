@@ -31,7 +31,7 @@ struct FTaggedMontage
    FGameplayTag CombatSocketTag;
 
    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-   USoundBase* ImpactSound;
+   USoundBase* ImpactSound = nullptr;
 
 };
 

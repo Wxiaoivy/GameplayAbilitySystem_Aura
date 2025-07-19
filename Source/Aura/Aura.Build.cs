@@ -9,7 +9,7 @@ public class Aura : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore","EnhancedInput", "GameplayAbilities", "Niagara" });
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore","EnhancedInput", "GameplayAbilities", "Niagara"});
 
 		PrivateDependencyModuleNames.AddRange(new string[] { "GameplayTags","GameplayTasks","NavigationSystem","AIModule" });
 
@@ -17,8 +17,8 @@ public class Aura : ModuleRules
         PublicIncludePaths.AddRange(new string[] { Path.Combine(ModuleDirectory, "public", "Character") });
         PrivateIncludePaths.AddRange(new string[] { Path.Combine(ModuleDirectory, "private", "Character") });
 
-       //PublicIncludePaths.AddRange(new string[] { Path.Combine(ModuleDirectory, "public", "UserSettings") });
-       //PrivateIncludePaths.AddRange(new string[] { Path.Combine(ModuleDirectory, "private", "UserSettings") });
+        //PublicIncludePaths.AddRange(new string[] { Path.Combine(ModuleDirectory, "public", "UserSettings") });
+        //PrivateIncludePaths.AddRange(new string[] { Path.Combine(ModuleDirectory, "private", "UserSettings") });
 
 
 
@@ -29,5 +29,13 @@ public class Aura : ModuleRules
         // PrivateDependencyModuleNames.Add("OnlineSubsystem");
 
         // To include OnlineSubsystemSteam, add it to the plugins section in your uproject file with the Enabled attribute set to true
+
+
+
+            //// 禁用优化但保留必要功能(临时调试用）
+            //OptimizeCode = CodeOptimization.Never;
+            //PublicDefinitions.Add("ALLOW_SHADER_COMPILATION=1");
+        
+
     }
 }
