@@ -3,6 +3,7 @@
 
 #include "AbilitySystem/Abilities/AuraBeamSpell.h"
 #include <../../../../../../../Source/Runtime/Engine/Classes/GameFramework/Character.h>
+#include <../../../../../../../Source/Runtime/Engine/Classes/Kismet/KismetSystemLibrary.h>
 
 void UAuraBeamSpell::StoreMouseDataInfo(const FHitResult& HitResult)
 {
@@ -58,6 +59,40 @@ void UAuraBeamSpell::StoreOwnerVariables()
 				短期持有 → 弱引用(TWeakObjectPtr)。
 
 				长期持有 → 强引用(UPROPERTY() TObjectPtr)，但需注意释放时机。*/
+	
+	}
+}
+
+void UAuraBeamSpell::TraceFirstTarget(const FVector& BeamTargetLocation)
+{
+	check(OwnerCharacter);
+	if (OwnerCharacter->Implements<UCombatInterface>())
+	{
+		if (USkeletalMeshComponent* Weapon = ICombatInterface::Execute_GetWeapon(OwnerCharacter))
+		{
+			TArray<AActor*>ActorsToIgnore;
+			ActorsToIgnore.Add(OwnerCharacter);
+			FHitResult HitResult;
+			const FVector SocketLocation = Weapon->GetSocketLocation(FName("TipSocket"));
+			UKismetSystemLibrary::SphereTraceSingle
+			(
+				OwnerCharacter,
+				SocketLocation,
+				BeamTargetLocation,
+				10.f,
+				TraceTypeQuery1,
+				false,
+				ActorsToIgnore,
+				EDrawDebugTrace::ForDuration,
+				HitResult,
+				true
+			);
+			if (HitResult.bBlockingHit)
+			{
+				MouseHitActor = HitResult.GetActor();
+				MouseHitLocation = HitResult.ImpactPoint;
+			}
+		}
 	
 	}
 }

@@ -22,6 +22,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void StoreOwnerVariables();
 
+	UFUNCTION(BlueprintCallable)
+	void TraceFirstTarget(const FVector& BeamTargetLocation);
+
 protected:
 	// 鼠标命中位置（可被蓝图读写）
 	UPROPERTY(BlueprintReadWrite, Category = "Beam")
