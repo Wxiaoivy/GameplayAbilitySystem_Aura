@@ -31,11 +31,5 @@ public class Aura : ModuleRules
         // To include OnlineSubsystemSteam, add it to the plugins section in your uproject file with the Enabled attribute set to true
 
 
-
-            //// 禁用优化但保留必要功能(临时调试用）
-            //OptimizeCode = CodeOptimization.Never;
-            //PublicDefinitions.Add("ALLOW_SHADER_COMPILATION=1");
-        
-
     }
 }

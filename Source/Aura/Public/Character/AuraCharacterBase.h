@@ -127,6 +127,7 @@ protected:
 	ECharacterClass GetCharacterClass_Implementation();
 	virtual FOnASCRegistered GetOnASCRegisteredDelegate()override;
 	virtual FOnDeath GetOnDeathDelegate()override;
+	USkeletalMeshComponent* GetWeapon_Implementation();
 	/*CombatInterface*/
 
 	FOnASCRegistered OnASCRegisteredDelegate;
