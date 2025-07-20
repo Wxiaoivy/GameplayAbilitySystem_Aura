@@ -2,6 +2,7 @@
 
 
 #include "AbilitySystem/AbilityTask/TargetDataUnderCursor.h"
+#include "../Aura.h"
 
 UTargetDataUnderCursor* UTargetDataUnderCursor::CreatTargetDataUnderMouse(UGameplayAbility* OwningAbility)
 {
@@ -55,7 +56,7 @@ void UTargetDataUnderCursor::SendMouseCursorData()
 	//通过射线检测获取鼠标光标下的命中结果（FHitResult）。
 	// 将命中结果封装到 FGameplayAbilityTargetData_SingleTargetHit 中，
 	// 并添加到 FGameplayAbilityTargetDataHandle。
-	PC->GetHitResultUnderCursor(ECC_Visibility, false, CursorHit);
+	PC->GetHitResultUnderCursor(ECC_TargetUnderMouse, false, CursorHit);
 
 	//FGameplayAbilityTargetDataHandle 是一个通用的目标数据容器，用于存储和管理目标数据。
 	FGameplayAbilityTargetDataHandle DataHandle;
