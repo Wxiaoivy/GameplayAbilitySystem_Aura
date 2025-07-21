@@ -309,6 +309,37 @@ FVector UAuraAbilitySystemLibrary::GetKnockBackForce(const FGameplayEffectContex
 	return FVector::ZeroVector;
 }
 
+void UAuraAbilitySystemLibrary::GetClosestTargets(int32 MaxTargets, const TArray<AActor*>& Actors, TArray<AActor*>& OutClosestActors, const FVector& Origin)
+{
+	if (Actors.Num() <= MaxTargets)
+	{
+		OutClosestActors = Actors;
+		return;
+	}
+	
+	TArray<AActor*>ActorsToCheck = Actors;
+	int32 NumTargetsFound = 0;
+
+	while(NumTargetsFound < MaxTargets)
+	{
+		double ClosestDistance = TNumericLimits<double>::Max();
+		AActor* ClosestActor;
+		for (AActor* PotentialTarget : ActorsToCheck)
+		{
+			if (ActorsToCheck.Num() == 0)break;
+			double Distance = (PotentialTarget->GetActorLocation() - Origin).Length();
+			if (Distance < ClosestDistance)
+			{
+				ClosestDistance = Distance;
+				ClosestActor = PotentialTarget;
+			}
+		}
+		ActorsToCheck.Remove(ClosestActor);
+		OutClosestActors.AddUnique(ClosestActor);
+		++NumTargetsFound;
+	}
+}
+
 void UAuraAbilitySystemLibrary::SetIsBlockedHit(UPARAM(ref)FGameplayEffectContextHandle& EffectContextHandle, bool InIsBlockedHit)
 {
 	if (FAuraGameplayEffectContext* AuraContext = static_cast<FAuraGameplayEffectContext*>(EffectContextHandle.Get()))
