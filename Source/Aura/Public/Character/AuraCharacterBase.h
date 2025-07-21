@@ -126,12 +126,12 @@ protected:
 	void IncrementalMinionCount_Implementation(int32 Amount);
 	ECharacterClass GetCharacterClass_Implementation();
 	virtual FOnASCRegistered GetOnASCRegisteredDelegate()override;
-	virtual FOnDeath GetOnDeathDelegate()override;
+	virtual FOnDeathSignature& GetOnDeathDelegate()override;
 	USkeletalMeshComponent* GetWeapon_Implementation();
 	/*CombatInterface*/
 
 	FOnASCRegistered OnASCRegisteredDelegate;
-	FOnDeath OnDeathDelegate;
+	FOnDeathSignature OnDeathDelegate;
 
 	/*Dissolve Effect*/
 

@@ -122,7 +122,7 @@ FOnASCRegistered AAuraCharacterBase::GetOnASCRegisteredDelegate()
 	return OnASCRegisteredDelegate;
 }
 
-FOnDeath AAuraCharacterBase::GetOnDeathDelegate()
+FOnDeathSignature& AAuraCharacterBase::GetOnDeathDelegate()
 {
 	return OnDeathDelegate;
 }
@@ -191,7 +191,9 @@ void AAuraCharacterBase::MulticastHandleDeath_Implementation(const FVector& Deat
 	AbilitySystemComponent->RemoveLooseGameplayTag(FAuraGameplayTags::Get().Debuff_Burn);//AI加的  因为死亡时DebuffTag没有消除所以不触发UDebuffNiagaraComponent::DebuffTagChanged 这里加了就好了
 	Dissolve();
 	bIsDead = true;
+	BurnNiagaraComponent->Deactivate();
 	OnDeathDelegate.Broadcast(this);
+
 
 }
 

@@ -28,6 +28,14 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void StoreAdditionalTargets(TArray<AActor*>& OutAdditionalTargets);
 
+	//bool bPrimaryTargetDiedIsBound = false;// 自己维护一个布尔变量,确保CombatInterface->GetOnDeathDelegate()只被绑定一次。
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void PrimaryTargetDied(AActor* DeadActor);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void AdditionalTargetDied(AActor* DeadActor);
+
 protected:
 	// 鼠标命中位置（可被蓝图读写）
 	UPROPERTY(BlueprintReadWrite, Category = "Beam")
