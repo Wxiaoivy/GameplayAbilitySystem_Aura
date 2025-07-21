@@ -1,4 +1,4 @@
-// Copyright Ivy
+	// Copyright Ivy
 
 
 #include "AuraAbilityTypes.h"
@@ -60,7 +60,9 @@ bool FAuraGameplayEffectContext::NetSerialize(FArchive& Ar, UPackageMap* Map, bo
 		{
 			RepBits |= 1 << 12;
 		}
-		if (DamageType->IsValid())
+		if (DamageType.IsValid())//if (DamageType->IsValid())  直接调用 -> 会崩溃（如果 DamageType 是 nullptr）     
+			                     //if (DamageType.IsValid())  // 正确调用 TSharedPtr 的 IsValid() 方法     
+			                     //TSharedPtr 的 IsValid() 是成员函数，会先检查指针是否为空，再检查对象有效性。而直接 -> 会解引用空指针导致崩溃。
 		{
 			RepBits |= 1 << 13;
 		}
@@ -161,11 +163,12 @@ bool FAuraGameplayEffectContext::NetSerialize(FArchive& Ar, UPackageMap* Map, bo
 		}
 		DamageType->NetSerialize(Ar, Map, bOutSuccess);
 	}
-	if (RepBits & (1 << 13))
+	
+	if (RepBits & (1 << 14))
 	{
 		DeathImpuse.NetSerialize(Ar, Map, bOutSuccess);//向量反序列化就是这样写的
 	}
-	if (RepBits & (1 << 14))
+	if (RepBits & (1 << 15))
 	{
 		KnockBackForce.NetSerialize(Ar, Map, bOutSuccess);//向量反序列化就是这样写的
 	}

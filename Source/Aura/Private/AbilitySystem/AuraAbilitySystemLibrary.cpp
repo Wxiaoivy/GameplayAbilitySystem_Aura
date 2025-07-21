@@ -323,9 +323,11 @@ void UAuraAbilitySystemLibrary::GetClosestTargets(int32 MaxTargets, const TArray
 	while(NumTargetsFound < MaxTargets)
 	{
 		double ClosestDistance = TNumericLimits<double>::Max();
-		AActor* ClosestActor;
+		AActor* ClosestActor = nullptr;
+
 		for (AActor* PotentialTarget : ActorsToCheck)
 		{
+			if (!PotentialTarget) continue; // 跳过无效指针
 			if (ActorsToCheck.Num() == 0)break;
 			double Distance = (PotentialTarget->GetActorLocation() - Origin).Length();
 			if (Distance < ClosestDistance)
@@ -334,9 +336,17 @@ void UAuraAbilitySystemLibrary::GetClosestTargets(int32 MaxTargets, const TArray
 				ClosestActor = PotentialTarget;
 			}
 		}
-		ActorsToCheck.Remove(ClosestActor);
-		OutClosestActors.AddUnique(ClosestActor);
-		++NumTargetsFound;
+		if (ClosestActor) // 确保不是 nullptr 再操作
+		{
+			ActorsToCheck.Remove(ClosestActor);
+			OutClosestActors.AddUnique(ClosestActor);
+			++NumTargetsFound;
+		}
+		else
+		{
+			break;
+		}
+	
 	}
 }
 
