@@ -25,6 +25,9 @@ class AURA_API UAuraDamageGameplayAbility : public UAuraGameplayAbility
 	UFUNCTION(BlueprintPure)
 	FDamageEffectParams MakeDamgeEffectParamsFormClassDefaults(AActor* TargetActor = nullptr)const;
 
+	UFUNCTION(BlueprintPure)
+	float GetDamageAtLevel()const;
+
 protected:
 
 
