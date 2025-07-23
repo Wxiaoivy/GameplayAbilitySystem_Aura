@@ -85,7 +85,7 @@ void AAuraPlayerController::SetupInputComponent()
 
 void AAuraPlayerController::AbilityInputTagPressed(FGameplayTag InputTag)
 {
-	if (GetASC()&&GetASC()->HasMatchingGameplayTag(FAuraGameplayTags::Get().Player_Block_InputPresssed))
+	if (GetASC() && GetASC()->HasMatchingGameplayTag(FAuraGameplayTags::Get().Player_Block_InputPresssed))
 	{
 		return;
 	}
@@ -216,7 +216,7 @@ void AAuraPlayerController::AbilityInputTagHeld(FGameplayTag InputTag)
 		{
 			const FVector WorldDirection = (CachedDestination - ControlledPawn->GetActorLocation()).GetSafeNormal();
 			ControlledPawn->AddMovementInput(WorldDirection);
-		}
+		}	
 		
 	}
 	/*Éè¼ÆÂß¼­Ê±Ðò£º
