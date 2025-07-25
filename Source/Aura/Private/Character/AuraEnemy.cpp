@@ -72,6 +72,8 @@ AAuraEnemy::AAuraEnemy()
 
 	GetCharacterMovement()->bUseControllerDesiredRotation = true;//需要敌人平滑转向
 	GetCharacterMovement()->bOrientRotationToMovement = false;
+
+	BaseWalkSpeed = 250.f;
 }
 
 void AAuraEnemy::die(const FVector& DeathImpuse)
@@ -180,6 +182,11 @@ void AAuraEnemy::InitAbilityActorInfo()
 	AbilitySystemComponent->InitAbilityActorInfo(this, this);
 	Cast<UAuraAbilitySystemComponent>(AbilitySystemComponent)->AbilityActorInfoSet();
 	OnASCRegisteredDelegate.Broadcast(AbilitySystemComponent);
+	
+	
+	AbilitySystemComponent->RegisterGameplayTagEvent(FAuraGameplayTags::Get().Debuff_Stun, EGameplayTagEventType::NewOrRemoved).AddUObject(this, &AAuraEnemy::StunTagChanged);
+	
+
 	if (HasAuthority())
 	{
 		InitializeDefualtAttributes();
@@ -196,6 +203,16 @@ void AAuraEnemy::InitializeDefualtAttributes() const
 {
 	//InitializeDefaultAttributes应该在服务器完成 所以应该检查权威 HasAuthority()
 	UAuraAbilitySystemLibrary::InitializeDefaultAttributes(this, CharacterClass, Level, AbilitySystemComponent);
+}
+
+void AAuraEnemy::StunTagChanged(const FGameplayTag CallbackTag, int32 NewCount)
+{
+	Super::StunTagChanged(CallbackTag, NewCount);
+
+	if (AuraAIController&&AuraAIController->GetBlackboardComponent())
+	{
+		AuraAIController->GetBlackboardComponent()->SetValueAsBool(FName("Stunned"), bIsStunned);
+	}
 }
 
 int32 AAuraEnemy::GetPlayerLevel_Implementation()

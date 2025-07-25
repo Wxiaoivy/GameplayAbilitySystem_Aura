@@ -26,6 +26,8 @@ public:
 	// Sets default values for this character's properties
 	AAuraCharacterBase();
 
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps)const;
+
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
 	TObjectPtr<UAttributeSet>GetAttributeSet() const { return AttributeSet; }
@@ -42,6 +44,14 @@ public:
 		用 Reliable 确保关键逻辑不丢失。*/
 	UFUNCTION(NetMulticast,Reliable)
 	virtual void MulticastHandleDeath(const FVector& DeathImpuse);
+
+
+
+	UPROPERTY(ReplicatedUsing= OnRep_Stunned,BlueprintReadOnly)
+	bool bIsStunned = false;
+
+	UFUNCTION()
+	virtual void OnRep_Stunned();
 
 protected:
 
@@ -71,10 +81,14 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	FName TailSocketName;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
+	float BaseWalkSpeed = 600.f;
 	
 
 	virtual void ApplyEffectToSelf(TSubclassOf<UGameplayEffect> GameplayEffect, float level)const;
 	virtual void InitializeDefualtAttributes()const;
+	virtual void StunTagChanged(const FGameplayTag CallbackTag, int32 NewCount);
 
 	void AddCharacterAbilities();
 

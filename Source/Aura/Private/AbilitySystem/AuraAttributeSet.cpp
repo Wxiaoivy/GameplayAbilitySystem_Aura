@@ -413,7 +413,17 @@ void UAuraAttributeSet::Debuff(FEffectProperties& Props)
 
 	//5. 添加标签和堆叠规则
 	//为动态创建的 Debuff 打上类型标签，实现 逻辑分类 和 行为触发。关键优势：通过标签系统将 Debuff 类型与游戏逻辑解耦，提升可维护性和扩展性。
-	Effect->InheritableOwnedTagsContainer.AddTag(GameplayTags.DamageTypesToDebuff[DamageType]);// 告诉游戏这是一个“火焰Debuff”，用于触发通用逻辑
+    const FGameplayTag DebuffTag = GameplayTags.DamageTypesToDebuff[DamageType];
+	Effect->InheritableOwnedTagsContainer.AddTag(DebuffTag);// 告诉游戏这是一个“火焰Debuff”，用于触发通用逻辑（这个是标识作用 ，不会把Tag添加到ASC里面，而在449行才把Tag添加到ASC接着触发AbilitySystemComponent->RegisterGameplayTagEvent
+	if (DebuffTag.MatchesTagExact(GameplayTags.Debuff_Stun))
+	{
+		Effect->InheritableOwnedTagsContainer.AddTag(GameplayTags.Player_Block_CursorTrace);
+		Effect->InheritableOwnedTagsContainer.AddTag(GameplayTags.Player_Block_InputHeld);
+		Effect->InheritableOwnedTagsContainer.AddTag(GameplayTags.Player_Block_InputPresssed);
+		Effect->InheritableOwnedTagsContainer.AddTag(GameplayTags.Player_Block_InputReleased);
+
+	}
+	
 
 	Effect->StackingType = EGameplayEffectStackingType::AggregateBySource;    //1. AggregateBySource 的核心定义
 	Effect->StackLimitCount = 1.f;                                            /*作用：
@@ -445,11 +455,45 @@ void UAuraAttributeSet::Debuff(FEffectProperties& Props)
 		TSharedPtr<FGameplayTag>DebuffDamageType = MakeShareable(new FGameplayTag(DamageType));
 		AuraContext->SetDamageType(DebuffDamageType);// 保留精确的伤害类型（Damage_Fire），
 		                                             //用于数值计算(Effect->InheritableOwnedTagsContainer.AddTag("Debuff.Fire"作用不同);
-		MutableSpec->DynamicGrantedTags.AddTag(FAuraGameplayTags::Get().Debuff_Burn);//自己加的 作用：向一个 GameplayEffectSpec 动态添加一个游戏标签（Debuff_Burn），
+		MutableSpec->DynamicGrantedTags.AddTag(DebuffTag);//AI让我自己加的 作用：向一个 GameplayEffectSpec 动态添加一个游戏标签（如Debuff_Burn），
 		                                                                             //这个标签会在效果被应用时附加到目标身上。
 		                                                                             /*DynamicGrantedTags 里的标签会 直接附加到目标（Target）的 AbilitySystemComponent(ASC) 上。
-			                                                                          也就是说，目标会临时获得 Debuff_Burn 标签，直到效果结束。*/
+			                                                                          也就是说，目标会临时获得 Debuff_Burn 标签，直到效果结束。*/// 关键修复：必须添加 DynamicGrantedTags
+
+
+		//添加BlockTag（用于眩晕时禁止鼠标的输入，键盘没禁止 ）
+		//方法一（推荐）
+		if (DebuffTag.MatchesTagExact(GameplayTags.Debuff_Stun))
+		{
+			MutableSpec->DynamicGrantedTags.AddTag(GameplayTags.Player_Block_CursorTrace);
+			MutableSpec->DynamicGrantedTags.AddTag(GameplayTags.Player_Block_InputHeld);
+			MutableSpec->DynamicGrantedTags.AddTag(GameplayTags.Player_Block_InputPresssed);
+			MutableSpec->DynamicGrantedTags.AddTag(GameplayTags.Player_Block_InputReleased);
+
+		}
+
+		//方法二（需要手动Remove)
+	/*	if (UAuraAbilitySystemComponent*AuraASC=Cast<UAuraAbilitySystemComponent>(Props.TargetASC))
+			{
+				FGameplayTagContainer BlockedTags;
+				BlockedTags.AddTag(GameplayTags.Player_Block_CursorTrace);
+				BlockedTags.AddTag(GameplayTags.Player_Block_InputHeld);
+				BlockedTags.AddTag(GameplayTags.Player_Block_InputPresssed);
+				BlockedTags.AddTag(GameplayTags.Player_Block_InputReleased);
+				
+				if (DebuffTag.MatchesTagExact(GameplayTags.Debuff_Stun))
+				{
+					AuraASC->AddLooseGameplayTags(BlockedTags);
+				}
+				else
+				{
+					AuraASC->RemoveLooseGameplayTags(BlockedTags);
+				}
+			}*/
+		
+
 		Props.TargetASC->ApplyGameplayEffectSpecToSelf(*MutableSpec);// 将Debuff应用到目标身上（触发周期性的属性修改）
+
 	}
 	//初始伤害->触发Debuff->动态创建新GE->添加Modifier到空数组->应用GE到目标->持续时间结束->GE自动销毁
 }

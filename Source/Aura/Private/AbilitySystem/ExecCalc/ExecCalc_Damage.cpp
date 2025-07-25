@@ -96,7 +96,7 @@ void UExecCalc_Damage::DeterminDebuff(const FGameplayEffectSpec& Spec, const FGa
 			const FGameplayTag& ResistanceTag = GameplayTags.DamageTypesToResistance[DamageType];
 			ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(InTagsToCaptureDefs[ResistanceTag], EvaluateParameters, TargetDebuffResistance);//从目标的属性系统中捕获抗性值
 			TargetDebuffResistance = FMath::Max<float>(0, TargetDebuffResistance);//确保抗性值不会为负数（最小为 0）
-			const float EffectDebuffChance = SourceDebuffChange * (100 - TargetDebuffResistance) / 100;//最终概率 = 施法者基础概率 × (100 - 目标抗性) / 100
+			const float EffectDebuffChance = SourceDebuffChange * (100 -0/*TargetDebuffResistance*/) / 100;//最终概率 = 施法者基础概率 × (100 - 目标抗性) / 100
 
 
 			bool bDebuff = FMath::RandRange(1, 100) < EffectDebuffChance;
