@@ -41,6 +41,8 @@ void AAuraCharacterBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& O
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(AAuraCharacterBase, bIsStunned);
+	DOREPLIFETIME(AAuraCharacterBase, bIsBurn);
+	DOREPLIFETIME(AAuraCharacterBase, bIsBeingShocked);
 }
 
 // Called when the game starts or when spawned
@@ -138,6 +140,16 @@ FOnASCRegistered& AAuraCharacterBase::GetOnASCRegisteredDelegate()
 FOnDeathSignature& AAuraCharacterBase::GetOnDeathDelegate()
 {
 	return OnDeathDelegate;
+}
+
+void AAuraCharacterBase::SetIsBeingShocked_Implementation(bool InIsBeingShocked)
+{
+	bIsBeingShocked = InIsBeingShocked;
+}
+
+bool AAuraCharacterBase::IsBeingShocked_Implementation()
+{
+	return bIsBeingShocked;
 }
 
 USkeletalMeshComponent* AAuraCharacterBase::GetWeapon_Implementation()

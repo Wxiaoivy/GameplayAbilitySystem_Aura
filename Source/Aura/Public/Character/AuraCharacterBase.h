@@ -53,6 +53,8 @@ public:
 	UPROPERTY(ReplicatedUsing = OnRep_Burn, BlueprintReadOnly)
 	bool bIsBurn = false;//这个布尔值都没设置呢，老师就写这个，无大语
 
+	UPROPERTY(Replicated, BlueprintReadOnly)
+	bool bIsBeingShocked = false;
 
 	UFUNCTION()
 	virtual void OnRep_Stunned();
@@ -149,6 +151,8 @@ protected:
 	virtual FOnASCRegistered& GetOnASCRegisteredDelegate()override;
 	virtual FOnDeathSignature& GetOnDeathDelegate()override;
 	USkeletalMeshComponent* GetWeapon_Implementation();
+	bool IsBeingShocked_Implementation();
+	void SetIsBeingShocked_Implementation(bool InIsBeingShocked);
 	/*CombatInterface*/
 
 	FOnASCRegistered OnASCRegisteredDelegate;

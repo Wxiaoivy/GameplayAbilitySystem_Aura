@@ -304,11 +304,15 @@ void UAuraAttributeSet::HandleIncomingDamage(FEffectProperties& Props)
 		}
 		else
 		{
-			//如果没有死亡，则尝试激活带有"Effects_HitReact"标签的技能
+			//如果没有死亡，并且没有在被电击中，则尝试激活带有"Effects_HitReact"标签的技能
 			//这会触发受击动画或其他受击反应逻辑
-			FGameplayTagContainer TagContainer;
-			TagContainer.AddTag(FAuraGameplayTags::Get().Effects_HitReact);
-			Props.TargetASC->TryActivateAbilitiesByTag(TagContainer);
+			if (Props.TargetCharacter->Implements<UCombatInterface>()&&!ICombatInterface::Execute_IsBeingShocked(Props.TargetCharacter))
+			{
+				FGameplayTagContainer TagContainer;
+				TagContainer.AddTag(FAuraGameplayTags::Get().Effects_HitReact);
+				Props.TargetASC->TryActivateAbilitiesByTag(TagContainer);
+			}
+
 			//Data是引擎提供的原始回调数据，包含所有GameplayEffect执行的原始信息
 			// Props是开发者自定义的结构体，通过SetEffectProperties函数从Data中提取并组织成更易用的形式
 
@@ -323,7 +327,12 @@ void UAuraAttributeSet::HandleIncomingDamage(FEffectProperties& Props)
 			//来源Actor
 
 			//效果规格(EffectSpec)等
-			Props.TargetCharacter->LaunchCharacter(UAuraAbilitySystemLibrary::GetKnockBackForce(Props.EffectContextHandle), true, true);
+			const FVector& KnockbackForce = UAuraAbilitySystemLibrary::GetKnockBackForce(Props.EffectContextHandle);
+			if (!KnockbackForce.IsNearlyZero(1.f))
+			{
+				Props.TargetCharacter->LaunchCharacter(KnockbackForce, true, true);
+			}
+		
 		}
 		bool bIsBlockedHit = UAuraAbilitySystemLibrary::IsBlockedHit(Props.EffectContextHandle);
 		bool bIsCriticalHit = UAuraAbilitySystemLibrary::IsCriticalHit(Props.EffectContextHandle);
