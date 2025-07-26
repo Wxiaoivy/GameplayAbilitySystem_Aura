@@ -17,6 +17,10 @@ AAuraCharacterBase::AAuraCharacterBase()
 	BurnNiagaraComponent = CreateDefaultSubobject<UDebuffNiagaraComponent>("BurnNiagaraComponent");
 	BurnNiagaraComponent->SetupAttachment(GetRootComponent());
 	BurnNiagaraComponent->DebuffTag = FAuraGameplayTags::Get().Debuff_Burn;
+
+	StunNiagaraComponent = CreateDefaultSubobject<UDebuffNiagaraComponent>("StunNiagaraComponent");
+	StunNiagaraComponent->SetupAttachment(GetRootComponent());
+	StunNiagaraComponent->DebuffTag = FAuraGameplayTags::Get().Debuff_Stun;
 	
 
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
@@ -126,7 +130,7 @@ void AAuraCharacterBase::die(const FVector& DeathImpuse)
 
 }
 
-FOnASCRegistered AAuraCharacterBase::GetOnASCRegisteredDelegate()
+FOnASCRegistered& AAuraCharacterBase::GetOnASCRegisteredDelegate()
 {
 	return OnASCRegisteredDelegate;
 }
@@ -201,6 +205,7 @@ void AAuraCharacterBase::MulticastHandleDeath_Implementation(const FVector& Deat
 	Dissolve();
 	bIsDead = true;
 	BurnNiagaraComponent->Deactivate();
+	StunNiagaraComponent->Deactivate();
 	OnDeathDelegate.Broadcast(this);
 
 
@@ -208,6 +213,28 @@ void AAuraCharacterBase::MulticastHandleDeath_Implementation(const FVector& Deat
 
 void AAuraCharacterBase::OnRep_Stunned()
 {
+	//老师把这个逻辑写在AuraCharacter的OnRep_Stunned里面，但是敌人没写，敌人又可以莫名其妙的激活该特效，
+	//我觉得应该写在这里 敌人触发特效的逻辑才是正确的，
+	if (bIsStunned)
+	{
+		StunNiagaraComponent->Activate();
+	}
+	else
+	{
+		StunNiagaraComponent->Deactivate();
+	}
+}
+
+void AAuraCharacterBase::OnRep_Burn()
+{
+	if (bIsBurn)//这个布尔值都没设置呢，老师就写这个，无大语
+	{
+		BurnNiagaraComponent->Activate();
+	} 
+	else
+	{
+		BurnNiagaraComponent->Deactivate();
+	}
 }
 
 void AAuraCharacterBase::StunTagChanged(const FGameplayTag CallbackTag, int32 NewCount)

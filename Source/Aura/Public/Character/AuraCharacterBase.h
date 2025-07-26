@@ -50,8 +50,15 @@ public:
 	UPROPERTY(ReplicatedUsing= OnRep_Stunned,BlueprintReadOnly)
 	bool bIsStunned = false;
 
+	UPROPERTY(ReplicatedUsing = OnRep_Burn, BlueprintReadOnly)
+	bool bIsBurn = false;//这个布尔值都没设置呢，老师就写这个，无大语
+
+
 	UFUNCTION()
 	virtual void OnRep_Stunned();
+
+	UFUNCTION()
+	virtual void OnRep_Burn();
 
 protected:
 
@@ -139,7 +146,7 @@ protected:
 	int32 GetMinionCount_Implementation();
 	void IncrementalMinionCount_Implementation(int32 Amount);
 	ECharacterClass GetCharacterClass_Implementation();
-	virtual FOnASCRegistered GetOnASCRegisteredDelegate()override;
+	virtual FOnASCRegistered& GetOnASCRegisteredDelegate()override;
 	virtual FOnDeathSignature& GetOnDeathDelegate()override;
 	USkeletalMeshComponent* GetWeapon_Implementation();
 	/*CombatInterface*/
@@ -170,7 +177,8 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
 	TObjectPtr<UDebuffNiagaraComponent>BurnNiagaraComponent;
 
-
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
+	TObjectPtr<UDebuffNiagaraComponent>StunNiagaraComponent;
 
 protected:
 	bool bIsDead = false;

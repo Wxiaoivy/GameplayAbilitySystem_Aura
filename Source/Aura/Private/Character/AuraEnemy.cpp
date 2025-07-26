@@ -74,6 +74,8 @@ AAuraEnemy::AAuraEnemy()
 	GetCharacterMovement()->bOrientRotationToMovement = false;
 
 	BaseWalkSpeed = 250.f;
+
+
 }
 
 void AAuraEnemy::die(const FVector& DeathImpuse)

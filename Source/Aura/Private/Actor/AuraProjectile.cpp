@@ -30,6 +30,10 @@ AAuraProjectile::AAuraProjectile()
 void AAuraProjectile::BeginPlay()
 {
 	Super::BeginPlay();
+	SetReplicateMovement(true);/*bReplicates是总开关，决定Actor是否参与网络同步
+								 ReplicateMovement是子开关，
+								 专门处理移动同步对于投射物这种需要精确同步移动的Actor，必须同时启用两者
+								 在BeginPlay中再次设置是良好的防御性编程实践*/
 
 	Sphere->OnComponentBeginOverlap.AddDynamic(this, &AAuraProjectile::OnSphereBeginOverlap);
 

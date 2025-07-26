@@ -5,6 +5,8 @@
 #include <../../../../../../../Source/Runtime/Engine/Classes/GameFramework/SpringArmComponent.h>
 #include <../../../../../../../Source/Runtime/Engine/Classes/Camera/CameraComponent.h>
 #include "AuraGameplayTags.h"
+#include "AbilitySystem/Debuff/DebuffNiagaraComponent.h"
+
 
 AAuraCharacter::AAuraCharacter()
 {
@@ -56,6 +58,8 @@ void AAuraCharacter::OnRep_PlayerState()
 
 void AAuraCharacter::OnRep_Stunned()
 {
+	Super::OnRep_Stunned();
+
 	if (UAuraAbilitySystemComponent* AuraASC = Cast<UAuraAbilitySystemComponent>(AbilitySystemComponent))
 	{
 		const FAuraGameplayTags& GameplayTags = FAuraGameplayTags::Get();
@@ -68,10 +72,12 @@ void AAuraCharacter::OnRep_Stunned()
 		if (bIsStunned)
 		{
 			AuraASC->AddLooseGameplayTags(BlockedTags);
+			//StunNiagaraComponent->Activate();
 		}
 		else
 		{
 			AuraASC->RemoveLooseGameplayTags(BlockedTags);
+			//StunNiagaraComponent->Deactivate();
 		}
 	}
 }

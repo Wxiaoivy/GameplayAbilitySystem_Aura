@@ -102,7 +102,7 @@ public:
 
 
 	virtual void die(const FVector& DeathImpuse) = 0; //主要逻辑写在AuraCharacterBase里面的
-	virtual FOnASCRegistered GetOnASCRegisteredDelegate() = 0;
+	virtual FOnASCRegistered& GetOnASCRegisteredDelegate() = 0;
 	virtual FOnDeathSignature& GetOnDeathDelegate() = 0;
 	
 };
