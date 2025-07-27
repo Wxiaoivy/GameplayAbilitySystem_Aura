@@ -350,7 +350,7 @@ void UAuraAttributeSet::HandleIncomingDamage(FEffectProperties& Props)
 
 void UAuraAttributeSet::ShowFloatingText(FEffectProperties& Props, const float LocalIncomingDamage, bool bIsBlockedHit, bool bIsCriticalHit)
 {
-	if (Props.SourceCharacter != Props.TargetCharacter)
+	if ( Props.SourceCharacter && Props.TargetCharacter && Props.SourceCharacter != Props.TargetCharacter)
 	{
 
 		if (AAuraPlayerController* PC = Cast<AAuraPlayerController>(Props.SourceCharacter->GetController()))

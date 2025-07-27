@@ -17,6 +17,7 @@ DECLARE_MULTICAST_DELEGATE(FAbilitiesGiven)//ÉùÃ÷Ò»¸ö¶à²¥Î¯ÍĞ£¬µ±¼¼ÄÜÏµÍ³Íê³É³õÊ
 DECLARE_DELEGATE_OneParam(FForEachAbility, const FGameplayAbilitySpec&)//¶¨ÒåÒ»¸öÎ¯ÍĞÀàĞÍ£¬ÓÃÓÚ±éÀúÃ¿¸ö¼¼ÄÜ£¨FGameplayAbilitySpec£©£¬¹©Íâ²¿×Ô¶¨Òå´¦ÀíÂß¼­¡£
 DECLARE_MULTICAST_DELEGATE_ThreeParams(FAbilityStatusChanged,const FGameplayTag& /*AbilityTag*/, const FGameplayTag& /*StatusTag*/,int32 /*AbilityLevel*/)
 DECLARE_MULTICAST_DELEGATE_FourParams(FAbilityEquipped, const FGameplayTag&,/* AbilityTag*/ const FGameplayTag&,/* Status*/ const FGameplayTag&, /*Slot */const FGameplayTag& /*PreviousSlot*/);
+DECLARE_MULTICAST_DELEGATE_OneParam(FDeactivatePassiveAbility, const FGameplayTag& /*AbilityTag*/);
 
 /**
  * 
@@ -43,8 +44,6 @@ public:
 
 	void AbilityActorInfoSet();
 	
-	FEffectAssetTag EffectAssetTag;
-
 	void AddCharacterAbilities(const TArray<TSubclassOf<UGameplayAbility>>& StartupAbilities);
 	void AddCharacterPassiveAbilities(const TArray<TSubclassOf<UGameplayAbility>>& StartupPassiveAbilities);
 
@@ -52,9 +51,11 @@ public:
 	void AbilityInputTagHeld(const FGameplayTag& InputTag);
     void AbilityInputTagReleased(const FGameplayTag& InputTag);
 
+	FEffectAssetTag EffectAssetTag;
 	FAbilitiesGiven AbilitiesGivenDelegate;
 	FAbilityStatusChanged AbilityStatusChanged;
 	FAbilityEquipped AbilityEquipped;
+	FDeactivatePassiveAbility DeactivatePassiveAbility;
 
 	bool bStartupAbilitiesGiven = false;
 
