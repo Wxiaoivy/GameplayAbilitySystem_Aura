@@ -84,7 +84,9 @@ public:
 	UFUNCTION(Server, Reliable)
 	void SeverEquipAbility(const FGameplayTag& AbilityTag, const FGameplayTag& Slot);
 
-	UFUNCTION(Client, Reliable)//老师忘写这个了宏了
+	UFUNCTION(Client, Reliable)//UFUNCTION(Client, Reliable),标记该函数在服务器调用，但仅在客户端上执行。用途：用于服务器向特定客户端发送通知（如更新UI、播放音效等）。
+		                       //UFUNCTION(Multicast, Reliable)标记该函数在服务器调用，在服务器和所有客户端上执行。用途：用于同步全局事件（如爆炸效果、场景状态变化等）。
+		                       //UFUNCTION(Server, Reliable)标记该函数在客户端调用，但仅在服务器上执行。用途：用于客户端向服务器发送请求（如玩家输入、交互等）
 	void ClientEquipAbility(const FGameplayTag& AbilityTag, const FGameplayTag& Status, const FGameplayTag& Slot, const FGameplayTag& PreviousSlot);
 
 	void ClearSlot(FGameplayAbilitySpec* Spec);
