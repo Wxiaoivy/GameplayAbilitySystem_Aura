@@ -6,6 +6,7 @@
 #include "Interaction/PlayerInterface.h"
 #include <../../../../../../../Plugins/Runtime/GameplayAbilities/Source/GameplayAbilities/Public/AbilitySystemBlueprintLibrary.h>
 #include <../../../../../../../Plugins/Runtime/GameplayAbilities/Source/GameplayAbilities/Public/GameplayAbilitySpec.h>
+#include <../../../../../../../Source/Runtime/Engine/Public/Net/UnrealNetwork.h>
 #include "AuraGameplayTags.h"
 #include "AbilitySystem/Data/AbilityInfo.h"
 #include "AbilitySystem/AuraAbilitySystemLibrary.h"
@@ -321,6 +322,11 @@ void UAuraAbilitySystemComponent::AssignSlotToAbility(FGameplayAbilitySpec& Abil
 {
 	ClearSlot(&AbilitySpec);
 	AbilitySpec.DynamicAbilityTags.AddTag(Slot);
+}
+
+void UAuraAbilitySystemComponent::MulticastActivatePassiveEffect_Implementation(const FGameplayTag& AbilityTag, bool bActivate)
+{
+	ActivatePassiveEffect.Broadcast(AbilityTag, bActivate);
 }
 
 void UAuraAbilitySystemComponent::UpdateAbilityStatus(int32 Level)//这个函数检查玩家的等级，如果满足条件（Level >= Info.LevelRequirement），
