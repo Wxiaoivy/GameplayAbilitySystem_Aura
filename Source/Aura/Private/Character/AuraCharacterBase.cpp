@@ -12,7 +12,7 @@
 AAuraCharacterBase::AAuraCharacterBase()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bCanEverTick = true;
 
 	BurnNiagaraComponent = CreateDefaultSubobject<UDebuffNiagaraComponent>("BurnNiagaraComponent");
 	BurnNiagaraComponent->SetupAttachment(GetRootComponent());
@@ -33,6 +33,15 @@ AAuraCharacterBase::AAuraCharacterBase()
 	Weapon -> SetupAttachment(GetMesh(), FName("WeaponHandSocket"));
 	Weapon->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
+	EffectAttachComponent = CreateDefaultSubobject<USceneComponent>("EffectAttachComponent");
+	EffectAttachComponent->SetupAttachment(GetRootComponent());
+	HaloOfProtectionNiagaraSystemComponent = CreateDefaultSubobject<UPassiveNiagaraComponent>("HaloOfProtectionNiagaraSystemComponent");
+	HaloOfProtectionNiagaraSystemComponent->SetupAttachment(EffectAttachComponent);
+	LifeSiphonNiagaraSystemComponent = CreateDefaultSubobject<UPassiveNiagaraComponent>("LifeSiphonNiagaraSystemComponent");
+	LifeSiphonNiagaraSystemComponent->SetupAttachment(EffectAttachComponent);
+	ManaSiphonNiagaraSystemComponent = CreateDefaultSubobject<UPassiveNiagaraComponent>("ManaSiphonNiagaraSystemComponent");
+	ManaSiphonNiagaraSystemComponent->SetupAttachment(EffectAttachComponent);
+
 }
 
 
@@ -50,6 +59,12 @@ void AAuraCharacterBase::BeginPlay()
 {
 	Super::BeginPlay();
 
+}
+
+void AAuraCharacterBase::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+	EffectAttachComponent->SetWorldRotation(FRotator::ZeroRotator);
 }
 
 void AAuraCharacterBase::InitAbilityActorInfo()

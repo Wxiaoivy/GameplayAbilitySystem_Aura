@@ -354,7 +354,7 @@ void UAuraAbilitySystemComponent::UpdateAbilityStatus(int32 Level)//这个函数检查
 
 void UAuraAbilitySystemComponent::ClientUpdateAbilityStatus_Implementation(const FGameplayTag& AbilityTag, const FGameplayTag& StatusTag, int32 AbilityLevel)
 {
-	AbilityStatusChanged.Broadcast(AbilityTag, StatusTag,AbilityLevel);
+	AbilityStatusChanged.Broadcast(AbilityTag, StatusTag, AbilityLevel);
 }
 
 void UAuraAbilitySystemComponent::SeverSpendSpellPoint_Implementation(const FGameplayTag& AbilityTag)
@@ -525,6 +525,7 @@ void UAuraAbilitySystemComponent::SeverEquipAbility_Implementation(const FGamepl
 					}
 					if (IsPassiveAbility(*SpecWithSlot))
 					{
+						MulticastActivatePassiveEffect(GetAbilityTagFormSpec(*SpecWithSlot), false);
 						DeactivatePassiveAbility.Broadcast(GetAbilityTagFormSpec(*SpecWithSlot));
 					}
 					ClearSlot(SpecWithSlot);
@@ -534,6 +535,7 @@ void UAuraAbilitySystemComponent::SeverEquipAbility_Implementation(const FGamepl
 			{
 				if (IsPassiveAbility(*AbilitySpec))
 				{
+					MulticastActivatePassiveEffect(AbilityTag, true);
 					TryActivateAbility(AbilitySpec->Handle);
 				}
 			}

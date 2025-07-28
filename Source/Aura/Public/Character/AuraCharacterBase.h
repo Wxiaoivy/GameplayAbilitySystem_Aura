@@ -11,6 +11,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Aura/Aura.h"
 #include "AbilitySystem/Data/CharacterClassInfo.h"
+#include "AbilitySystem/Passive/PassiveNiagaraComponent.h"
 #include "AuraCharacterBase.generated.h"
 
 class UDebuffNiagaraComponent;
@@ -66,6 +67,8 @@ protected:
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	virtual void Tick(float DeltaTime)override;
 
 	//跟AbilitySystem里面一个函数一样的名字（这个有点坑）
 	virtual void InitAbilityActorInfo();
@@ -197,4 +200,16 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	TObjectPtr<UAnimMontage>HitReactMontage;
+
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<UPassiveNiagaraComponent>HaloOfProtectionNiagaraSystemComponent;
+
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<UPassiveNiagaraComponent>LifeSiphonNiagaraSystemComponent;
+
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<UPassiveNiagaraComponent>ManaSiphonNiagaraSystemComponent;
+
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<USceneComponent>EffectAttachComponent;
 };
