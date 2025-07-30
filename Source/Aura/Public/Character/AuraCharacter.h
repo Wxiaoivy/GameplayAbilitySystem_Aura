@@ -45,6 +45,8 @@ public:
 	 int32 GetSpellPointsReward_Implementation(int32 Level)const;
 	 int32 GetAttributePoints_Implementation()const;
 	 int32 GetSpellPoints_Implementation()const;
+	 void ShowMagicCircle_Implementation(UMaterialInterface* DecalMaterial);
+	 void HideMagicCircle_Implementation();
 	/*End Player Interface*/
 
 	/*Combat Interface*/

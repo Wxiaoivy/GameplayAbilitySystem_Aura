@@ -140,7 +140,7 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 
 	GameplayTags.Abilities_Fire_FireBolt = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Abilities.Fire.FireBolt"), FString("FireBolt Abilities Tag"));
 	GameplayTags.Abilities_Lightning_Electrocute = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Abilities.Lightning.Electrocute"), FString("Electrocute Abilities Tag"));
-
+	GameplayTags.Abilities_Arcane_ArcaneShards= UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Abilities.Arcane.ArcaneShards"), FString("Arcane Shards Abilities Tag"));
 
 	GameplayTags.Abilities_HitReact = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Abilities.HitReact"), FString("Hit React Ability"));
 	GameplayTags.Abilities_Status_Lock= UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Abilities.Status.Lock"), FString("Lock Status"));

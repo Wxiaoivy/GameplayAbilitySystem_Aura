@@ -4,6 +4,8 @@
 #include "Player/AuraPlayerController.h"
 #include <../../../../../../../Plugins/FX/Niagara/Source/Niagara/Public/NiagaraFunctionLibrary.h>
 #include "Actor/MagicCircle.h"
+#include <../../../../../../../Source/Runtime/Engine/Classes/Materials/MaterialInterface.h>
+#include <../../../../../../../Source/Runtime/Engine/Classes/Components/DecalComponent.h>
 
 AAuraPlayerController::AAuraPlayerController()
 {
@@ -431,11 +433,15 @@ void AAuraPlayerController::ShowDamageNumber_Implementation(float Damage, AChara
 	}
 }
 
-void AAuraPlayerController::ShowMagicCircle()
+void AAuraPlayerController::ShowMagicCircle(UMaterialInterface* DecalMaterial)
 {
 	if (!IsValid(MagicCircle))
 	{
 		MagicCircle = GetWorld()->SpawnActor<AMagicCircle>(MagicCircleClass);
+		if (DecalMaterial)
+		{
+			MagicCircle->MagicCircleDecal->SetMaterial(0, DecalMaterial);
+		}
 	}
 	
 }

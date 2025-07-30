@@ -6,6 +6,7 @@
 #include <../../../../../../../Source/Runtime/Engine/Classes/Camera/CameraComponent.h>
 #include "AuraGameplayTags.h"
 #include "AbilitySystem/Debuff/DebuffNiagaraComponent.h"
+#include "Player/AuraPlayerController.h"
 
 
 AAuraCharacter::AAuraCharacter()
@@ -54,6 +55,24 @@ void AAuraCharacter::OnRep_PlayerState()
 	InitAbilityActorInfo();
 	
 	
+}
+
+void AAuraCharacter::ShowMagicCircle_Implementation(UMaterialInterface* DecalMaterial)
+{
+	if (AAuraPlayerController* AuraPlayerController = Cast<AAuraPlayerController>(GetController()))
+	{
+		AuraPlayerController->ShowMagicCircle(DecalMaterial);
+		AuraPlayerController->bShowMouseCursor = false;//更改鼠标是否显示 ， 必须要移动鼠标一点点位置才更新 这里我没做，  在电击怪的蓝图做过。
+	}
+}
+
+void AAuraCharacter::HideMagicCircle_Implementation()
+{
+	if (AAuraPlayerController* AuraPlayerController = Cast<AAuraPlayerController>(GetController()))
+	{
+		AuraPlayerController->HideMagicCircle();
+		AuraPlayerController->bShowMouseCursor = true;
+	}
 }
 
 void AAuraCharacter::OnRep_Stunned()

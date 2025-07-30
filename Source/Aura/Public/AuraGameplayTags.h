@@ -120,6 +120,7 @@ public:
 
 	FGameplayTag Abilities_Fire_FireBolt;
 	FGameplayTag Abilities_Lightning_Electrocute;
+	FGameplayTag Abilities_Arcane_ArcaneShards;
 
 
 	FGameplayTag Abilities_HitReact;
