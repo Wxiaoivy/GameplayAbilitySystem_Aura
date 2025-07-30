@@ -3,6 +3,7 @@
 
 #include "Player/AuraPlayerController.h"
 #include <../../../../../../../Plugins/FX/Niagara/Source/Niagara/Public/NiagaraFunctionLibrary.h>
+#include "Actor/MagicCircle.h"
 
 AAuraPlayerController::AAuraPlayerController()
 {
@@ -254,6 +255,7 @@ void AAuraPlayerController::PlayerTick(float DeltaTime)
 
 	CursorTrace();
 	AutoRun();
+	UpdateMagicCircleLocation();
 
 }
 
@@ -282,6 +284,14 @@ void AAuraPlayerController::AutoRun()
 }
 
 
+void AAuraPlayerController::UpdateMagicCircleLocation()
+{
+	if (IsValid(MagicCircle))
+	{
+		MagicCircle->SetActorLocation(CursorHit.ImpactPoint);
+	}
+}
+
 void AAuraPlayerController::CursorTrace()
 {
 	if (GetASC()&&GetASC()->HasMatchingGameplayTag(FAuraGameplayTags::Get().Player_Block_CursorTrace))
@@ -292,8 +302,7 @@ void AAuraPlayerController::CursorTrace()
 		ThisActor = nullptr;
 		return;
 	}
-	// 定义一个FHitResult类型的变量CursorHit，用于存储光标追踪的结果。
-	FHitResult CursorHit;
+	
 
 	// 调用GetHitResultUnderCursor函数，尝试获取光标下的物体碰撞信息。
 	// CursorHit用于存储函数返回的结果。
@@ -419,5 +428,22 @@ void AAuraPlayerController::ShowDamageNumber_Implementation(float Damage, AChara
 		DamageTextComponent->SetDamageText(Damage, bBlockedHit, bCriticalHit);
 		
 		
+	}
+}
+
+void AAuraPlayerController::ShowMagicCircle()
+{
+	if (!IsValid(MagicCircle))
+	{
+		MagicCircle = GetWorld()->SpawnActor<AMagicCircle>(MagicCircleClass);
+	}
+	
+}
+
+void AAuraPlayerController::HideMagicCircle()
+{
+	if (IsValid(MagicCircle))
+	{
+		MagicCircle->Destroy();
 	}
 }

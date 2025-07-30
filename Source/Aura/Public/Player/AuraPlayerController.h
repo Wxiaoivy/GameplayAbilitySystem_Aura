@@ -25,7 +25,7 @@
  * 
  */
 class UInputMappingContext;
-
+class AMagicCircle;
 
 
 UCLASS()
@@ -41,6 +41,12 @@ public:
 		参数列表在声明和实现中必须完全一致。*/
 	UFUNCTION(Client, Reliable, WithValidation)//ShowDamageNumber 是 Client RPC，只能在服务器调用并同步到客户端。
 	void ShowDamageNumber(float Damage, ACharacter* TargetCharacter, bool bBlockedHit, bool bCriticalHit);//该伤害数字在客户端没显示 还没检查出来什么原因
+
+	UFUNCTION(BlueprintCallable)
+	void ShowMagicCircle();
+
+	UFUNCTION(BlueprintCallable)
+	void HideMagicCircle();
 
 	
 protected:
@@ -88,6 +94,8 @@ private:
 
 	UAuraAbilitySystemComponent* GetASC();
 
+	// 定义一个FHitResult类型的变量CursorHit，用于存储光标追踪的结果。
+	FHitResult CursorHit;
 	FVector CachedDestination = FVector::ZeroVector;
 	float FollowTime = 0.f;
 	float ShortPressThreshold = 0.5f;
@@ -110,4 +118,11 @@ private:
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UNiagaraSystem>ClickNiagaraSystem;
 
+	UPROPERTY(EditDefaultsOnly)
+    TSubclassOf<AMagicCircle>MagicCircleClass;
+
+	UPROPERTY()
+	TObjectPtr<AMagicCircle>MagicCircle;
+
+	void UpdateMagicCircleLocation();
 };
