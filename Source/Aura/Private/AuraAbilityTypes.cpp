@@ -74,8 +74,24 @@ bool FAuraGameplayEffectContext::NetSerialize(FArchive& Ar, UPackageMap* Map, bo
 		{
 			RepBits |= 1 << 15;
 		}
+		if (bIsRadialDamage)
+		{
+			RepBits |= 1 << 16;
+			if (RadialDamageInnerRadius > 0)
+			{
+				RepBits |= 1 << 17;
+			}
+			if (RadialDamageOuterRadius > 0)
+			{
+				RepBits |= 1 << 18;
+			}
+			if (!RadialDamageOrigin.IsZero())
+			{
+				RepBits |= 1 << 19;
+			}
+		}
 	}
-	Ar.SerializeBits(&RepBits, 16);//老师写的13  我觉得是14  因为是Length.
+	Ar.SerializeBits(&RepBits, 19);//老师写的13  我觉得是14  因为是Length.
 
 	if (RepBits & (1 << 0))
 	{
@@ -171,6 +187,22 @@ bool FAuraGameplayEffectContext::NetSerialize(FArchive& Ar, UPackageMap* Map, bo
 	if (RepBits & (1 << 15))
 	{
 		KnockBackForce.NetSerialize(Ar, Map, bOutSuccess);//向量反序列化就是这样写的
+	}
+	if (RepBits & (1 << 16))
+	{
+		Ar << bIsRadialDamage;
+		if (RepBits & (1 << 17))
+		{
+			Ar << RadialDamageInnerRadius;
+		}
+		if (RepBits & (1 << 18))
+		{
+			Ar << RadialDamageOuterRadius;
+		}
+		if (RepBits & (1 << 19))
+		{
+			RadialDamageOrigin.NetSerialize(Ar, Map, bOutSuccess);//向量反序列化就是这样写的
+		}
 	}
 	if (Ar.IsLoading())
 	{

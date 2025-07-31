@@ -47,6 +47,12 @@ FDamageEffectParams UAuraDamageGameplayAbility::MakeDamgeEffectParamsFormClassDe
 		// 设置击退力方向和大小
 		Params.KnockBackForce = ToTarget * KnockBackMagnitude;
 	}
+	if (bIsRadialDamage)
+	{
+		Params.RadialDamageInnerRadius = RadialDamageInnerRadius;
+		Params.RadialDamageOuterRadius = RadialDamageOuterRadius;
+		Params.RadialDamageOrigin = RadialDamageOrigin;
+	}
 	return Params;
 }
 

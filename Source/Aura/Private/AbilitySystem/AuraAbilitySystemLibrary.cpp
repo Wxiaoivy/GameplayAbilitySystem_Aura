@@ -309,46 +309,47 @@ FVector UAuraAbilitySystemLibrary::GetKnockBackForce(const FGameplayEffectContex
 	return FVector::ZeroVector;
 }
 
-void UAuraAbilitySystemLibrary::GetClosestTargets(int32 MaxTargets, const TArray<AActor*>& Actors, TArray<AActor*>& OutClosestActors, const FVector& Origin)
+bool UAuraAbilitySystemLibrary::IsRadialDamage(const FGameplayEffectContextHandle& EffectContextHandle)
 {
-	if (Actors.Num() <= MaxTargets)
+	if (const FAuraGameplayEffectContext* AuraContext = static_cast<const FAuraGameplayEffectContext*>(EffectContextHandle.Get()))
 	{
-		OutClosestActors = Actors;
-		return;
+		return AuraContext->IsRadialDamage();
 	}
-	
-	TArray<AActor*>ActorsToCheck = Actors;
-	int32 NumTargetsFound = 0;
 
-	while(NumTargetsFound < MaxTargets)
-	{
-		double ClosestDistance = TNumericLimits<double>::Max();
-		AActor* ClosestActor = nullptr;
-
-		for (AActor* PotentialTarget : ActorsToCheck)
-		{
-			if (!PotentialTarget) continue; // 跳过无效指针
-			if (ActorsToCheck.Num() == 0)break;
-			double Distance = (PotentialTarget->GetActorLocation() - Origin).Length();
-			if (Distance < ClosestDistance)
-			{
-				ClosestDistance = Distance;
-				ClosestActor = PotentialTarget;
-			}
-		}
-		if (ClosestActor) // 确保不是 nullptr 再操作
-		{
-			ActorsToCheck.Remove(ClosestActor);
-			OutClosestActors.AddUnique(ClosestActor);
-			++NumTargetsFound;
-		}
-		else
-		{
-			break;
-		}
-	
-	}
+	return false;
 }
+
+float UAuraAbilitySystemLibrary::GetRadialDamageInnerRadius(const FGameplayEffectContextHandle& EffectContextHandle)
+{
+	if (const FAuraGameplayEffectContext* AuraContext = static_cast<const FAuraGameplayEffectContext*>(EffectContextHandle.Get()))
+	{
+		return AuraContext->GetRadialDamageInnerRadius();
+	}
+
+	return 0.f;
+}
+
+float UAuraAbilitySystemLibrary::GetRadialDamageOuterRadius(const FGameplayEffectContextHandle& EffectContextHandle)
+{
+	if (const FAuraGameplayEffectContext* AuraContext = static_cast<const FAuraGameplayEffectContext*>(EffectContextHandle.Get()))
+	{
+		return AuraContext->GetRadialDamageOuterRadius();
+	}
+
+	return 0.f;
+}
+
+FVector UAuraAbilitySystemLibrary::GetRadialDamageOrigin(const FGameplayEffectContextHandle& EffectContextHandle)
+{
+	if (const FAuraGameplayEffectContext* AuraContext = static_cast<const FAuraGameplayEffectContext*>(EffectContextHandle.Get()))
+	{
+		return AuraContext->GetRadialDamageOrigin();
+	}
+
+	return FVector::ZeroVector;
+}
+
+
 
 void UAuraAbilitySystemLibrary::SetIsBlockedHit(UPARAM(ref)FGameplayEffectContextHandle& EffectContextHandle, bool InIsBlockedHit)
 {
@@ -425,6 +426,38 @@ void UAuraAbilitySystemLibrary::SetKnockBackForce(FGameplayEffectContextHandle& 
 	}
 }
 
+void UAuraAbilitySystemLibrary::SetIsRadialDamage(FGameplayEffectContextHandle& EffectContextHandle, bool InIsRadialDamage)
+{
+	if (FAuraGameplayEffectContext* AuraContext = static_cast<FAuraGameplayEffectContext*>(EffectContextHandle.Get()))
+	{
+		AuraContext->SetIsRadialDamage(InIsRadialDamage);
+	}
+}
+
+void UAuraAbilitySystemLibrary::SetRadialDamageInnerRadius(FGameplayEffectContextHandle& EffectContextHandle, float InRadialDamageInnerRadius)
+{
+	if (FAuraGameplayEffectContext* AuraContext = static_cast<FAuraGameplayEffectContext*>(EffectContextHandle.Get()))
+	{
+		AuraContext->SetRadialDamageInnerRadius(InRadialDamageInnerRadius);
+	}
+}
+
+void UAuraAbilitySystemLibrary::SetRadialDamageOuterRadius(FGameplayEffectContextHandle& EffectContextHandle, float InRadialDamageOuterRadius)
+{
+	if (FAuraGameplayEffectContext* AuraContext = static_cast<FAuraGameplayEffectContext*>(EffectContextHandle.Get()))
+	{
+		AuraContext->SetRadialDamageOuterRadius(InRadialDamageOuterRadius);
+	}
+}
+
+void UAuraAbilitySystemLibrary::SetRadialDamageOrigin(FGameplayEffectContextHandle& EffectContextHandle, const FVector& InRadialDamageOrigin)
+{
+	if (FAuraGameplayEffectContext* AuraContext = static_cast<FAuraGameplayEffectContext*>(EffectContextHandle.Get()))
+	{
+		AuraContext->SetRadialDamageOrigin(InRadialDamageOrigin);
+	}
+}
+
 void UAuraAbilitySystemLibrary::GetLivePlayersWithinRadius(
 	const UObject* WorldContextObject,  // 用于获取World上下文的对象
 	TArray<AActor*>& OutOverlapingActors,  // 输出参数：存储符合条件的Actor数组
@@ -459,6 +492,47 @@ void UAuraAbilitySystemLibrary::GetLivePlayersWithinRadius(
 	}
 }
 
+void UAuraAbilitySystemLibrary::GetClosestTargets(int32 MaxTargets, const TArray<AActor*>& Actors, TArray<AActor*>& OutClosestActors, const FVector& Origin)
+{
+	if (Actors.Num() <= MaxTargets)
+	{
+		OutClosestActors = Actors;
+		return;
+	}
+
+	TArray<AActor*>ActorsToCheck = Actors;
+	int32 NumTargetsFound = 0;
+
+	while (NumTargetsFound < MaxTargets)
+	{
+		double ClosestDistance = TNumericLimits<double>::Max();
+		AActor* ClosestActor = nullptr;
+
+		for (AActor* PotentialTarget : ActorsToCheck)
+		{
+			if (!PotentialTarget) continue; // 跳过无效指针
+			if (ActorsToCheck.Num() == 0)break;
+			double Distance = (PotentialTarget->GetActorLocation() - Origin).Length();
+			if (Distance < ClosestDistance)
+			{
+				ClosestDistance = Distance;
+				ClosestActor = PotentialTarget;
+			}
+		}
+		if (ClosestActor) // 确保不是 nullptr 再操作
+		{
+			ActorsToCheck.Remove(ClosestActor);
+			OutClosestActors.AddUnique(ClosestActor);
+			++NumTargetsFound;
+		}
+		else
+		{
+			break;
+		}
+
+	}
+}
+
 bool UAuraAbilitySystemLibrary::IsNotFriend(AActor* FirstActor, AActor* SecondActor)
 {
 	const bool BothArePlayers = FirstActor->ActorHasTag(FName("Player")) && SecondActor->ActorHasTag(FName("Player"));
@@ -488,6 +562,12 @@ FGameplayEffectContextHandle UAuraAbilitySystemLibrary::ApplyDamageEffect(const 
 	SetDeathImpuse(EffectContextHandle, DamageEffectParams.DeathImpuse);
 	// 设置击退力到上下文
 	SetKnockBackForce(EffectContextHandle, DamageEffectParams.KnockBackForce);
+
+	SetIsRadialDamage(EffectContextHandle, DamageEffectParams.bIsRadialDamage);
+	SetRadialDamageInnerRadius(EffectContextHandle, DamageEffectParams.RadialDamageInnerRadius);
+	SetRadialDamageOuterRadius(EffectContextHandle, DamageEffectParams.RadialDamageOuterRadius);
+	SetRadialDamageOrigin(EffectContextHandle, DamageEffectParams.RadialDamageOrigin);
+
 	// 创建游戏效果规格句柄，包含效果类、能力等级和上下文
 	FGameplayEffectSpecHandle SpecHandle = DamageEffectParams.SourceAbilitySystemComponent->
 	MakeOutgoingSpec(DamageEffectParams.DamageGameplayEffectClass, DamageEffectParams.AbilityLevel, EffectContextHandle);

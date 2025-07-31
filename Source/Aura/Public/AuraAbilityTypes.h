@@ -66,6 +66,18 @@ struct FDamageEffectParams
 	UPROPERTY(BlueprintReadWrite)
 	FVector KnockBackForce = FVector::ZeroVector;
 
+	UPROPERTY(BlueprintReadWrite)
+	bool bIsRadialDamage = false;
+
+	UPROPERTY(BlueprintReadWrite)
+	float RadialDamageInnerRadius = 0.f;
+
+	UPROPERTY(BlueprintReadWrite)
+	float RadialDamageOuterRadius = 0.f;
+
+	UPROPERTY(BlueprintReadWrite)
+	FVector RadialDamageOrigin = FVector::ZeroVector;
+
 };
 
 
@@ -105,6 +117,18 @@ protected:
 	UPROPERTY()
 	FVector KnockBackForce = FVector::ZeroVector;
 
+	UPROPERTY()
+	bool bIsRadialDamage = false;
+
+	UPROPERTY()
+	float RadialDamageInnerRadius = 0.f;
+
+	UPROPERTY()
+	float RadialDamageOuterRadius = 0.f;
+
+	UPROPERTY()
+	FVector RadialDamageOrigin = FVector::ZeroVector;
+
 public:
 
 	bool IsCriticalHit()const { return bIsCriticalHit; }
@@ -116,6 +140,10 @@ public:
 	TSharedPtr<FGameplayTag> GetDamageType()const { return DamageType; }
 	FVector GetDeathImpuse()const { return DeathImpuse; }
 	FVector GetKnockBackForce()const { return KnockBackForce; }
+	bool IsRadialDamage()const { return bIsRadialDamage; }
+	float GetRadialDamageInnerRadius()const { return RadialDamageInnerRadius; }
+	float GetRadialDamageOuterRadius()const {return RadialDamageOuterRadius;}
+	FVector GetRadialDamageOrigin()const { return RadialDamageOrigin; }
 
 
 	void SetIsCriticalHit(bool InIsCriticalHit) {bIsCriticalHit = InIsCriticalHit;}
@@ -127,6 +155,10 @@ public:
 	void SetDamageType(TSharedPtr<FGameplayTag> InDamageType) { DamageType = InDamageType; }
 	void SetDeathImpuse(const FVector& InImpuse) { DeathImpuse = InImpuse; }
 	void SetKnockBackForce(const FVector& InKnockBackForce) { KnockBackForce = InKnockBackForce; }
+	void SetIsRadialDamage(bool InIsRadialDamage) { bIsRadialDamage = InIsRadialDamage; }
+	void SetRadialDamageInnerRadius(float InRadialDamageInnerRadius) { RadialDamageInnerRadius = InRadialDamageInnerRadius; }
+	void SetRadialDamageOuterRadius(float InRadialDamageOuterRadius) { RadialDamageOuterRadius = InRadialDamageOuterRadius; }
+	void SetRadialDamageOrigin(const FVector& InRadialDamageOrigin) { RadialDamageOrigin = InRadialDamageOrigin; }
 
 	//重写的函数（一） GetScriptStruct()
 	/** Returns the actual struct used for serialization, subclasses must override this! */
