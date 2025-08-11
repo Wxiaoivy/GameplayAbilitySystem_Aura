@@ -12,7 +12,7 @@
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnASCRegistered, UAbilitySystemComponent*)
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDeathSignature, AActor*, DeadActor);
-
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnDamageSignature, float /*DamageAmount*/);
 
 
 class UAnimMontage;
@@ -112,5 +112,6 @@ public:
 	virtual void die(const FVector& DeathImpuse) = 0; //主要逻辑写在AuraCharacterBase里面的
 	virtual FOnASCRegistered& GetOnASCRegisteredDelegate() = 0;
 	virtual FOnDeathSignature& GetOnDeathDelegate() = 0;
+	virtual FOnDamageSignature& GetOnDamageDelegete() = 0;
 	
 };

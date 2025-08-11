@@ -156,10 +156,12 @@ protected:
 	USkeletalMeshComponent* GetWeapon_Implementation();
 	bool IsBeingShocked_Implementation();
 	void SetIsBeingShocked_Implementation(bool InIsBeingShocked);
+	virtual FOnDamageSignature& GetOnDamageDelegete()override;
 	/*CombatInterface*/
 
 	FOnASCRegistered OnASCRegisteredDelegate;
 	FOnDeathSignature OnDeathDelegate;
+	FOnDamageSignature OnDamageDelegate;
 
 	/*Dissolve Effect*/
 

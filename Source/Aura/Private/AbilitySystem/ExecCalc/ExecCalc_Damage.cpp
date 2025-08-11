@@ -161,6 +161,7 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
    // ICombatInterface* TargetCombatInterface = Cast<ICombatInterface>(TargetAvatar);
 
     const FGameplayEffectSpec& Spec = ExecutionParams.GetOwningSpec();
+    FGameplayEffectContextHandle ContextHandle = Spec.GetContext();
     /*SetBaseInfo*/
 
 
@@ -178,27 +179,85 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 
     //通过SetByCaller得到动态的Damage
     float Damage = 0.f;
+    // 遍历所有伤害类型与抗性的映射关系（如FireDamage -> FireResistance）
     for (const auto& Pair:FAuraGameplayTags::Get().DamageTypesToResistance)
     {
+        // 获取当前伤害类型标签（如FireDamage）
         const FGameplayTag DamageTypeTag = Pair.Key;
+
+        // 获取对应的抗性标签（如FireResistance）
         const FGameplayTag ResistanceTag = Pair.Value;
+
+        // 声明抗性属性的捕获定义（用于从目标的AttributeSet中读取抗性值）
         FGameplayEffectAttributeCaptureDefinition CaptureDef;
 
+        // 检查抗性标签是否已注册到捕获定义表中
         if (TagsToCaptureDefs.Contains(ResistanceTag))
         {
+            // 获取该抗性标签对应的属性捕获定义（如FireResistance属性）
            CaptureDef = TagsToCaptureDefs[ResistanceTag];
         }
 
-
+        // 通过SetByCaller机制获取当前伤害类型的初始值（如FireDamage = 100）
         float DamageTypeValue = Spec.GetSetByCallerMagnitude(Pair.Key,false);//通过相同的GameplayTag查找并获取之前设置的动态数值（在AuraProjectileSpell.cpp的AssignTagSetByCallerMagnitude里设置好了）
-       
+        if (DamageTypeValue <= 0) //DamageTypeValue <= 0.f: 跳过未配置或强制无效的伤害类型！它的跳过仅基于技能配置，而非目标是否在受到伤害。
+		{
+            continue;// 直接进入下一循环迭代
+
+
+			/*	(1) 场景1：技能仅配置火焰伤害
+				遍历时的行为：
+					火焰伤害：DamageTypeValue = 100 → 不跳过，计算抗性并累加。
+					其他伤害类型：DamageTypeValue = 0（未配置）→ 触发 continue，跳过计算。
+					结果：只有火焰伤害生效，其他类型被过滤。*/
+
+            //这个项目每个技能只配置了一个类型。 所以每次遍历到的别的类型就会直接  DamageTypeValue <= 0 并跳过这次循环
+       }
+
+        // 初始化抗性值为0（默认无抗性）
         float Resistance = 0.f;
+        // 从目标的AttributeSet中捕获实际抗性值（如FireResistance=30）
         ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(CaptureDef, EvaluateParameters, Resistance);
+        // 钳制抗性值在0~100范围内（避免负数或超100%抗性）
         Resistance = FMath::Clamp(Resistance, 0.f, 100.f);
 
+        // 计算抗性减免后的实际伤害（如100 * (1 - 0.3) = 70）
         DamageTypeValue *= (100.f - Resistance) / 100.f;
-    
-        Damage += DamageTypeValue;
+
+        // 检查是否为范围伤害（通过EffectContext中的标记判断）
+		if (UAuraAbilitySystemLibrary::IsRadialDamage(ContextHandle))
+		{
+            // 如果目标实现了战斗接口（ICombatInterface）
+			if (ICombatInterface* CombatInterface = Cast<ICombatInterface>(TargetAvatar))
+			{
+                // 绑定Lambda到伤害代理，用于动态更新DamageTypeValue
+				CombatInterface->GetOnDamageDelegete().AddLambda
+				(
+					[&](float DamageAmount)
+					{
+                        DamageTypeValue = DamageAmount; // 接收TakeDamage广播的实际伤害
+                    }
+				);
+			}
+            // 调用引擎函数施加范围伤害（带衰减）
+			UGameplayStatics::ApplyRadialDamageWithFalloff
+            (
+				TargetAvatar,        // 目标Actor（通常为伤害中心点）
+				DamageTypeValue,     // 基础伤害值（可能被代理更新）
+				0.f,                 // 最小伤害（最外圈的伤害值）
+				UAuraAbilitySystemLibrary::GetRadialDamageOrigin(ContextHandle),// 伤害中心坐标
+                UAuraAbilitySystemLibrary::GetRadialDamageInnerRadius(ContextHandle),// 内圈半径（满伤害区域）
+                UAuraAbilitySystemLibrary::GetRadialDamageOuterRadius(ContextHandle),// 外圈半径（伤害衰减到0）
+				1.f,                       // 衰减曲线指数（1.0 = 线性衰减）
+				UDamageType::StaticClass(),// 伤害类型（可自定义子类）
+				TArray<AActor*>(),         // 忽略的Actor列表
+				SourceAvatar,              // 伤害来源Actor
+				nullptr                    // 伤害控制器（可空）
+            );                  
+		}
+		
+
+        Damage += DamageTypeValue;// 将当前伤害类型的值累加到总伤害（非范围伤害时使用）
     }
 
 
@@ -211,7 +270,7 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 
     const bool bBlocked = FMath::RandRange(1, 100) < TargetBlockChance;
 
-    FGameplayEffectContextHandle ContextHandle = Spec.GetContext();
+   
     UAuraAbilitySystemLibrary::SetIsBlockedHit(ContextHandle, bBlocked);//传递bBlocked，到蓝图里调用
 
     Damage = bBlocked ? Damage / 2 : Damage;
@@ -285,7 +344,6 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 
     const FGameplayModifierEvaluatedData EvaluatedData(UAuraAttributeSet::GetIncomingDamageAttribute(), EGameplayModOp::Additive, Damage);
     OutExecutionOutput.AddOutputModifier(EvaluatedData);
-
 
 }
 

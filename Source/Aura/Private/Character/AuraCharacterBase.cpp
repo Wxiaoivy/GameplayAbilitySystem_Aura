@@ -157,6 +157,11 @@ FOnDeathSignature& AAuraCharacterBase::GetOnDeathDelegate()
 	return OnDeathDelegate;
 }
 
+FOnDamageSignature& AAuraCharacterBase::GetOnDamageDelegete()
+{
+	return OnDamageDelegate;
+}
+
 void AAuraCharacterBase::SetIsBeingShocked_Implementation(bool InIsBeingShocked)
 {
 	bIsBeingShocked = InIsBeingShocked;
