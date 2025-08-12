@@ -23,7 +23,7 @@ class AURA_API UAuraDamageGameplayAbility : public UAuraGameplayAbility
 	void CauseDamage(AActor* TargetActor);
 
 	UFUNCTION(BlueprintPure)
-	FDamageEffectParams MakeDamgeEffectParamsFormClassDefaults(AActor* TargetActor = nullptr)const;
+	FDamageEffectParams MakeDamgeEffectParamsFormClassDefaults(AActor* TargetActor = nullptr,FVector InRadialDamageOrigin = FVector::ZeroVector)const;
 
 	UFUNCTION(BlueprintPure)
 	float GetDamageAtLevel()const;
@@ -70,8 +70,6 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Damage")
 	float RadialDamageOuterRadius = 0.f;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Damage")
-	FVector RadialDamageOrigin = FVector::ZeroVector;
 
 	UFUNCTION(BlueprintPure)
 	FTaggedMontage GetRandomTaggedMontageFromArray(const TArray<FTaggedMontage>& TaggedMontages)const;

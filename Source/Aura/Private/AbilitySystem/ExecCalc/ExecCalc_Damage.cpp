@@ -227,6 +227,18 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
         // 检查是否为范围伤害（通过EffectContext中的标记判断）
 		if (UAuraAbilitySystemLibrary::IsRadialDamage(ContextHandle))
 		{
+            // 1.override TakeDamage in AuraCharacterBase.                                     (在AuraCharacterBase中重写TakeDamage函数)
+            
+            // 2. create delegate OnDamageDelegate, broadcast damage received in TakeDamage    (在CombatInterface中创建委托0nDamageDelegate，在TakeDamage中广播接收到的伤害值 ）
+            
+            // 3. Bind lambda to OnDamageDelegate on the Victim here.                         （在这里（受害者角色上）将lambda表达式绑定到0nDamageDelegate委托 )
+            
+            // 4. Call UGameplaystatics::ApplyRadialDamageWithFalloff to cause damage          (调用UGameplaystatics::ApplyRadialDamageWithFalloff来施加伤害)
+            // (this will result in TakeDamage being called/!on the Victim, which will then broadcast 0nDamageDelegate) （这将导致受害者的TakeDamage被调用，进而广播0nDamageDelegate）)
+           
+            //5. In Lambda, set DamageTypeValue to the damage received from the broadcast      (在Lambda表达式中，将DamageTypeValue设置为从委托广播接收到的伤害值 )
+            
+            
             // 如果目标实现了战斗接口（ICombatInterface）
 			if (ICombatInterface* CombatInterface = Cast<ICombatInterface>(TargetAvatar))
 			{
@@ -243,7 +255,7 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 			UGameplayStatics::ApplyRadialDamageWithFalloff
             (
 				TargetAvatar,        // 目标Actor（通常为伤害中心点）
-				DamageTypeValue,     // 基础伤害值（可能被代理更新）
+				DamageTypeValue,     // 基础伤害值（可能被代理更新）TakeDamage初始传入的伤害值，该值可能在TakeDamage中有别的扣血逻辑进行更新，具体可以查看有道云笔记“TakeDamage概念”
 				0.f,                 // 最小伤害（最外圈的伤害值）
 				UAuraAbilitySystemLibrary::GetRadialDamageOrigin(ContextHandle),// 伤害中心坐标
                 UAuraAbilitySystemLibrary::GetRadialDamageInnerRadius(ContextHandle),// 内圈半径（满伤害区域）

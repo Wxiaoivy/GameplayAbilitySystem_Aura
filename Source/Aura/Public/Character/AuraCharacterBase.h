@@ -33,6 +33,7 @@ public:
 
 	TObjectPtr<UAttributeSet>GetAttributeSet() const { return AttributeSet; }
 
+	virtual float TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)override;
 
 	//NetMulticast：表示这是一个 多播 RPC，会在服务器调用后同步到所有客户端。
 	//Reliable：保证该 RPC 必定会执行（即使网络条件差，也会重试直到成功）。
