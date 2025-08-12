@@ -70,7 +70,7 @@ bool FAuraGameplayEffectContext::NetSerialize(FArchive& Ar, UPackageMap* Map, bo
 		{
 			RepBits |= 1 << 14;
 		}
-		if (!KnockBackForce.IsZero())
+		if (!KnockbackForce.IsZero())
 		{
 			RepBits |= 1 << 15;
 		}
@@ -186,7 +186,7 @@ bool FAuraGameplayEffectContext::NetSerialize(FArchive& Ar, UPackageMap* Map, bo
 	}
 	if (RepBits & (1 << 15))
 	{
-		KnockBackForce.NetSerialize(Ar, Map, bOutSuccess);//向量反序列化就是这样写的
+		KnockbackForce.NetSerialize(Ar, Map, bOutSuccess);//向量反序列化就是这样写的
 	}
 	if (RepBits & (1 << 16))
 	{

@@ -561,7 +561,7 @@ FGameplayEffectContextHandle UAuraAbilitySystemLibrary::ApplyDamageEffect(const 
 	// 设置死亡冲击力到上下文
 	SetDeathImpuse(EffectContextHandle, DamageEffectParams.DeathImpuse);
 	// 设置击退力到上下文
-	SetKnockBackForce(EffectContextHandle, DamageEffectParams.KnockBackForce);
+	SetKnockBackForce(EffectContextHandle, DamageEffectParams.KnockbackForce);
 
 	SetIsRadialDamage(EffectContextHandle, DamageEffectParams.bIsRadialDamage);
 	SetRadialDamageInnerRadius(EffectContextHandle, DamageEffectParams.RadialDamageInnerRadius);

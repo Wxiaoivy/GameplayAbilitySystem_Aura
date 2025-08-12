@@ -93,15 +93,15 @@ void AAuraProjectile::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedCompon
 			const FVector DeathImpuse = GetActorForwardVector() * DamageEffectParams.DeathImpuseMagnitude;
 			DamageEffectParams.DeathImpuse = DeathImpuse;
 			//先设置好DamageEffectParams.DeathImpuse ，然后在ApplyDamageEffect（）函数里会返回带有死亡冲量的ContextSpecHandle,Handle里的数据就会传递到AttributeSet里面使用
-			const bool bKnockBack = FMath::RandRange(1, 100) < DamageEffectParams.KnockBackChance;
+			const bool bKnockBack = FMath::RandRange(1, 100) < DamageEffectParams.KnockbackChance;
 			if (bKnockBack)
 			{
 				FRotator Rotation = GetActorRotation();
 				Rotation.Pitch = 45.f;
 
 				const FVector KnockBackDirection = Rotation.Vector();
-				const FVector KnockBackForce = KnockBackDirection * DamageEffectParams.KnockBackMagnitude;
-				DamageEffectParams.KnockBackForce = KnockBackForce;
+				const FVector KnockbackForce = KnockBackDirection * DamageEffectParams.KnockbackForceMagnitude;
+				DamageEffectParams.KnockbackForce = KnockbackForce;
 			}
 
 

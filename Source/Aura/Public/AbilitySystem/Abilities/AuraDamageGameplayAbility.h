@@ -23,7 +23,17 @@ class AURA_API UAuraDamageGameplayAbility : public UAuraGameplayAbility
 	void CauseDamage(AActor* TargetActor);
 
 	UFUNCTION(BlueprintPure)
-	FDamageEffectParams MakeDamgeEffectParamsFormClassDefaults(AActor* TargetActor = nullptr,FVector InRadialDamageOrigin = FVector::ZeroVector)const;
+	FDamageEffectParams MakeDamgeEffectParamsFormClassDefaults
+	(
+		AActor* TargetActor = nullptr,
+		FVector InRadialDamageOrigin = FVector::ZeroVector,
+		bool bOverrideKnockbackDirection = false,
+	    FVector KnockbackDirectionOverride = FVector::ZeroVector,
+		bool bOverrideDeathImpuse = false,
+		FVector DeathImpuseOverride = FVector::ZeroVector,
+		bool bOverridePitch = false,
+		float PitchOverride = 0.f
+	)const;
 
 	UFUNCTION(BlueprintPure)
 	float GetDamageAtLevel()const;
@@ -56,10 +66,10 @@ protected:
 	float DeathImpuseMagnitude = 1000.f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Damage")
-	float KnockBackMagnitude = 1000.f;
+	float KnockbackForceMagnitude = 1000.f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Damage")
-	float KnockBackChance = 25.f;
+	float KnockbackChance = 25.f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Damage")
 	bool bIsRadialDamage = false;

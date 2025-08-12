@@ -58,13 +58,13 @@ struct FDamageEffectParams
 	FVector DeathImpuse = FVector::ZeroVector;
 
 	UPROPERTY(BlueprintReadWrite)
-	float KnockBackMagnitude = 0.f;
+	float KnockbackForceMagnitude = 0.f;
 
 	UPROPERTY(BlueprintReadWrite)
-	float KnockBackChance = 0.f;
+	float KnockbackChance = 0.f;
 
 	UPROPERTY(BlueprintReadWrite)
-	FVector KnockBackForce = FVector::ZeroVector;
+	FVector KnockbackForce = FVector::ZeroVector;
 
 	UPROPERTY(BlueprintReadWrite)
 	bool bIsRadialDamage = false;
@@ -115,7 +115,7 @@ protected:
 	FVector DeathImpuse = FVector::ZeroVector;
 
 	UPROPERTY()
-	FVector KnockBackForce = FVector::ZeroVector;
+	FVector KnockbackForce = FVector::ZeroVector;
 
 	UPROPERTY()
 	bool bIsRadialDamage = false;
@@ -139,7 +139,7 @@ public:
 	float GetDebuffFrequency()const { return DebuffFrequency; }
 	TSharedPtr<FGameplayTag> GetDamageType()const { return DamageType; }
 	FVector GetDeathImpuse()const { return DeathImpuse; }
-	FVector GetKnockBackForce()const { return KnockBackForce; }
+	FVector GetKnockBackForce()const { return KnockbackForce; }
 	bool IsRadialDamage()const { return bIsRadialDamage; }
 	float GetRadialDamageInnerRadius()const { return RadialDamageInnerRadius; }
 	float GetRadialDamageOuterRadius()const {return RadialDamageOuterRadius;}
@@ -154,7 +154,7 @@ public:
 	void SetDebuffFrequency(float InDebuffFrequency) { DebuffFrequency = InDebuffFrequency; }
 	void SetDamageType(TSharedPtr<FGameplayTag> InDamageType) { DamageType = InDamageType; }
 	void SetDeathImpuse(const FVector& InImpuse) { DeathImpuse = InImpuse; }
-	void SetKnockBackForce(const FVector& InKnockBackForce) { KnockBackForce = InKnockBackForce; }
+	void SetKnockBackForce(const FVector& InKnockBackForce) { KnockbackForce = InKnockBackForce; }
 	void SetIsRadialDamage(bool InIsRadialDamage) { bIsRadialDamage = InIsRadialDamage; }
 	void SetRadialDamageInnerRadius(float InRadialDamageInnerRadius) { RadialDamageInnerRadius = InRadialDamageInnerRadius; }
 	void SetRadialDamageOuterRadius(float InRadialDamageOuterRadius) { RadialDamageOuterRadius = InRadialDamageOuterRadius; }
