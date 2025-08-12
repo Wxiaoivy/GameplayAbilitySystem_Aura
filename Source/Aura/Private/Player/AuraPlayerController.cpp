@@ -6,6 +6,7 @@
 #include "Actor/MagicCircle.h"
 #include <../../../../../../../Source/Runtime/Engine/Classes/Materials/MaterialInterface.h>
 #include <../../../../../../../Source/Runtime/Engine/Classes/Components/DecalComponent.h>
+#include "../Aura.h"
 
 AAuraPlayerController::AAuraPlayerController()
 {
@@ -308,7 +309,8 @@ void AAuraPlayerController::CursorTrace()
 
 	// 调用GetHitResultUnderCursor函数，尝试获取光标下的物体碰撞信息。
 	// CursorHit用于存储函数返回的结果。
-	GetHitResultUnderCursor(ECC_Visibility, false, CursorHit);
+	const ECollisionChannel TraceChannel = IsValid(MagicCircle) ? ECC_ExcludePlayers : ECC_Visibility;
+	GetHitResultUnderCursor(TraceChannel, false, CursorHit);
 
 	// 检查CursorHit.bBlockingHit是否为false，即是否没有发生阻挡碰撞。
 	if (!CursorHit.bBlockingHit)return;
