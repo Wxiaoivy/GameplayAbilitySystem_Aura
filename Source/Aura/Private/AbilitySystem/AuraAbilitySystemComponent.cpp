@@ -127,7 +127,7 @@ void UAuraAbilitySystemComponent::AbilityInputTagHeld(const FGameplayTag& InputT
 		处理蓄力 / 持续技能（通过每帧更新状态，如蓄力进度条）。*/
 	if (!InputTag.IsValid()) return;
 
-	for (auto& AbilitySpec : GetActivatableAbilities())
+	for (FGameplayAbilitySpec& AbilitySpec : GetActivatableAbilities())
 	{
 		if (AbilitySpec.DynamicAbilityTags.HasTagExact(InputTag))
 		{
