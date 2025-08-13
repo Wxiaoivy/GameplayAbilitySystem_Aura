@@ -57,29 +57,15 @@ void AAuraProjectile::BeginPlay()
 void AAuraProjectile::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 
-	// 防止投射物（Projectile）对“造成伤害的源头”（Effect Causer）自身造成伤害，通常用于避免自伤或逻辑冲突的情况。
-	//DamageEffectSpecHandle.Data.IsValid()  判断这个是因为AuraProjectileSpell类里的SpawnProjectile函数里会判断是否为服务器端， 
-	// 如果是客户端就直接返回 并不会生成DamageEffectSpecHandle，所以这种情况下DamageEffectSpecHandle.Data是无效的，
-	//因为Actor被标记为bReplicated = true后  Actor 的生成销毁和变换都会被引擎服务器端自动处理并复制
-	if (DamageEffectParams.SourceAbilitySystemComponent)
-	{
-		AActor* SourceAvatarActor = DamageEffectParams.SourceAbilitySystemComponent->GetAvatarActor();
-		if (SourceAvatarActor == OtherActor)return;
 
-		//检查攻击者（EffectCauser）和目标（OtherActor）是否是友方关系。如果是友方，则直接返回，不造成伤害。
-		if (!UAuraAbilitySystemLibrary::IsNotFriend(SourceAvatarActor, OtherActor))return;
-	}
-		
+	if (!IsValidOverlap(OtherActor))return;
+	
 	//bHit = true; 的作用是标记投射物已经发生了碰撞。(详见有道云笔记数据传递和网络同步)
 	// 由于网络同步的问题，客户端可能会在触发 OnSphereBeginOverlap 之前收到服务器的 Destroy() 调用，导致 OnSphereBeginOverlap 没有被执行。
 	// 因此，bHit 的设计是为了确保即使客户端提前销毁了 Actor，也能正确处理碰撞逻辑。
 	if (!bHit && LoopingSoundComponent)
 	{
-		LoopingSoundComponent->Stop();
-		LoopingSoundComponent->DestroyComponent();
-		UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation(), FRotator::ZeroRotator);
-		UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ImpactEffect, GetActorLocation());
-		bHit = true;
+		OnHit();
 	}
 	
 
@@ -120,19 +106,43 @@ void AAuraProjectile::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedCompon
 	}
 }
 
-void AAuraProjectile::Destroyed()
+bool AAuraProjectile::IsValidOverlap(AActor* OtherActor)
 {
+	// 防止投射物（Projectile）对“造成伤害的源头”（Effect Causer）自身造成伤害，通常用于避免自伤或逻辑冲突的情况。
+	//DamageEffectSpecHandle.Data.IsValid()  判断这个是因为AuraProjectileSpell类里的SpawnProjectile函数里会判断是否为服务器端， 
+	// 如果是客户端就直接返回 并不会生成DamageEffectSpecHandle，所以这种情况下DamageEffectSpecHandle.Data是无效的，
+	//因为Actor被标记为bReplicated = true后  Actor 的生成销毁和变换都会被引擎服务器端自动处理并复制
+	if (DamageEffectParams.SourceAbilitySystemComponent == nullptr)return false;
+	AActor* SourceAvatarActor = DamageEffectParams.SourceAbilitySystemComponent->GetAvatarActor();
+	if (SourceAvatarActor == OtherActor)return false;
+	//检查攻击者（EffectCauser）和目标（OtherActor）是否是友方关系。如果是友方，则直接返回，不造成伤害。
+	if (!UAuraAbilitySystemLibrary::IsNotFriend(SourceAvatarActor, OtherActor))return false;
+	return true;
+}
 
-	if (!bHit && !HasAuthority() && LoopingSoundComponent)//!bHit && !HasAuthority()
-		                                                   //!bHit：说明客户端在收到销毁通知前未触发 OnSphereBeginOverlap（可能因网络延迟）。
-		                                                   //!HasAuthority()：仅在客户端执行补播逻辑（服务器已正常处理过碰撞）。
+void AAuraProjectile::OnHit()
+{
+	UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation(), FRotator::ZeroRotator);
+	UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ImpactEffect, GetActorLocation());
+	if (LoopingSoundComponent)
 	{
-		UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation(), FRotator::ZeroRotator);
-		UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ImpactEffect, GetActorLocation());
 		LoopingSoundComponent->Stop();
 		LoopingSoundComponent->DestroyComponent();
-		bHit = true;
 	}
+	bHit = true;
+}
+
+void AAuraProjectile::Destroyed()
+{
+	if (LoopingSoundComponent)
+	{
+		LoopingSoundComponent->Stop();
+		LoopingSoundComponent->DestroyComponent();
+	}
+	if (!bHit && !HasAuthority()) OnHit();//!bHit && !HasAuthority()
+		                         //!bHit：说明客户端在收到销毁通知前未触发 OnSphereBeginOverlap（可能因网络延迟）。
+		                         //!HasAuthority()：仅在客户端执行补播逻辑（服务器已正常处理过碰撞）。
+	
 	Super::Destroyed();
 }
 

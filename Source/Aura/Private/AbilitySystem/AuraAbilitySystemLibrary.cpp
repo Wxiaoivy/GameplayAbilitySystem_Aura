@@ -154,6 +154,45 @@ int32 UAuraAbilitySystemLibrary::GetXPRewardForClassAndLevel(const UObject* Worl
 }
 
 
+void UAuraAbilitySystemLibrary::SetIsRadialDamageEffectParam(FDamageEffectParams& DamageEffectParams, bool bIsRadial, float InnerRadial, float OuterRadial, FVector Origin)
+{
+	DamageEffectParams.bIsRadialDamage = bIsRadial;
+	DamageEffectParams.RadialDamageInnerRadius = InnerRadial;
+	DamageEffectParams.RadialDamageOuterRadius = OuterRadial;
+	DamageEffectParams.RadialDamageOrigin = Origin;
+}
+
+void UAuraAbilitySystemLibrary::SetKnockbackForceDirection(FDamageEffectParams& DamageEffectParams, FVector KnockbackDirection, float Magnitude /*= 0.f*/)
+{
+	KnockbackDirection.Normalize();
+	if (Magnitude == 0.f)
+	{
+		DamageEffectParams.KnockbackForce = KnockbackDirection * DamageEffectParams.KnockbackForceMagnitude;
+	}
+	else
+	{
+		DamageEffectParams.KnockbackForce = KnockbackDirection * Magnitude;
+	}
+}
+
+void UAuraAbilitySystemLibrary::SetImpuseDirection(FDamageEffectParams& DamageEffectParams, FVector DeathImpuseDirection, float Magnitude /*= 0.f*/)
+{
+	DeathImpuseDirection.Normalize();
+	if (Magnitude == 0.f)
+	{
+		DamageEffectParams.DeathImpuse = DeathImpuseDirection * DamageEffectParams.DeathImpuseMagnitude;
+	}
+	else
+	{
+		DamageEffectParams.DeathImpuse = DeathImpuseDirection * Magnitude;
+	}
+}
+
+void UAuraAbilitySystemLibrary::SetEffectParamsTargetASC(FDamageEffectParams& DamageEffectParams, UAbilitySystemComponent* InASC)
+{
+	DamageEffectParams.TargetAbilitySystemComponent = InASC;
+}
+
 TArray<FRotator> UAuraAbilitySystemLibrary::EvenlySpaceRotators(const FVector& Forward, const FVector& Axis, float Spread, int32 NumRotators)
 {
 	TArray<FRotator>Rotators;

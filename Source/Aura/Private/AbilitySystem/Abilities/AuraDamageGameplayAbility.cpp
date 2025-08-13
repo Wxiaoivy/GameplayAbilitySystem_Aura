@@ -6,6 +6,14 @@
 #include "AbilitySystem/AuraAbilitySystemComponent.h"
 #include "AuraAbilityTypes.h"
 
+UAuraDamageGameplayAbility::UAuraDamageGameplayAbility()
+{
+	// 示例路径，需替换为你的实际GameplayEffect路径
+	static ConstructorHelpers::FClassFinder<UGameplayEffect> DefaultEffect(
+		TEXT("/Game/Path/To/GE_DefaultDamage"));
+	DamageEffectClass = DefaultEffect.Class;
+}
+
 void UAuraDamageGameplayAbility::CauseDamage(AActor* TargetActor)
 {
 	FGameplayEffectSpecHandle EffectSpecHandle = MakeOutgoingGameplayEffectSpec(DamageEffectClass, 1.f);
@@ -18,7 +26,8 @@ void UAuraDamageGameplayAbility::CauseDamage(AActor* TargetActor)
 
 
 FDamageEffectParams UAuraDamageGameplayAbility::MakeDamgeEffectParamsFormClassDefaults
-(AActor* TargetActor /*= nullptr*/, 
+(
+	AActor* TargetActor /*= nullptr*/, 
 	FVector InRadialDamageOrigin /*= FVector::ZeroVector*/,
 	bool bOverrideKnockbackDirection /*= false*/, 
 	FVector KnockbackDirectionOverride /*= FVector::ZeroVector*/, 
@@ -27,7 +36,6 @@ FDamageEffectParams UAuraDamageGameplayAbility::MakeDamgeEffectParamsFormClassDe
 	bool bOverridePitch /*= false*/, 
 	float PitchOverride /*= 0.f */) const
 {
-
 	FDamageEffectParams Params;
 	Params.WorldContextObject = GetAvatarActorFromActorInfo();
 	Params.DamageGameplayEffectClass = DamageEffectClass;

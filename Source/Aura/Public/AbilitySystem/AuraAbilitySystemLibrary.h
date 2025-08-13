@@ -178,4 +178,20 @@ public:
 
 	static int32 GetXPRewardForClassAndLevel(const UObject* WorldContextObject, ECharacterClass CharacterClass, int32 CharacterLevel);
 
+	/*
+	* Damage Effect Params
+	*
+	*/
+
+	UFUNCTION(BlueprintCallable,Category= "AuraAbilitySystemLibrary|DamageEffect")
+	static void SetIsRadialDamageEffectParam(UPARAM(ref)FDamageEffectParams& DamageEffectParams, bool bIsRadial,float InnerRadial, float OuterRadial, FVector Origin);
+
+	UFUNCTION(BlueprintCallable, Category = "AuraAbilitySystemLibrary|DamageEffect")
+	static void SetKnockbackForceDirection(UPARAM(ref)FDamageEffectParams& DamageEffectParams,FVector KnockbackDirection,float Magnitude = 0.f);
+
+	UFUNCTION(BlueprintCallable, Category = "AuraAbilitySystemLibrary|DamageEffect")
+	static void SetImpuseDirection(UPARAM(ref)FDamageEffectParams& DamageEffectParams, FVector DeathImpuseDirection, float Magnitude = 0.f);
+
+	UFUNCTION(BlueprintCallable, Category = "AuraAbilitySystemLibrary|DamageEffect")
+	static void SetEffectParamsTargetASC(UPARAM(ref)FDamageEffectParams& DamageEffectParams, UAbilitySystemComponent* InASC);
 };
