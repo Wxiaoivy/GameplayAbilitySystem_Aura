@@ -46,7 +46,7 @@ protected:
 	bool IsValidOverlap(AActor* OtherActor);
 
 	UFUNCTION(BlueprintCallable)
-	void OnHit();
+	virtual void OnHit();
 	
 	void Destroyed()override;
 
