@@ -16,4 +16,8 @@ class AURA_API ULoadScreenWidget : public UUserWidget
 {
 	GENERATED_BODY()
 
+public:
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void BluePrintInitializeWidget();
 };
