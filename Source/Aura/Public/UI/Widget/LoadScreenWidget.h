@@ -18,6 +18,10 @@ class AURA_API ULoadScreenWidget : public UUserWidget
 
 public:
 
-	UFUNCTION(BlueprintImplementableEvent)
+	// 将 BlueprintImplementableEvent 改为 BlueprintNativeEvent
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void BluePrintInitializeWidget();
+
+	// 注意：这里需要声明对应的_Implementation函数
+	virtual void BluePrintInitializeWidget_Implementation();
 };
