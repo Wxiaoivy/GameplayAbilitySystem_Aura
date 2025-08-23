@@ -24,8 +24,19 @@ public:
 	FString LoadSlotName;
 	/*AI加的  为了正确使用MVVM*/
 
+
+
 	UPROPERTY(BlueprintAssignable)
 	FSetWidgetSwitcherIndex SetWidgetSwitcherIndex;
 
 	void InitializeSlot();
+
+	/*UPROPERTY()
+	FString LoadSlotName;*/
+
+	UPROPERTY()
+	int32 SlotIndex;//老师写的FString 我也不知道为什么
+
+	UPROPERTY()
+	FString PlayerName;
 };
