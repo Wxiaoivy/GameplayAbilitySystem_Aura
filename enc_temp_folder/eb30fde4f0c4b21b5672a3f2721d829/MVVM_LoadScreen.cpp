@@ -151,7 +151,7 @@ void UMVVM_LoadScreen::DeleteButtonPressed()
 		SelectedSlot->SlotStatus = Vacant;
 		// 重新初始化槽位（重置显示信息等）
 		SelectedSlot->InitializeSlot();
-		// 启用该槽位的SelectSlot（因为已删除，可以重新选择)
+		// 启用该槽位的选择按钮（因为已删除，可以重新选择)
 		SelectedSlot->EnableSelectSlotButton.Broadcast(true);
 	}
 }
