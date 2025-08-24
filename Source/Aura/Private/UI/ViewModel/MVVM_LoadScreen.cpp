@@ -109,7 +109,17 @@ void UMVVM_LoadScreen::NewGameButtonPressed(int32 Slot)
 
 void UMVVM_LoadScreen::SelecteSlotButtonPressed(int32 Slot)
 {
-
+	for (const TTuple<int32, UMVVM_LoadSlot*>LoadSlot : LoadSlots)
+	{
+		if (LoadSlot.Key == Slot)
+		{
+			LoadSlot.Value->EnableSelectSlotButton.Broadcast(false);
+		}
+		else
+		{
+			LoadSlot.Value->EnableSelectSlotButton.Broadcast(true);
+		}
+	}
 }
 
 void UMVVM_LoadScreen::LoadData()//数据流向：磁盘存档 → SaveObject → MVVM视图模型 → UI显示
