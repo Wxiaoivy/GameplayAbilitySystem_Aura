@@ -4,7 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "MVVMViewModelBase.h"
+#include "Game/LoadScreenSaveGame.h"
 #include "MVVM_LoadSlot.generated.h"
+
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FSetWidgetSwitcherIndex, int32, WidgetSwitcherIndex);
 /**
@@ -16,13 +18,20 @@ class AURA_API UMVVM_LoadSlot : public UMVVMViewModelBase
 	GENERATED_BODY()
 public:
 
-	/*AI加的  为了正确使用MVVM*/
+
+	/*Setter*/
 	UFUNCTION(BlueprintCallable)
 	void SetLoadSlotName(const FString& InLoadSlotName);
 
-	UPROPERTY(BlueprintReadWrite, FieldNotify)
-	FString LoadSlotName;
-	/*AI加的  为了正确使用MVVM*/
+	UFUNCTION(BlueprintCallable)
+	void SetPlayerName(FString InPlayerName);
+
+
+
+	/*Getter*/
+	UFUNCTION(BlueprintCallable)
+	const FString& GetPlayerName() const {return PlayerName;};
+
 
 
 
@@ -31,12 +40,16 @@ public:
 
 	void InitializeSlot();
 
-	/*UPROPERTY()
-	FString LoadSlotName;*/
+	UPROPERTY()
+	TEnumAsByte<ESaveSlotStatus>SlotStatus;
 
 	UPROPERTY()
-	int32 SlotIndex;//老师写的FString 我也不知道为什么
+	int32 SlotIndex;
 
-	UPROPERTY()
+	/*Field Notify*/
+	UPROPERTY(BlueprintReadWrite, FieldNotify)
+	FString LoadSlotName;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, FieldNotify, Setter = SetPlayerName, Getter = GetPlayerName);
 	FString PlayerName;
 };

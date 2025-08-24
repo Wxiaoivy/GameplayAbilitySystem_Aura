@@ -86,8 +86,10 @@ void UMVVM_LoadScreen::NewSlotButtonPressed(int32 Slot, const FString& EnteredNa
 	// 获取游戏模式基类实例
 	AAuraGameModeBase* AuraGameModeBase = Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(this));
 	// 更新视图模型中的玩家名称
-	LoadSlots[Slot]->PlayerName = EnteredName;
-	// 调用游戏模式的保存功能，将数据持久化到磁盘
+	LoadSlots[Slot]->SetPlayerName(EnteredName);
+	// 更新视图模型中的槽位状态
+	LoadSlots[Slot]->SlotStatus = Taken;
+	// 调用游戏模式的保存功能，将数据持久化到磁盘(这是自定义的函数)
 	AuraGameModeBase->SaveSlotData(LoadSlots[Slot], Slot);
 	LoadSlots[Slot]->InitializeSlot();
 }
@@ -108,5 +110,37 @@ void UMVVM_LoadScreen::NewGameButtonPressed(int32 Slot)
 void UMVVM_LoadScreen::SelecteSlotButtonPressed(int32 Slot)
 {
 
+}
+
+void UMVVM_LoadScreen::LoadData()//数据流向：磁盘存档 → SaveObject → MVVM视图模型 → UI显示
+{
+	// 获取游戏模式基类实例
+	// 通过UGameplayStatics获取当前游戏模式，并转换为AAuraGameModeBase类型
+	AAuraGameModeBase* AuraGameModeBase = Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(this));
+
+	// 遍历所有加载槽位
+		// LoadSlots 是一个 TMap<int32, UMVVM_LoadSlot*> 类型的容器
+		// 包含槽位索引和对应的MVVM视图模型对象
+	for (const TTuple<int32, UMVVM_LoadSlot*> LoadSlot : LoadSlots)
+	{
+		// 从游戏模式获取指定槽位的存档数据
+		// LoadSlot.Value->LoadSlotName: 从MVVM视图模型获取槽位名称
+		// LoadSlot.Key: 槽位的索引键值
+		ULoadScreenSaveGame* SaveObject = AuraGameModeBase->GetSaveSlotData(LoadSlot.Value->LoadSlotName, LoadSlot.Key);
+
+		// 从存档对象中读取玩家名称
+		const FString PlayerName = SaveObject->PlayerName;
+
+		// 从存档对象中读取槽位状态
+        // ESaveSlotStatus 是一个枚举类型，表示槽位的状态（Vacant、EnterName、Taken）
+		TEnumAsByte<ESaveSlotStatus>SaveSlotStatus = SaveObject->SaveSlotStatus;
+
+		// 将读取到的数据设置到MVVM视图模型中
+		LoadSlot.Value->SlotStatus = SaveSlotStatus;
+		LoadSlot.Value->SetPlayerName(PlayerName);
+
+		// 初始化槽位，可能包括更新UI显示、绑定委托等操作
+		LoadSlot.Value->InitializeSlot();
+	}
 }
 

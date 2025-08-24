@@ -13,6 +13,7 @@
 class UCharacterClassInfo;
 class UAbilityInfo;
 class UMVVM_LoadSlot;
+class ULoadScreenSaveGame;
 
 UCLASS()
 class AURA_API AAuraGameModeBase : public AGameModeBase
@@ -23,11 +24,14 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "CharacterClassDefaultInfo")
 	TObjectPtr<UCharacterClassInfo>CharacterClassInfo;
 
+
 	UPROPERTY(EditDefaultsOnly, Category = "AbilityInfo")
 	TObjectPtr<UAbilityInfo>AbilityInfo;
 
 
 	void SaveSlotData(UMVVM_LoadSlot* LoadSlot, int32 SlotIndex);
+	ULoadScreenSaveGame* GetSaveSlotData(const FString& SlotName, int32 SlotIndex)const;
+
 
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<USaveGame>LoadScreenSaveGameClass;
