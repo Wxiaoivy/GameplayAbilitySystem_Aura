@@ -14,6 +14,7 @@ class UCharacterClassInfo;
 class UAbilityInfo;
 class UMVVM_LoadSlot;
 class ULoadScreenSaveGame;
+class UWorld;
 
 UCLASS()
 class AURA_API AAuraGameModeBase : public AGameModeBase
@@ -37,5 +38,19 @@ public:
 
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<USaveGame>LoadScreenSaveGameClass;
+
+	UPROPERTY(EditDefaultsOnly)
+	FString DefaultMapName;
+
+	UPROPERTY(EditDefaultsOnly)
+	TSoftObjectPtr<UWorld> DefaultMap;
+
+	UPROPERTY(EditDefaultsOnly)
+	TMap<FString, TSoftObjectPtr<UWorld>> Maps;
+
+
+protected:
+
+	virtual void BeginPlay()override;
 
 };

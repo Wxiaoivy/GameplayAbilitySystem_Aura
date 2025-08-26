@@ -88,10 +88,15 @@ void UMVVM_LoadScreen::NewSlotButtonPressed(int32 Slot, const FString& EnteredNa
 {
 	// 获取游戏模式基类实例
 	AAuraGameModeBase* AuraGameModeBase = Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(this));
+
+	// 更新视图模型中的地图名称
+	LoadSlots[Slot]->SetMapName(AuraGameModeBase->DefaultMapName);
 	// 更新视图模型中的玩家名称
 	LoadSlots[Slot]->SetPlayerName(EnteredName);
 	// 更新视图模型中的槽位状态
 	LoadSlots[Slot]->SlotStatus = Taken;
+
+
 	// 调用游戏模式的保存功能，将数据持久化到磁盘(这是自定义的函数)
 	AuraGameModeBase->SaveSlotData(LoadSlots[Slot], Slot);
 	LoadSlots[Slot]->InitializeSlot();
