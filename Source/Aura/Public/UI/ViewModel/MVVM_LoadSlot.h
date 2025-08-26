@@ -59,5 +59,5 @@ public:
 	FString PlayerName;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, FieldNotify, Setter = SetMapName, Getter = GetMapName);
-	FString MapName;
+	FString MapName;//392集的时候还没有赋值   不知道什么时候赋值。
 };

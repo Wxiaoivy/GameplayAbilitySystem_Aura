@@ -161,11 +161,20 @@ void UMVVM_LoadScreen::DeleteButtonPressed()
 	}
 }
 
+void UMVVM_LoadScreen::PlayButtonPressed()
+{
+	AAuraGameModeBase* AuraGameMode = Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(this));
+	if (IsValid(SelectedSlot))
+	{
+		AuraGameMode->TravelToMap(SelectedSlot);
+	}
+}
+
 void UMVVM_LoadScreen::LoadData()//Êı¾İÁ÷Ïò£º´ÅÅÌ´æµµ ¡ú SaveObject ¡ú MVVMÊÓÍ¼Ä£ĞÍ ¡ú UIÏÔÊ¾
 {
 	// »ñÈ¡ÓÎÏ·Ä£Ê½»ùÀàÊµÀı
 	// Í¨¹ıUGameplayStatics»ñÈ¡µ±Ç°ÓÎÏ·Ä£Ê½£¬²¢×ª»»ÎªAAuraGameModeBaseÀàĞÍ
-	AAuraGameModeBase* AuraGameModeBase = Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(this));
+	AAuraGameModeBase* AuraGameMode = Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(this));
 
 	// ±éÀúËùÓĞ¼ÓÔØ²ÛÎ»
 		// LoadSlots ÊÇÒ»¸ö TMap<int32, UMVVM_LoadSlot*> ÀàĞÍµÄÈİÆ÷
@@ -175,7 +184,7 @@ void UMVVM_LoadScreen::LoadData()//Êı¾İÁ÷Ïò£º´ÅÅÌ´æµµ ¡ú SaveObject ¡ú MVVMÊÓÍ¼Ä
 		// ´ÓÓÎÏ·Ä£Ê½»ñÈ¡Ö¸¶¨²ÛÎ»µÄ´æµµÊı¾İ
 		// LoadSlot.Value->LoadSlotName: ´ÓMVVMÊÓÍ¼Ä£ĞÍ»ñÈ¡²ÛÎ»Ãû³Æ
 		// LoadSlot.Key: ²ÛÎ»µÄË÷Òı¼üÖµ
-		ULoadScreenSaveGame* SaveObject = AuraGameModeBase->GetSaveSlotData(LoadSlot.Value->LoadSlotName, LoadSlot.Key);
+		ULoadScreenSaveGame* SaveObject = AuraGameMode->GetSaveSlotData(LoadSlot.Value->LoadSlotName, LoadSlot.Key);
 
 		// ´Ó´æµµ¶ÔÏóÖĞ¶ÁÈ¡Íæ¼ÒÃû³Æ
 		const FString PlayerName = SaveObject->PlayerName;
