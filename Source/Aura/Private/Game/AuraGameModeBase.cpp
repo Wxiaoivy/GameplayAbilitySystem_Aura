@@ -76,27 +76,68 @@ void AAuraGameModeBase::TravelToMap(UMVVM_LoadSlot* Slot)
 
 AActor* AAuraGameModeBase::ChoosePlayerStart_Implementation(AController* Player)
 {
-	UAuraGameInstance* AuraGameInstance = Cast<UAuraGameInstance>(GetGameInstance());
+	UE_LOG(LogTemp, Warning, TEXT("ChoosePlayerStart called"));
 
-	TArray<AActor*>Actors;
+	UAuraGameInstance* AuraGameInstance = Cast<UAuraGameInstance>(GetGameInstance());
+	if (!AuraGameInstance)
+	{
+		UE_LOG(LogTemp, Error, TEXT("GameInstance is null!"));
+		return nullptr;
+	}
+
+	TArray<AActor*> Actors;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), APlayerStart::StaticClass(), Actors);
+
+	UE_LOG(LogTemp, Warning, TEXT("Found %d PlayerStarts"), Actors.Num());
+
 	if (Actors.Num() > 0)
 	{
 		AActor* SelectedActor = Actors[0];
+		UE_LOG(LogTemp, Warning, TEXT("Default: %s"), *SelectedActor->GetName());
+
 		for (AActor* Actor : Actors)
 		{
 			if (APlayerStart* PlayerStart = Cast<APlayerStart>(Actor))
 			{
-				if (PlayerStart->PlayerStartTag== AuraGameInstance->PlayerStartTag)
+				UE_LOG(LogTemp, Warning, TEXT("Checking: %s, Tag: %s"),
+					*PlayerStart->GetName(), *PlayerStart->PlayerStartTag.ToString());
+
+				if (!PlayerStart->PlayerStartTag.IsNone() && PlayerStart->PlayerStartTag == AuraGameInstance->PlayerStartTag)
 				{
 					SelectedActor = PlayerStart;
+					UE_LOG(LogTemp, Warning, TEXT("MATCH FOUND: %s"), *PlayerStart->GetName());
 					break;
 				}
 			}
 		}
-		return SelectedActor;
+
+		UE_LOG(LogTemp, Warning, TEXT("Returning: %s"), *SelectedActor->GetName());
+		return SelectedActor; // 这里肯定返回了SelectedActor
 	}
-	return nullptr;
+
+	UE_LOG(LogTemp, Error, TEXT("No PlayerStarts, returning nullptr"));
+	return nullptr; // 只有这里才会返回nullptr
+	//UAuraGameInstance* AuraGameInstance = Cast<UAuraGameInstance>(GetGameInstance());
+
+	//TArray<AActor*>Actors;
+	//UGameplayStatics::GetAllActorsOfClass(GetWorld(), APlayerStart::StaticClass(), Actors);
+	//if (Actors.Num() > 0)
+	//{
+	//	AActor* SelectedActor = Actors[0];
+	//	for (AActor* Actor : Actors)
+	//	{
+	//		if (APlayerStart* PlayerStart = Cast<APlayerStart>(Actor))
+	//		{
+	//			if (PlayerStart->PlayerStartTag== AuraGameInstance->PlayerStartTag)
+	//			{
+	//				SelectedActor = PlayerStart;
+	//				break;
+	//			}
+	//		}
+	//	}
+	//	return SelectedActor;
+	//}
+	//return nullptr;
 }
 
 void AAuraGameModeBase::BeginPlay()

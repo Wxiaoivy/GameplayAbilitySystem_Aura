@@ -30,7 +30,7 @@ void ALoadScreenHUD::BeginPlay()
 
 	// 加载数据到ViewModel
 	// 这个方法可能从存档系统读取数据并更新ViewModel状态
-	LoadScreenViewModel->LoadData();
+	LoadScreenViewModel->LoadData(); // 直接尝试加载，(第一次新建角色前)如果存档不存在，ViewModel会保持默认状态
 
 
 
