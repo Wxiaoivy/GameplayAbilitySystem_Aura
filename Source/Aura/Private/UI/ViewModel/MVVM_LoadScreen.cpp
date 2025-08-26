@@ -176,6 +176,8 @@ void UMVVM_LoadScreen::PlayButtonPressed()
 	AAuraGameModeBase* AuraGameMode = Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(this));
 	UAuraGameInstance* AuraGameInstance = Cast<UAuraGameInstance>(AuraGameMode->GetGameInstance());
 	AuraGameInstance->PlayerStartTag = SelectedSlot->PlayerStartTag;//如果直接打开Dungeon关卡  不经过这个PlayButtonPressed函数，不按这个Play按钮， PlayerStartTag 就不会被正确初始化 就找不到正确的PlayerStart。
+	AuraGameInstance->LoadSlotName = SelectedSlot->LoadSlotName;
+	AuraGameInstance->LoadSlotIndex = SelectedSlot->SlotIndex;
 
 	/*? 通过Play按钮进入：调用 PlayButtonPressed() → 正确设置 PlayerStartTag → 找到正确PlayerStart
 	? 直接打开关卡：跳过 PlayButtonPressed() → PlayerStartTag 未被设置 → 找不到匹配的PlayerStart*/

@@ -3,6 +3,7 @@
 
 #include "CheckPoint/CheckPoint.h"
 #include <../../../../../../../Source/Runtime/Engine/Classes/Components/SphereComponent.h>
+#include "Interaction/PlayerInterface.h"
 
 ACheckPoint::ACheckPoint(const FObjectInitializer& ObjectInitializer)
 	:Super(ObjectInitializer)
@@ -23,8 +24,9 @@ ACheckPoint::ACheckPoint(const FObjectInitializer& ObjectInitializer)
 
 void ACheckPoint::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (OtherActor->ActorHasTag(FName("Player")))
+	if (OtherActor->Implements<UPlayerInterface>())
 	{
+		IPlayerInterface::Execute_SaveProgress(OtherActor, PlayerStartTag);//PlayerStartTag是该类自带的。  蓝图里可以直接初始化（SaveProgress的实现写在AuraCharacter里面的）
 		HandleGlowEffects();
 	}
 }

@@ -7,6 +7,7 @@
 #include "AuraGameplayTags.h"
 #include "AbilitySystem/Debuff/DebuffNiagaraComponent.h"
 #include "Player/AuraPlayerController.h"
+#include "Game/LoadScreenSaveGame.h"
 
 
 AAuraCharacter::AAuraCharacter()
@@ -72,6 +73,29 @@ void AAuraCharacter::HideMagicCircle_Implementation()
 	{
 		AuraPlayerController->HideMagicCircle();
 		AuraPlayerController->bShowMouseCursor = true;
+	}
+}
+
+// 保存游戏进度到存档的实现函数
+void AAuraCharacter::SaveProgress_Implementation(const FName& CheckPointTag)
+{
+	// 获取当前游戏的GameMode，并转换为自定义的AAuraGameModeBase类型
+	AAuraGameModeBase* AuraGameMode = Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(this));
+	// 检查GameMode是否有效
+	if (AuraGameMode)
+	{
+		// 从GameMode获取当前游戏的存档数据(非指定槽位的存档数据，所以这里用RetriveInGameSaveData）
+		// RetriveInGameSaveData()会自动获取当前游戏会话的存档
+		ULoadScreenSaveGame* SaveData = AuraGameMode->RetriveInGameSaveData();
+		// 如果存档数据为空，直接返回（避免空指针异常）
+		if (SaveData == nullptr)return;
+		
+		// 将传入的检查点标签(CheckPointTag)保存到存档数据中
+		// 这通常用于记录玩家最后到达的检查点或重生点
+		SaveData->PlayerStartTag = CheckPointTag;
+
+
+		AuraGameMode->SaveInGameProgressData(SaveData);
 	}
 }
 

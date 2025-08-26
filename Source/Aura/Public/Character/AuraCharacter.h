@@ -47,6 +47,7 @@ public:
 	 int32 GetSpellPoints_Implementation()const;
 	 void ShowMagicCircle_Implementation(UMaterialInterface* DecalMaterial);
 	 void HideMagicCircle_Implementation();
+	 void SaveProgress_Implementation(const FName& CheckPointTag);
 	/*End Player Interface*/
 
 	/*Combat Interface*/
