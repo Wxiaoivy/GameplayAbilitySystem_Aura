@@ -27,6 +27,8 @@ void AAuraGameModeBase::SaveSlotData(UMVVM_LoadSlot* LoadSlot, int32 SlotIndex)/
 	// 将加载槽位中的地图名称赋值给存档数据
 	LoadScreenSaveGame->MapName = LoadSlot->GetMapName();
 
+	LoadScreenSaveGame->PlayerStartTag = LoadSlot->PlayerStartTag;
+
 	// 将存档数据保存到指定槽位名称和索引的位置
 	UGameplayStatics::SaveGameToSlot(LoadScreenSaveGame, LoadSlot->LoadSlotName, SlotIndex);
 }

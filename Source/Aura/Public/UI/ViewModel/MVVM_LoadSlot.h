@@ -51,6 +51,9 @@ public:
 	UPROPERTY()
 	int32 SlotIndex;
 
+	UPROPERTY()
+	FName PlayerStartTag;
+
 	/*Field Notify*/
 	UPROPERTY(BlueprintReadWrite, FieldNotify)
 	FString LoadSlotName;
