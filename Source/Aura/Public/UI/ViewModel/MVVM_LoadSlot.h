@@ -23,20 +23,14 @@ public:
 	/*Setter*/
 	//UFUNCTION(BlueprintCallable)
 	void SetLoadSlotName(const FString& InLoadSlotName);
-
-	//UFUNCTION(BlueprintCallable)
 	void SetPlayerName(FString InPlayerName);
-
-	//UFUNCTION(BlueprintCallable)
 	void SetMapName(FString InMapName);
 
 
 
 	/*Getter*/
-	//UFUNCTION(BlueprintCallable)
-	const FString& GetPlayerName() const {return PlayerName;};
 
-	//UFUNCTION(BlueprintCallable)
+	const FString& GetPlayerName() const {return PlayerName;};
 	const FString& GetMapName() const { return MapName; };
 
 

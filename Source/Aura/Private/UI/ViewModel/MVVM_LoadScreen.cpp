@@ -187,6 +187,7 @@ void UMVVM_LoadScreen::LoadData()//Êý¾ÝÁ÷Ïò£º´ÅÅÌ´æµµ ¡ú SaveObject ¡ú MVVMÊÓÍ¼Ä
 		// ½«¶ÁÈ¡µ½µÄÊý¾ÝÉèÖÃµ½MVVMÊÓÍ¼Ä£ÐÍÖÐ
 		LoadSlot.Value->SlotStatus = SaveSlotStatus;
 		LoadSlot.Value->SetPlayerName(PlayerName);
+		LoadSlot.Value->SetMapName(SaveObject->MapName);
 
 		// ³õÊ¼»¯²ÛÎ»£¬¿ÉÄÜ°üÀ¨¸üÐÂUIÏÔÊ¾¡¢°ó¶¨Î¯ÍÐµÈ²Ù×÷
 		LoadSlot.Value->InitializeSlot();
