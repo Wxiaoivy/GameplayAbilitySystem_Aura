@@ -5,6 +5,7 @@
 #include "UI/ViewModel/MVVM_LoadSlot.h"
 #include "Game/AuraGameModeBase.h"
 #include <../../../../../../../Source/Runtime/Engine/Classes/Kismet/GameplayStatics.h>
+#include "Game/AuraGameInstance.h"
 
 /*AI加的  为了正确使用MVVM*/
 UMVVM_LoadScreen::UMVVM_LoadScreen()//AI
@@ -87,10 +88,10 @@ UMVVM_LoadSlot* UMVVM_LoadScreen::GetLoadSlotViewModelByIndex(int32 Index) const
 void UMVVM_LoadScreen::NewSlotButtonPressed(int32 Slot, const FString& EnteredName)
 {
 	// 获取游戏模式基类实例
-	AAuraGameModeBase* AuraGameModeBase = Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(this));
+	AAuraGameModeBase* AuraGameMode = Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(this));
 
 	// 更新视图模型中的地图名称
-	LoadSlots[Slot]->SetMapName(AuraGameModeBase->DefaultMapName);
+	LoadSlots[Slot]->SetMapName(AuraGameMode->DefaultMapName);
 	// 更新视图模型中的玩家名称
 	LoadSlots[Slot]->SetPlayerName(EnteredName);
 	// 更新视图模型中的槽位状态
@@ -98,8 +99,13 @@ void UMVVM_LoadScreen::NewSlotButtonPressed(int32 Slot, const FString& EnteredNa
 
 
 	// 调用游戏模式的保存功能，将数据持久化到磁盘(这是自定义的函数)
-	AuraGameModeBase->SaveSlotData(LoadSlots[Slot], Slot);
+	AuraGameMode->SaveSlotData(LoadSlots[Slot], Slot);
 	LoadSlots[Slot]->InitializeSlot();
+
+	UAuraGameInstance* AuraGameInstance = Cast<UAuraGameInstance>(AuraGameMode->GetGameInstance());
+	AuraGameInstance->LoadSlotName = LoadSlots[Slot]->LoadSlotName;
+	AuraGameInstance->LoadSlotIndex = LoadSlots[Slot]->SlotIndex;
+	AuraGameInstance->PlayerStartTag = AuraGameMode->DefaultPlayerStartTag;
 }
 
 /**
