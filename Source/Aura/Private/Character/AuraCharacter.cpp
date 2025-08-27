@@ -46,8 +46,38 @@ void AAuraCharacter::PossessedBy(AController* NewController)
 	Super::PossessedBy(NewController);
 	//Init Ability Actor Info for the Server
 	InitAbilityActorInfo();
+	LoadProgress();
+
 	//这里调用AuraCharacterBase中的AddCharacterAbilities()这个函数
 	AddCharacterAbilities();
+}
+
+void AAuraCharacter::LoadProgress()
+{
+	AAuraGameModeBase* AuraGameMode = Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(this));
+	if (AuraGameMode)
+	{
+		ULoadScreenSaveGame* SaveData = AuraGameMode->RetriveInGameSaveData();
+		if (SaveData == nullptr)return;
+		
+		if (AAuraPlayerState* AuraPlayerState = Cast<AAuraPlayerState>(GetPlayerState()))
+		{
+			AuraPlayerState->SetLevel(SaveData->PlayerLevel);
+			AuraPlayerState->SetXP(SaveData->XP);
+			AuraPlayerState->SetAttributePoints(SaveData->AttributePoints);
+			AuraPlayerState->SetSpellPoints(SaveData->SpellPoints);
+		}
+
+		if (SaveData->bFirstTimeLoadIn)
+		{
+			InitializeDefualtAttributes();
+			AddCharacterAbilities();
+		}
+		else
+		{
+
+		}
+	}
 }
 
 void AAuraCharacter::OnRep_PlayerState()
@@ -108,6 +138,14 @@ void AAuraCharacter::SaveProgress_Implementation(const FName& CheckPointTag)
 		SaveData->Resilience = UAuraAttributeSet::GetResilienceAttribute().GetNumericValue(GetAttributeSet());
 		SaveData->Vigor = UAuraAttributeSet::GetVigorAttribute().GetNumericValue(GetAttributeSet());
 
+
+		/*当执行 SaveProgress_Implementation 时，说明玩家已经通过了游戏的初始阶段，并且游戏进度正在被保存（例如到达了一个检查点）。*/
+		/*此时将 bFirstTimeLoadIn 设置为 false，
+		表示：
+			玩家已经完成了首次加载过程
+			后续加载这个存档时，游戏不需要再执行首次加载的特殊逻辑（如初始教程、初始物品分配等）
+			游戏可以正常从检查点恢复进度*/
+		SaveData->bFirstTimeLoadIn = false;
 		//保存"当前正在进行的游戏"的进度数据(SaveInGameProgressData)
 		AuraGameMode->SaveInGameProgressData(SaveData);
 	}
@@ -138,6 +176,8 @@ void AAuraCharacter::OnRep_Stunned()
 		}
 	}
 }
+
+
 
 int32 AAuraCharacter::GetSpellPoints_Implementation() const
 {
@@ -254,7 +294,7 @@ void AAuraCharacter::InitAbilityActorInfo()
 		AttributeSet = AuraPlayerState->GetAttributeSet();
 
 		//初始化PrimaryAttribute和SecondaryAttribute
-		InitializeDefualtAttributes();
+		//InitializeDefualtAttributes();
 	
 	}
 	OnASCRegisteredDelegate.Broadcast(AbilitySystemComponent);
