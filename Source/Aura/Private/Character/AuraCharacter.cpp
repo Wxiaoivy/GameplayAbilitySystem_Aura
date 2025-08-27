@@ -8,6 +8,7 @@
 #include "AbilitySystem/Debuff/DebuffNiagaraComponent.h"
 #include "Player/AuraPlayerController.h"
 #include "Game/LoadScreenSaveGame.h"
+#include "AbilitySystem/AuraAttributeSet.h"
 
 
 AAuraCharacter::AAuraCharacter()
@@ -94,7 +95,20 @@ void AAuraCharacter::SaveProgress_Implementation(const FName& CheckPointTag)
 		// 这通常用于记录玩家最后到达的检查点或重生点
 		SaveData->PlayerStartTag = CheckPointTag;
 
+		if (const AAuraPlayerState* AuraPlayerState = GetPlayerState <AAuraPlayerState>())
+		{
+			SaveData->PlayerLevel = AuraPlayerState->GetPlayerLevel();
+			SaveData->XP = AuraPlayerState->GetXP();
+			SaveData->SpellPoints = AuraPlayerState->GetSpellPoints();
+			SaveData->AttributePoints = AuraPlayerState->GetAttributePoints();
+		}
 
+		SaveData->Strength = UAuraAttributeSet::GetStrengthAttribute().GetNumericValue(GetAttributeSet());
+		SaveData->Intelligence = UAuraAttributeSet::GetIntelligenceAttribute().GetNumericValue(GetAttributeSet());
+		SaveData->Resilience = UAuraAttributeSet::GetResilienceAttribute().GetNumericValue(GetAttributeSet());
+		SaveData->Vigor = UAuraAttributeSet::GetVigorAttribute().GetNumericValue(GetAttributeSet());
+
+		//保存"当前正在进行的游戏"的进度数据(SaveInGameProgressData)
 		AuraGameMode->SaveInGameProgressData(SaveData);
 	}
 }
