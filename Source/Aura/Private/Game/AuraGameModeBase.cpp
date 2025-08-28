@@ -7,6 +7,9 @@
 #include "Game/LoadScreenSaveGame.h"
 #include <../../../../../../../Source/Runtime/Engine/Classes/GameFramework/PlayerStart.h>
 #include "Game/AuraGameInstance.h"
+#include <../../../../../../../Source/Runtime/Engine/Public/EngineUtils.h>
+#include "Interaction/SaveInterface.h"
+
 
 void AAuraGameModeBase::DeleteSlot(const FString& SlotName, int32 SlotIndex)
 {
@@ -121,6 +124,79 @@ void AAuraGameModeBase::SaveInGameProgressData(ULoadScreenSaveGame* SaveObject)
 }
 
 
+
+void AAuraGameModeBase::SaveWorldState(UWorld* World)
+{
+	// 获取当前世界的名称，并移除流式关卡前缀（如"UEDPIE_0_"）
+	FString WorldName = World->GetMapName();
+	WorldName.RemoveFromStart(World->StreamingLevelsPrefix);
+
+	// 获取游戏实例并转换为自定义的UAuraGameInstance类型
+	UAuraGameInstance* AuraGI = Cast<UAuraGameInstance>(GetGameInstance());
+	check(AuraGI);// 确保游戏实例有效
+
+	// 获取指定槽位的存档数据
+	if (ULoadScreenSaveGame* SaveGame = GetSaveSlotData(AuraGI->LoadSlotName, AuraGI->LoadSlotIndex))
+	{
+		// 检查存档中是否已有当前地图的保存数据，如果没有则创建新的
+		if (!SaveGame->HasMap(WorldName))
+		{
+			FSavedMap NewSavedMap;
+			NewSavedMap.MapAssetName = WorldName;
+			SaveGame->SavedMaps.Add(NewSavedMap);
+		}
+
+		// 获取当前地图的保存数据
+		FSavedMap SavedMap = SaveGame->GetSavedMapWithMapName(WorldName);
+		SavedMap.SavedActors.Empty();// 清空已有的演员数据
+
+		// 遍历世界中的所有Actor
+		/*FActorIterator 是UE提供的一个高效遍历世界所有Actor的工具。它：
+			直接访问世界的内部Actor列表
+			性能优异：没有临时数组分配开销
+			简单易用：标准的C++迭代器模式
+			功能强大：可以访问到所有类型的Actor*/
+		for (FActorIterator It(World); It; ++It)
+		{
+			AActor* Actor = *It;
+
+			// 遍历所有Actor通常需要过滤
+			//如果Actor无效或者没有实现SaveInterface就跳过
+			if (IsValid(Actor) || !Actor->Implements<USaveInterface>())continue;
+		  
+			// 创建保存的Actor数据
+			FSavedActor SavedActor;
+			SavedActor.ActorName = Actor->GetFName();
+			SavedActor.Transform = Actor->GetTransform();
+
+			// 创建内存写入器，用于序列化Actor数据到Bytes数组
+			FMemoryWriter MemoryWriter(SavedActor.Bytes);
+			// 设置序列化标志，告诉Actor只保存标记为SaveGame的属性
+			MemoryWriter.ArIsSaveGame = true;
+
+			// Actor将自己标记为SaveGame的属性写入MemoryWriter
+            // MemoryWriter将这些数据保存到SavedActor.Bytes中
+			Actor->Serialize(MemoryWriter);
+
+			// 将保存的Actor添加到地图的保存列表中
+			SavedMap.SavedActors.AddUnique(SavedActor);
+		}
+
+		// 遍历存档中的所有已保存地图，查找需要更新的地图记录
+		for (FSavedMap& MapToReplace : SaveGame->SavedMaps)
+		{
+			if (MapToReplace.MapAssetName == WorldName)
+			{
+				// 当找到与当前地图名称匹配的记录时，用新的SavedMap数据替换旧数据
+				MapToReplace = SavedMap;
+				break;  // 找到并替换后立即退出循环，提高效率
+			}
+			
+		}
+		// 将更新后的存档对象保存到指定的磁盘槽位(// 参数说明： - SaveGame: 要保存的存档对象（包含所有更新后的数据）)
+		UGameplayStatics::SaveGameToSlot(SaveGame, AuraGI->LoadSlotName, AuraGI->LoadSlotIndex);
+	}
+}
 
 void AAuraGameModeBase::TravelToMap(UMVVM_LoadSlot* Slot)
 {
