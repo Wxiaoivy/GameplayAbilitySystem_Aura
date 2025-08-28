@@ -121,6 +121,7 @@ void AAuraCharacter::SaveProgress_Implementation(const FName& CheckPointTag)
 		// 这通常用于记录玩家最后到达的检查点或重生点
 		SaveData->PlayerStartTag = CheckPointTag;
 
+		// 保存玩家状态相关数据
 		if (const AAuraPlayerState* AuraPlayerState = GetPlayerState <AAuraPlayerState>())
 		{
 			SaveData->PlayerLevel = AuraPlayerState->GetPlayerLevel();
@@ -128,7 +129,7 @@ void AAuraCharacter::SaveProgress_Implementation(const FName& CheckPointTag)
 			SaveData->SpellPoints = AuraPlayerState->GetSpellPoints();
 			SaveData->AttributePoints = AuraPlayerState->GetAttributePoints();
 		}
-
+		// 保存角色主要属性数值
 		SaveData->Strength = UAuraAttributeSet::GetStrengthAttribute().GetNumericValue(GetAttributeSet());
 		SaveData->Intelligence = UAuraAttributeSet::GetIntelligenceAttribute().GetNumericValue(GetAttributeSet());
 		SaveData->Resilience = UAuraAttributeSet::GetResilienceAttribute().GetNumericValue(GetAttributeSet());
@@ -142,6 +143,41 @@ void AAuraCharacter::SaveProgress_Implementation(const FName& CheckPointTag)
 			后续加载这个存档时，游戏不需要再执行首次加载的特殊逻辑（如初始教程、初始物品分配等）
 			游戏可以正常从检查点恢复进度*/
 		SaveData->bFirstTimeLoadIn = false;
+
+		// 如果不是在服务器上，直接返回（确保只有服务器能保存能力数据）
+		if (!HasAuthority())return;
+		
+
+		UAuraAbilitySystemComponent* AuraASC = Cast<UAuraAbilitySystemComponent>(AbilitySystemComponent);
+		FForEachAbility SaveAbilityDelegate;
+
+		// 使用Lambda函数遍历所有能力并保存
+		SaveAbilityDelegate.BindLambda
+		([this, AuraASC, SaveData](const FGameplayAbilitySpec& AbilitySpec)
+			{
+				// 获取能力的GameplayTag
+				const FGameplayTag AbilityTag = AuraASC->GetAbilityTagFormSpec(AbilitySpec);
+				// 从能力信息库中获取该能力的详细信息
+				UAbilityInfo* AbilityInfo = UAuraAbilitySystemLibrary::GetAbilityInfo(this);
+
+				FAuraAbilityInfo Info = AbilityInfo->FindAbilityInfoForTag(AbilityTag);
+
+				// 构建保存的能力数据结构
+				FSavedAbility SavedAbility;
+				SavedAbility.GameplayAbility = Info.Ability;
+				SavedAbility.AbilityLevel = AbilitySpec.Level;
+				SavedAbility.AbilitySlot = AuraASC->GetSlotTagFromAbilityTag(AbilityTag);
+				SavedAbility.AbilityStatus = AuraASC->GetStatusFromAbilityTag(AbilityTag);
+				SavedAbility.AbilityTag = AbilityTag;
+				SavedAbility.AbilityType = Info.AbilityType;
+
+				// 将能力数据添加到存档中
+				SaveData->SavedAbilities.Add(SavedAbility);
+			}
+		);
+		// 遍历所有能力并应用上面的保存逻辑（代理的回调模式，不是广播模式）
+		AuraASC->ForEachAbility(SaveAbilityDelegate);
+
 		//保存"当前正在进行的游戏"的进度数据(SaveInGameProgressData)
 		AuraGameMode->SaveInGameProgressData(SaveData);
 	}

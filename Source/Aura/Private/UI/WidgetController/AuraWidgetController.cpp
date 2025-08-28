@@ -42,7 +42,7 @@ void UAuraWidgetController::BroadcastAbilityInfo()
 
 		}
 	);
-	// 遍历所有技能并执行委托
+	// 遍历所有技能并执行委托(代理的回调模式）
 	GetAuraASC()->ForEachAbility(BroadcastDelegate);
 }
 
