@@ -41,6 +41,12 @@ struct FSavedAbility
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "ClassDefaults")
 	int32 AbilityLevel;
 };
+
+//结构体数组想正常使用使用AddUnique  因为不能直接比较两个结构体是否相等（判断是否相等 才能判断是否Unique）， 所以要运算符重载。
+inline bool operator==(const FSavedAbility& Left, const FSavedAbility& Right)
+{
+	return Left.AbilityTag.MatchesTagExact(Right.AbilityTag);	
+}
 /**
  * 
  */

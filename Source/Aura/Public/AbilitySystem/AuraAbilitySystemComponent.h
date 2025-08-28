@@ -10,6 +10,7 @@
 #include "AuraAbilitySystemComponent.generated.h"
 
 struct FGameplayAbilitySpec;
+class ULoadScreenSaveGame;
 
 
 
@@ -46,6 +47,7 @@ public:
 
 	void AbilityActorInfoSet();
 	
+	void AddCharacterAbilitiesFromSaveData(ULoadScreenSaveGame* SaveData);
 	void AddCharacterAbilities(const TArray<TSubclassOf<UGameplayAbility>>& StartupAbilities);
 	void AddCharacterPassiveAbilities(const TArray<TSubclassOf<UGameplayAbility>>& StartupPassiveAbilities);
 

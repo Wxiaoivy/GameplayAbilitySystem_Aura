@@ -127,8 +127,6 @@ void AAuraCharacterBase::AddCharacterAbilities()
 	AuraASC->AddCharacterPassiveAbilities(StartupPassiveAbilities);
 }
 
-
-
 UAbilitySystemComponent* AAuraCharacterBase::GetAbilitySystemComponent() const
 {
 	return AbilitySystemComponent;

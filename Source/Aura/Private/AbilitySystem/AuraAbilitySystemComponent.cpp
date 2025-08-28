@@ -11,17 +11,58 @@
 #include "AbilitySystem/Data/AbilityInfo.h"
 #include "AbilitySystem/AuraAbilitySystemLibrary.h"
 #include "AbilitySystem/Abilities/AuraGameplayAbility.h"
+#include "Game/LoadScreenSaveGame.h"
 
 UAuraAbilitySystemComponent::UAuraAbilitySystemComponent()
 {
 
 }
 
-//FGameplayEffectContextHandle UAuraAbilitySystemComponent::MakeEffectContext() const
-//{
-//	// 返回自定义的 FAuraGameplayEffectContext
-//	return FGameplayEffectContextHandle(new FAuraGameplayEffectContext());
-//}
+
+
+/**
+ * 函数：AddCharacterAbilitiesFromSaveData
+ * 作用：从存档数据中加载并添加角色能力
+ * 参数：
+ *   - SaveData: 包含已保存能力数据的存档对象
+ * 调用时机：从存档加载游戏时，恢复角色的能力配置
+ */
+void UAuraAbilitySystemComponent::AddCharacterAbilitiesFromSaveData(ULoadScreenSaveGame* SaveData)
+{
+	// 遍历存档中保存的所有能力数据
+	for (const FSavedAbility& Data : SaveData->SavedAbilities)
+	{
+		// 获取保存的能力类引用
+		const TSubclassOf<UGameplayAbility>LoadedAbilityClass = Data.GameplayAbility;
+		// 创建能力规格（Spec），指定能力类和等级
+		FGameplayAbilitySpec LoadedAbilitySpec = FGameplayAbilitySpec(LoadedAbilityClass, Data.AbilityLevel);
+
+		// 恢复能力的动态标签（技能栏位和状态）
+		LoadedAbilitySpec.DynamicAbilityTags.AddTag(Data.AbilitySlot);
+		LoadedAbilitySpec.DynamicAbilityTags.AddTag(Data.AbilityStatus);
+
+		// 根据能力类型分别处理 offensive：主动 passive：被动
+		if (Data.AbilityType == FAuraGameplayTags::Get().Abilities_Type_Offensive)
+		{
+			GiveAbility(LoadedAbilitySpec);// 给予攻击型能力（需要手动激活）
+		}
+		else if (Data.AbilityType == FAuraGameplayTags::Get().Abilities_Type_Passive)
+		{
+			if (Data.AbilityStatus.MatchesTagExact(FAuraGameplayTags::Get().Abilities_Status_Equipped))
+			{
+				GiveAbilityAndActivateOnce(LoadedAbilitySpec);// 给予被动型能力并立即激活一次（被动能力通常需要自动激活）
+			}
+			else
+			{
+				GiveAbility(LoadedAbilitySpec);
+			}
+		}
+	}
+	// 标记启动能力已全部给予完成
+	bStartupAbilitiesGiven = true;
+	// 广播能力给予完成委托，通知其他系统能力加载完成
+	AbilitiesGivenDelegate.Broadcast();
+}
 
 //这个函数被AuraCharacterBase的同名函数调用
 void UAuraAbilitySystemComponent::AddCharacterAbilities(const TArray<TSubclassOf<UGameplayAbility>>& StartupAbilities)
@@ -77,6 +118,7 @@ void UAuraAbilitySystemComponent::AddCharacterPassiveAbilities(const TArray<TSub
 		// AbilityClass: 当前循环中的能力类。
 		// 1 : 表示能力的等级（Level），这里设置为 1。
 		FGameplayAbilitySpec AbilitySpec = FGameplayAbilitySpec(AbilityClass, 1);
+		AbilitySpec.DynamicAbilityTags.AddTag(FAuraGameplayTags::Get().Abilities_Status_Equipped);
 		GiveAbilityAndActivateOnce(AbilitySpec);
 	}
 }
@@ -173,6 +215,7 @@ void UAuraAbilitySystemComponent::AbilityActorInfoSet()
 	//GEngine->AddOnScreenDebugMessage(-1, 10.0, FColor::Orange, FString::Printf(TEXT("Tag:%s"), *GameplayTags.Attribute_Secondary_Armor.ToString()));
 	// FGameplayTag Tag = FAuraGameplayTags::Get().Attribute_Primary_Intelligence;//测试可以在C++中访问这些native tags
 }
+
 
 void UAuraAbilitySystemComponent::EffectApplied(UAbilitySystemComponent* AbilitySystemComponent, const FGameplayEffectSpec& EffectSpec, FActiveGameplayEffectHandle ActiveEffectHandle)
 {
@@ -318,11 +361,7 @@ bool UAuraAbilitySystemComponent::AbilityHasAnySlot(const FGameplayAbilitySpec& 
 	return AbilitySpec.DynamicAbilityTags.HasTag(FGameplayTag::RequestGameplayTag(FName("InputTag")));
 }
 
-void UAuraAbilitySystemComponent::AssignSlotToAbility(FGameplayAbilitySpec& AbilitySpec, const FGameplayTag& Slot)
-{
-	ClearSlot(&AbilitySpec);
-	AbilitySpec.DynamicAbilityTags.AddTag(Slot);
-}
+
 
 void UAuraAbilitySystemComponent::MulticastActivatePassiveEffect_Implementation(const FGameplayTag& AbilityTag, bool bActivate)
 {
@@ -538,6 +577,8 @@ void UAuraAbilitySystemComponent::SeverEquipAbility_Implementation(const FGamepl
 					MulticastActivatePassiveEffect(AbilityTag, true);
 					TryActivateAbility(AbilitySpec->Handle);
 				}
+				AbilitySpec->DynamicAbilityTags.RemoveTag(GetStatusTagFormSpec(*AbilitySpec));
+				AbilitySpec->DynamicAbilityTags.AddTag(GameplayTags.Abilities_Status_Equipped);
 			}
 			AssignSlotToAbility(*AbilitySpec, Slot);
 
@@ -546,6 +587,12 @@ void UAuraAbilitySystemComponent::SeverEquipAbility_Implementation(const FGamepl
 			ClientEquipAbility(AbilityTag, Status, Slot, PrevSlot);//ClientEquipAbility 是一个 客户端 RPC，通知客户端更新 UI（如技能栏图标）。
 		}
 	}
+}
+
+void UAuraAbilitySystemComponent::AssignSlotToAbility(FGameplayAbilitySpec& AbilitySpec, const FGameplayTag& Slot)
+{
+	ClearSlot(&AbilitySpec);
+	AbilitySpec.DynamicAbilityTags.AddTag(Slot);
 }
 
 void UAuraAbilitySystemComponent::ClearSlot(FGameplayAbilitySpec* Spec)//能力携带的InputTag

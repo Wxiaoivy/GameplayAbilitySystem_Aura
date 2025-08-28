@@ -57,14 +57,7 @@ void AAuraCharacter::LoadProgress()
 	{
 		ULoadScreenSaveGame* SaveData = AuraGameMode->RetriveInGameSaveData();
 		if (SaveData == nullptr)return;
-		
-		if (AAuraPlayerState* AuraPlayerState = Cast<AAuraPlayerState>(GetPlayerState()))
-		{
-			AuraPlayerState->SetLevel(SaveData->PlayerLevel);
-			AuraPlayerState->SetXP(SaveData->XP);
-			AuraPlayerState->SetAttributePoints(SaveData->AttributePoints);
-			AuraPlayerState->SetSpellPoints(SaveData->SpellPoints);
-		}
+
 
 		if (SaveData->bFirstTimeLoadIn)
 		{
@@ -73,6 +66,19 @@ void AAuraCharacter::LoadProgress()
 		}
 		else
 		{
+			if (UAuraAbilitySystemComponent* AuraASC = Cast<UAuraAbilitySystemComponent>(AbilitySystemComponent))
+			{
+				AuraASC->AddCharacterAbilitiesFromSaveData(SaveData);
+			}
+
+			if (AAuraPlayerState* AuraPlayerState = Cast<AAuraPlayerState>(GetPlayerState()))
+			{
+				AuraPlayerState->SetLevel(SaveData->PlayerLevel);
+				AuraPlayerState->SetXP(SaveData->XP);
+				AuraPlayerState->SetAttributePoints(SaveData->AttributePoints);
+				AuraPlayerState->SetSpellPoints(SaveData->SpellPoints);
+			}
+			
 			UAuraAbilitySystemLibrary::InitializeDefaultAttributesFromSaveData(this, AbilitySystemComponent, SaveData);
 		}
 	}
@@ -151,6 +157,8 @@ void AAuraCharacter::SaveProgress_Implementation(const FName& CheckPointTag)
 		UAuraAbilitySystemComponent* AuraASC = Cast<UAuraAbilitySystemComponent>(AbilitySystemComponent);
 		FForEachAbility SaveAbilityDelegate;
 
+		SaveData->SavedAbilities.Empty();
+
 		// 使用Lambda函数遍历所有能力并保存
 		SaveAbilityDelegate.BindLambda
 		([this, AuraASC, SaveData](const FGameplayAbilitySpec& AbilitySpec)
@@ -172,7 +180,7 @@ void AAuraCharacter::SaveProgress_Implementation(const FName& CheckPointTag)
 				SavedAbility.AbilityType = Info.AbilityType;
 
 				// 将能力数据添加到存档中
-				SaveData->SavedAbilities.Add(SavedAbility);
+				SaveData->SavedAbilities.AddUnique(SavedAbility);
 			}
 		);
 		// 遍历所有能力并应用上面的保存逻辑（代理的回调模式，不是广播模式）
