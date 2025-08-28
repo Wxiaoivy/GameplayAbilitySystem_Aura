@@ -49,13 +49,13 @@ void AAuraPlayerState::SetXP(int32 InXP)
 void AAuraPlayerState::AddToLevel(int32 InLevel)
 {
 	Level += InLevel;
-	OnLevelChangedDelegate.Broadcast(Level);
+	OnLevelChangedDelegate.Broadcast(Level,true); // 使用 true / false 来区分正常升级和存档加载这两种不同的等级变化情况。 这个AddToLevel函数只用于正常升级情况调用
 }
 
 void AAuraPlayerState::SetLevel(int32 InLevel)
 {
 	Level = InLevel;
-	OnLevelChangedDelegate.Broadcast(Level);
+	OnLevelChangedDelegate.Broadcast(Level,false);//使用 true/false 来区分正常升级和存档加载这两种不同的等级变化情况。 这个SetLevel函数只用于存档加载情况才调用
 }
 
 void AAuraPlayerState::SetAttributePoints(int32 InPoints)
@@ -84,7 +84,9 @@ void AAuraPlayerState::AddToSpellPoints(int32 InSpellPoints)
 
 void AAuraPlayerState::OnRep_Level(int32 OldLevel)
 {
-	OnLevelChangedDelegate.Broadcast(Level);
+	// 通过比较新旧值来判断是否是升级(这里是AI写的，判断是否是因为角色升级导致的等级变化）
+	bool bIsLevelUp = (Level > OldLevel);
+	OnLevelChangedDelegate.Broadcast(Level, bIsLevelUp);//使用 true/false 来区分正常升级和存档加载这两种不同的等级变化情况。
 }
 
 void AAuraPlayerState::OnRep_XP(int32 OldXP)

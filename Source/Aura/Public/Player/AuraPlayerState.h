@@ -12,6 +12,7 @@
 #include "AuraPlayerState.generated.h"
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnPlayerStatChanged, int32/*StatValue*/)
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnLevelChanged, int32,/*StatValue*/ bool /*bLevelUp*/)  //使用 true / false 来区分正常升级和存档加载这两种不同的等级变化情况。
 /**
  * 
  */
@@ -28,7 +29,7 @@ public:
     UAttributeSet*GetAttributeSet() const { return AttributeSet; }
 
 	FOnPlayerStatChanged OnXPChangedDelegate;
-	FOnPlayerStatChanged OnLevelChangedDelegate;
+	FOnLevelChanged OnLevelChangedDelegate;
 	FOnPlayerStatChanged OnAttirbutePointsChangedDelegate;
 	FOnPlayerStatChanged OnSpellPointsChangedDelegate;
 

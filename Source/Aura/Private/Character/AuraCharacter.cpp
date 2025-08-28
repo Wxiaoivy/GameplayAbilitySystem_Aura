@@ -48,8 +48,6 @@ void AAuraCharacter::PossessedBy(AController* NewController)
 	InitAbilityActorInfo();
 	LoadProgress();
 
-	//这里调用AuraCharacterBase中的AddCharacterAbilities()这个函数
-	AddCharacterAbilities();
 }
 
 void AAuraCharacter::LoadProgress()
@@ -71,11 +69,11 @@ void AAuraCharacter::LoadProgress()
 		if (SaveData->bFirstTimeLoadIn)
 		{
 			InitializeDefualtAttributes();
-			AddCharacterAbilities();
+			AddCharacterAbilities();//这里调用AuraCharacterBase中的AddCharacterAbilities()这个函数
 		}
 		else
 		{
-
+			UAuraAbilitySystemLibrary::InitializeDefaultAttributesFromSaveData(this, AbilitySystemComponent, SaveData);
 		}
 	}
 }
@@ -85,8 +83,6 @@ void AAuraCharacter::OnRep_PlayerState()
 	Super::OnRep_PlayerState();
 	//Init Ability Actor Info for the Client
 	InitAbilityActorInfo();
-	
-	
 }
 
 void AAuraCharacter::ShowMagicCircle_Implementation(UMaterialInterface* DecalMaterial)

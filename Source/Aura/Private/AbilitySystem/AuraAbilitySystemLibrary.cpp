@@ -3,6 +3,7 @@
 
 #include "AbilitySystem/AuraAbilitySystemLibrary.h"
 #include "UI/HUD/AuraHUD.h"
+#include "Game/LoadScreenSaveGame.h"
 
 //返回一个布尔值(true/false)
 
@@ -99,7 +100,11 @@ const void UAuraAbilitySystemLibrary::InitializeDefaultAttributes(const UObject*
 	const FGameplayEffectSpecHandle PrimaryAttributesSpecHandle = ASC->MakeOutgoingSpec(CharacterClassDefaultInfo.PrimaryAttribute, Level, PrimaryAttributesContextHandle);
 	ASC->ApplyGameplayEffectSpecToSelf(*PrimaryAttributesSpecHandle.Data.Get());
 
+	//InitializeDefaultAttributes - 新角色初始化为什么不用永久？
 
+	/* 一次性设置：新角色只需要设置初始值
+	 性能考虑：避免不必要的永久效果监听
+	 后续覆盖：这些初始值很快会被永久性效果覆盖*/
 	FGameplayEffectContextHandle SecondaryAttributesContextHandle = ASC->MakeEffectContext();
 	SecondaryAttributesContextHandle.AddSourceObject(AvatarActor);
 	const FGameplayEffectSpecHandle SecondaryAttributesSpecHandle = ASC->MakeOutgoingSpec(CharacterClassInfo->SecondaryAttribute, Level, SecondaryAttributesContextHandle);
@@ -111,8 +116,72 @@ const void UAuraAbilitySystemLibrary::InitializeDefaultAttributes(const UObject*
 	ASC->ApplyGameplayEffectSpecToSelf(*VitalAttributesSpecHandle.Data.Get());
 
 
+	/*新角色创建流程：
+	* 
+		InitializeDefaultAttributes() - 设置初始值（临时GE）
+		AddCharacterAbilities() - 添加技能和能力
+		应用永久性次级属性GE（替换临时值）
+		开始游戏
+
+	存档加载流程：
+
+		InitializeDefaultAttributesFromSaveData() - 直接应用永久GE
+		恢复所有状态
+		立即进入游戏*/
 
 
+}
+
+// 函数：InitializeDefaultAttributesFromSaveData
+// 作用：从保存的游戏数据中初始化角色的默认属性
+// 参数：
+//   - WorldContextObject: 世界上下文对象，用于获取游戏资源
+//   - ASC: 能力系统组件，负责管理角色的属性和能力
+//   - SaveGame: 加载的存档数据，包含角色的属性值。
+const void UAuraAbilitySystemLibrary::InitializeDefaultAttributesFromSaveData(const UObject* WorldContextObject, UAbilitySystemComponent* ASC, ULoadScreenSaveGame* SaveGame)
+{
+	// 获取角色职业信息数据资产
+	UCharacterClassInfo* CharacterClassInfo = GetCharacterClassInfo(WorldContextObject);
+	//安全检查 防止空指针解引用（Crash）
+	if (CharacterClassInfo == nullptr)return;
+
+	const FAuraGameplayTags& GameplayTags = FAuraGameplayTags::Get();
+
+	// 获取能力系统组件对应的角色actor
+	const AActor* SourceAvatarActor = ASC->GetAvatarActor();
+
+	// 创建游戏效果上下文，用于传递效果来源等信息
+	FGameplayEffectContextHandle EffectContextHandle = ASC->MakeEffectContext();
+	// 设置效果来源
+	EffectContextHandle.AddSourceObject(SourceAvatarActor);
+	// 创建主要属性效果规格（基于SetByCaller方式）
+	const FGameplayEffectSpecHandle SpecHandle = ASC->MakeOutgoingSpec(CharacterClassInfo->PrimaryAttributes_SetByCaller,/* 使用SetByCaller类型的GE*/ 1.f, EffectContextHandle);
+
+	// 使用存档数据设置各个主要属性的具体数值
+	UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, GameplayTags.Attribute_Primary_Strength, SaveGame->Strength);
+	UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, GameplayTags.Attribute_Primary_Intelligence, SaveGame->Intelligence);
+	UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, GameplayTags.Attribute_Primary_Resilience, SaveGame->Resilience);
+	UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, GameplayTags.Attribute_Primary_Vigor, SaveGame->Vigor);
+
+	// 将创建的效果应用到自身
+	ASC->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
+
+	//InitializeDefaultAttributesFromSaveData - 存档恢复为什么需要永久？
+	
+	//动态更新：需要持续监听属性变化
+    //状态保持：确保属性与存档数据一致
+	//实时响应：随时响应装备、技能等变化
+
+	
+	FGameplayEffectContextHandle SecondaryAttributesContextHandle = ASC->MakeEffectContext();
+	SecondaryAttributesContextHandle.AddSourceObject(SourceAvatarActor);
+	const FGameplayEffectSpecHandle SecondaryAttributesSpecHandle = ASC->MakeOutgoingSpec(CharacterClassInfo->SecondaryAttribute_Infinit, 1.f, SecondaryAttributesContextHandle);
+	ASC->ApplyGameplayEffectSpecToSelf(*SecondaryAttributesSpecHandle.Data.Get());
+
+	FGameplayEffectContextHandle VitalAttributesContextHandle = ASC->MakeEffectContext();
+	VitalAttributesContextHandle.AddSourceObject(SourceAvatarActor);
+	const FGameplayEffectSpecHandle VitalAttributesSpecHandle = ASC->MakeOutgoingSpec(CharacterClassInfo->VitalAttribute, 1.f, VitalAttributesContextHandle);
+	ASC->ApplyGameplayEffectSpecToSelf(*VitalAttributesSpecHandle.Data.Get());
 }
 
 void UAuraAbilitySystemLibrary::GiveStartupAbilities(const UObject* WorldContextObject, UAbilitySystemComponent* ASC, ECharacterClass CharacterClass)

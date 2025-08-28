@@ -8,6 +8,16 @@
 #include <../../../../../../../Source/Runtime/Engine/Classes/GameFramework/PlayerStart.h>
 #include "Game/AuraGameInstance.h"
 
+void AAuraGameModeBase::DeleteSlot(const FString& SlotName, int32 SlotIndex)
+{
+	// 检查指定槽位名称和索引的存档是否已存在
+	if (UGameplayStatics::DoesSaveGameExist(SlotName, SlotIndex))
+	{
+		// 如果存档已存在，先删除旧存档以便创建新存档
+		UGameplayStatics::DeleteGameInSlot(SlotName, SlotIndex);
+	}
+}
+
 //保存数据到磁盘
 void AAuraGameModeBase::SaveSlotData(UMVVM_LoadSlot* LoadSlot, int32 SlotIndex)//LoadSlot：MVVM模式的视图模型，包含UI显示所需的数据   SlotIndex：多存档系统中的槽位索引，用于支持多个存档文件
 {
@@ -110,15 +120,6 @@ void AAuraGameModeBase::SaveInGameProgressData(ULoadScreenSaveGame* SaveObject)
 	UGameplayStatics::SaveGameToSlot(SaveObject, InGameLoadSlotName, InGameLoadSlotIndex);
 }
 
-void AAuraGameModeBase::DeleteSlot(const FString& SlotName, int32 SlotIndex)
-{
-	// 检查指定槽位名称和索引的存档是否已存在
-	if (UGameplayStatics::DoesSaveGameExist(SlotName, SlotIndex))
-	{
-		// 如果存档已存在，先删除旧存档以便创建新存档
-		UGameplayStatics::DeleteGameInSlot(SlotName, SlotIndex);
-	}
-}
 
 
 void AAuraGameModeBase::TravelToMap(UMVVM_LoadSlot* Slot)
