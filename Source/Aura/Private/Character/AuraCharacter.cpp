@@ -41,12 +41,22 @@ AAuraCharacter::AAuraCharacter()
 
 }
 
+//作用：当控制器拥有这个角色时（通常在角色生成时调用），初始化能力系统信息，加载玩家个人进度，并加载整个世界状态。
 void AAuraCharacter::PossessedBy(AController* NewController)
 {
+	// 调用父类的PossessedBy方法
 	Super::PossessedBy(NewController);
 	//Init Ability Actor Info for the Server
+	// 为服务器初始化Ability Actor信息
 	InitAbilityActorInfo();
+	// 加载玩家进度
 	LoadProgress();
+
+	// 获取游戏模式并加载世界状态
+	if (AAuraGameModeBase* AuraGameMode = Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(this)))
+	{
+		AuraGameMode->LoadWorldState(GetWorld());
+	}
 
 }
 

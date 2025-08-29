@@ -21,6 +21,12 @@ public:
 
 	ACheckPoint(const FObjectInitializer& ObjectInitializer);
 
+
+	/*Save Interface*/
+	bool ShouldLoadTransform_Implementation() { return false; };
+	void LoadActor_Implementation();
+	/*end Save Interface*/
+
 	UPROPERTY(BlueprintReadOnly,SaveGame)
 	bool bReached = false;
 

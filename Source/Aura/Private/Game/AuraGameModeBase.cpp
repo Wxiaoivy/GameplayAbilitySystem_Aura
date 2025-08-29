@@ -9,6 +9,7 @@
 #include "Game/AuraGameInstance.h"
 #include <../../../../../../../Source/Runtime/Engine/Public/EngineUtils.h>
 #include "Interaction/SaveInterface.h"
+#include <../../../../../../../Source/Runtime/CoreUObject/Public/Serialization/ObjectAndNameAsStringProxyArchive.h>
 
 
 void AAuraGameModeBase::DeleteSlot(const FString& SlotName, int32 SlotIndex)
@@ -125,7 +126,7 @@ void AAuraGameModeBase::SaveInGameProgressData(ULoadScreenSaveGame* SaveObject)
 
 
 
-void AAuraGameModeBase::SaveWorldState(UWorld* World)
+void AAuraGameModeBase::SaveWorldState(UWorld* World)const
 {
 	// 获取当前世界的名称，并移除流式关卡前缀（如"UEDPIE_0_"）
 	FString WorldName = World->GetMapName();
@@ -162,7 +163,7 @@ void AAuraGameModeBase::SaveWorldState(UWorld* World)
 
 			// 遍历所有Actor通常需要过滤
 			//如果Actor无效或者没有实现SaveInterface就跳过
-			if (IsValid(Actor) || !Actor->Implements<USaveInterface>())continue;
+			if (!IsValid(Actor) || !Actor->Implements<USaveInterface>())continue;
 		  
 			// 创建保存的Actor数据
 			FSavedActor SavedActor;
@@ -171,14 +172,20 @@ void AAuraGameModeBase::SaveWorldState(UWorld* World)
 
 			// 创建内存写入器，用于序列化Actor数据到Bytes数组
 			FMemoryWriter MemoryWriter(SavedActor.Bytes);
+
+			// 创建代理存档器，它能够将对象和名称以字符串形式序列化
+            // 第二个参数true表示使用引用方式（节省内存，避免重复数据）
+			FObjectAndNameAsStringProxyArchive Archive(MemoryWriter, true);
+
 			// 设置序列化标志，告诉Actor只保存标记为SaveGame的属性
-			MemoryWriter.ArIsSaveGame = true;
+			Archive.ArIsSaveGame = true;
 
 			// Actor将自己标记为SaveGame的属性写入MemoryWriter
             // MemoryWriter将这些数据保存到SavedActor.Bytes中
-			Actor->Serialize(MemoryWriter);
+			Actor->Serialize(Archive);
 
 			// 将保存的Actor添加到地图的保存列表中
+			// AddUnique使用之前定义的operator==来避免重复保存同一个Actor
 			SavedMap.SavedActors.AddUnique(SavedActor);
 		}
 
@@ -195,6 +202,64 @@ void AAuraGameModeBase::SaveWorldState(UWorld* World)
 		}
 		// 将更新后的存档对象保存到指定的磁盘槽位(// 参数说明： - SaveGame: 要保存的存档对象（包含所有更新后的数据）)
 		UGameplayStatics::SaveGameToSlot(SaveGame, AuraGI->LoadSlotName, AuraGI->LoadSlotIndex);
+	}
+}
+
+//作用：从存档中加载世界状态，包括所有实现了SaveInterface的Actor的变换信息和自定义属性。
+void AAuraGameModeBase::LoadWorldState(UWorld* World)const
+{
+	// 获取当前世界的名称，并移除流式关卡前缀（如"UEDPIE_0_"）
+	FString WorldName = World->GetMapName();
+	WorldName.RemoveFromStart(World->StreamingLevelsPrefix);
+
+	UAuraGameInstance* AuraGI = Cast<UAuraGameInstance>(GetGameInstance());
+	check(AuraGI);// 确保游戏实例有效
+
+	// 检查指定槽位的存档是否存在
+	if (UGameplayStatics::DoesSaveGameExist(AuraGI->LoadSlotName,AuraGI->LoadSlotIndex))
+	{
+		// 从槽位加载存档游戏
+		ULoadScreenSaveGame* SaveGame = Cast<ULoadScreenSaveGame>(UGameplayStatics::LoadGameFromSlot(AuraGI->LoadSlotName, AuraGI->LoadSlotIndex));
+		if (SaveGame==nullptr)
+		{
+			UE_LOG(LogTemp, Error, TEXT("Failed to load slot"));
+			return;
+		}
+		for (FActorIterator It(World); It; ++It)
+		{
+			AActor* Actor = *It;
+
+			// 遍历所有Actor通常需要过滤
+			//如果Actor无效或者没有实现SaveInterface就跳过
+			if (!IsValid(Actor) || !Actor->Implements<USaveInterface>())continue;
+
+			// 遍历存档中保存的该地图的所有Actor数据
+			for (FSavedActor SavedActor:SaveGame->GetSavedMapWithMapName(WorldName).SavedActors)
+			{
+				// 找到与当前Actor名称匹配的存档数据
+				if (SavedActor.ActorName==Actor ->GetFName())
+				{
+					// 如果Actor需要加载变换信息，则设置其位置、旋转、缩放
+					if (ISaveInterface::Execute_ShouldLoadTransform(Actor))
+					{
+						Actor->SetActorTransform(SavedActor.Transform);
+					}
+
+					// 使用内存读取器读取保存的字节数据
+					FMemoryReader MemoryReader(SavedActor.Bytes);
+
+					// 创建代理存档用于序列化
+					FObjectAndNameAsStringProxyArchive Archive(MemoryReader, true);
+					Archive.ArIsSaveGame = true;
+
+					// 将保存的数据反序列化到Actor中（恢复属性值）
+					Actor->Serialize(Archive);
+
+					// 调用Actor的加载后处理函数
+					ISaveInterface::Execute_LoadActor(Actor);
+				}
+			}
+		}
 	}
 }
 

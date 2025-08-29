@@ -10,6 +10,7 @@
 #include "UI/HUD/AuraHUD.h"
 #include "Interaction/PlayerInterface.h"
 #include <../../../../../../../Plugins/FX/Niagara/Source/Niagara/Public/NiagaraComponent.h>
+#include "Interaction/SaveInterface.h"
 #include "AuraCharacter.generated.h"
 
 class USpringArmComponent;
