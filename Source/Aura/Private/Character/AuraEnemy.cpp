@@ -4,14 +4,43 @@
 #include "Character/AuraEnemy.h"
 
 
+AAuraEnemy::AAuraEnemy()
+{
+
+	bReplicates = true;
+	GetMesh()->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
+
+	AbilitySystemComponent = CreateDefaultSubobject<UAuraAbilitySystemComponent>("AbilitySystemComponent");
+	AbilitySystemComponent->SetIsReplicated(true);
+	AbilitySystemComponent->SetReplicationMode(EGameplayEffectReplicationMode::Minimal);
+
+	AttributeSet = CreateDefaultSubobject<UAuraAttributeSet>("AttributeSet");
+
+	HealthBar = CreateDefaultSubobject<UWidgetComponent>("HealthBar");
+	HealthBar->SetupAttachment(GetRootComponent());
+
+
+	bUseControllerRotationPitch = false;
+	bUseControllerRotationRoll = false;
+	bUseControllerRotationYaw = false;
+
+	GetCharacterMovement()->bUseControllerDesiredRotation = true;//需要敌人平滑转向
+	GetCharacterMovement()->bOrientRotationToMovement = false;
+
+	GetMesh()->SetCustomDepthStencilValue(CUSTOM_DEPTH_RED);
+	GetMesh()->MarkRenderStateDirty();
+	Weapon->SetCustomDepthStencilValue(CUSTOM_DEPTH_RED);
+	Weapon->MarkRenderStateDirty();
+
+	BaseWalkSpeed = 250.f;
+
+}
+
+
 void AAuraEnemy::HighlightActor_Implementation()
 {
 	GetMesh()->SetRenderCustomDepth(true);
-	GetMesh()->SetCustomDepthStencilValue(CUSTOM_DEPTH_RED);
 	Weapon->SetRenderCustomDepth(true);
-	Weapon->SetCustomDepthStencilValue(CUSTOM_DEPTH_RED);
-
-
 }
 
 void AAuraEnemy::UnHighlightActor_Implementation()
@@ -49,33 +78,9 @@ void AAuraEnemy::PossessedBy(AController* NewController)
 }
 
 
-
-AAuraEnemy::AAuraEnemy()
+void AAuraEnemy::SetMoveToLocation_Implementation(FVector& OutDestination)
 {
-
-	bReplicates = true;
-	GetMesh()->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
-
-	AbilitySystemComponent = CreateDefaultSubobject<UAuraAbilitySystemComponent>("AbilitySystemComponent");
-	AbilitySystemComponent->SetIsReplicated(true);
-	AbilitySystemComponent->SetReplicationMode(EGameplayEffectReplicationMode::Minimal);
-
-	AttributeSet = CreateDefaultSubobject<UAuraAttributeSet>("AttributeSet");
-
-	HealthBar = CreateDefaultSubobject<UWidgetComponent>("HealthBar");
-	HealthBar->SetupAttachment(GetRootComponent());
-
-
-	bUseControllerRotationPitch = false;
-	bUseControllerRotationRoll = false;
-	bUseControllerRotationYaw = false;
-
-	GetCharacterMovement()->bUseControllerDesiredRotation = true;//需要敌人平滑转向
-	GetCharacterMovement()->bOrientRotationToMovement = false;
-
-	BaseWalkSpeed = 250.f;
-
-
+	//DO not change OutDestination
 }
 
 void AAuraEnemy::die(const FVector& DeathImpuse)

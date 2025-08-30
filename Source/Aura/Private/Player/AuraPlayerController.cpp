@@ -177,6 +177,7 @@ void AAuraPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 		// 判断是否为“短按”（按住时间小于阈值）并且角色有效
 		if (FollowTime <= ShortPressThreshold && ControlledPawn)
 		{
+			
 			// 获取光标下的命中结果
 			FHitResult Hit;
 			bool bHit = GetHitResultUnderCursor(ECC_Visibility, false, Hit);
@@ -186,6 +187,19 @@ void AAuraPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 			{
 				// 缓存点击的位置作为目标点
 				CachedDestination = Hit.ImpactPoint;
+			}
+
+			if (IsValid(ThisActor) && ThisActor->Implements<UHighlightInterface>())
+			{
+				IHighlightInterface::Execute_SetMoveToLocation(ThisActor, CachedDestination);
+			}
+			else
+			{
+				// 如果当前没有阻止“输入按下”的标签（可能用于控制何时播放特效），则在目标点生成点击特效
+				if (GetASC() && !GetASC()->HasMatchingGameplayTag(FAuraGameplayTags::Get().Player_Block_InputPresssed))
+				{
+					UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ClickNiagaraSystem, CachedDestination);
+				}
 			}
 
 			// 计算从角色当前位置到目标点的导航路径
@@ -219,7 +233,7 @@ void AAuraPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 					// 在世界空间下添加Spline点
 					Spline->AddSplinePoint(PointLoc, ESplineCoordinateSpace::World);
 					// 绘制调试球体，显示路径点（仅在开发版本可见）
-					DrawDebugSphere(GetWorld(), PointLoc, 8.f, 8, FColor::Green, false, 5.f);
+					//DrawDebugSphere(GetWorld(), PointLoc, 8.f, 8, FColor::Green, false, 5.f);
 				}
 				// 将最终目标点更新为路径的最后一个点（导航网格上的精确点）
 				CachedDestination = NavPath->PathPoints[NavPath->PathPoints.Num() - 1];
@@ -231,11 +245,8 @@ void AAuraPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 			{
 				UE_LOG(LogTemp, Error, TEXT("NavPath is invalid or has no points!"));
 			}
-			// 如果当前有阻止“输入持有”的标签（可能用于控制何时播放特效），则在目标点生成点击特效
-			if (GetASC() && GetASC()->HasMatchingGameplayTag(FAuraGameplayTags::Get().Player_Block_InputHeld))
-			{
-				UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ClickNiagaraSystem, CachedDestination);
-			}
+			
+			
 		}
 		// 重置按住时间，为下一次按键做准备
 		FollowTime = 0.f;
@@ -435,6 +446,10 @@ void AAuraPlayerController::CursorTrace()
 
 void AAuraPlayerController::Move(const FInputActionValue& InputActionValue)
 {
+	if (GetASC() && GetASC()->HasMatchingGameplayTag(FAuraGameplayTags::Get().Player_Block_InputPresssed))
+	{
+		return;
+	}
 	//这个二维向量拿来储存用户输入的Value.
 	const FVector2D InputAxisVector = InputActionValue.Get<FVector2D>();
 
