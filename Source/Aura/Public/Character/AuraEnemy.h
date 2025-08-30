@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "Character/AuraCharacter.h"
-#include "Interaction/EnemyInterface.h"
 #include "AbilitySystem/AuraAbilitySystemComponent.h"
 #include "Aura/Aura.h"
 #include "Components/WidgetComponent.h"
@@ -12,6 +11,7 @@
 #include "AuraGameplayTags.h"
 #include "AI/AuraAIController.h"
 #include "BehaviorTree/BehaviorTree.h"
+#include "Interaction/HighlightInterface.h"
 #include "AuraEnemy.generated.h"
 
 /**
@@ -20,22 +20,25 @@
 class UBehaviorTreeComponent;
 class UCharacterClassInfo;
 UCLASS()
-class AURA_API AAuraEnemy : public AAuraCharacterBase , public IEnemyInterface
+class AURA_API AAuraEnemy : public AAuraCharacterBase , public IEnemyInterface , public IHighlightInterface
 {
 	GENERATED_BODY()
 public:
 
 	AAuraEnemy();
-	/*Enemy Interface*/
+
+
+	/*Hightlight Interface*/
 	virtual void HighlightActor() override;
 	virtual void UnHighlightActor() override;
-     void SetCombatTarget_Implementation(AActor* InCombatTarget);
-	 AActor* GetCombatTarget_Implementation()const ;
-	/*End Enemy Interface*/
+	/*End Hightlight Interface*/
+	
 
 	/*Combat Interface*/
 	int32 GetPlayerLevel_Implementation();
 	virtual void die(const FVector& DeathImpuse)override;
+	void SetCombatTarget_Implementation(AActor* InCombatTarget);
+	AActor* GetCombatTarget_Implementation()const;
 	/*End Combat Interface*/
 
 	virtual void PossessedBy(AController* NewController)override;//PossessedBy()是角色被控制器接管时自动触发；（角色出生，重生，控制器变更都会触发）

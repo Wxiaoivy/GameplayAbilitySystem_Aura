@@ -6,6 +6,7 @@
 #include "Actor/MagicCircle.h"
 #include <../../../../../../../Source/Runtime/Engine/Classes/Materials/MaterialInterface.h>
 #include <../../../../../../../Source/Runtime/Engine/Classes/Components/DecalComponent.h>
+#include "Interaction/HighlightInterface.h"
 #include "../Aura.h"
 
 AAuraPlayerController::AAuraPlayerController()
@@ -320,7 +321,7 @@ void AAuraPlayerController::CursorTrace()
 	LastActor = ThisActor;
 
 	// 如果转换成功，ThisActor将指向一个新的怪物对象；如果失败，则ThisActor将为nullptr。
-	ThisActor = Cast<IEnemyInterface>(CursorHit.GetActor());
+	ThisActor = Cast<IHighlightInterface>(CursorHit.GetActor());
 
 
 	/*

@@ -26,6 +26,7 @@
  */
 class UInputMappingContext;
 class AMagicCircle;
+class IHighlightInterface;
 
 
 UCLASS()
@@ -81,8 +82,8 @@ private:
 	bool bShiftKeyDown = false;
 
 	void CursorTrace();
-	IEnemyInterface* LastActor;
-	IEnemyInterface* ThisActor;
+	IHighlightInterface* LastActor;
+	IHighlightInterface* ThisActor;
 
 
 	void AbilityInputTagPressed(FGameplayTag InputTag);
