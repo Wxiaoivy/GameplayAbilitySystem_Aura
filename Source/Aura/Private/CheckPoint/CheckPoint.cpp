@@ -23,11 +23,21 @@ ACheckPoint::ACheckPoint(const FObjectInitializer& ObjectInitializer)
 	Sphere->SetCollisionResponseToAllChannels(ECR_Ignore);
 	Sphere->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
 
-	CheckPointMesh->SetCustomDepthStencilValue(CUSTOM_DEPTH_TAN);
+	CheckPointMesh->SetCustomDepthStencilValue(CustomDepthStencilOverride);
 	CheckPointMesh->MarkRenderStateDirty();
 
 	MoveToComponent = CreateDefaultSubobject<USceneComponent>("MoveToComponent");
 	MoveToComponent->SetupAttachment(Sphere);
+}
+
+void ACheckPoint::BeginPlay()
+{
+	Super::BeginPlay();
+
+	if (bBindOverlapCallback)
+	{
+		Sphere->OnComponentBeginOverlap.AddDynamic(this, &ACheckPoint::OnSphereBeginOverlap);
+	}
 }
 
 //作用：检查点Actor的加载实现，当从存档加载时，如果检查点之前已被激活，则恢复其视觉效果。
@@ -62,16 +72,14 @@ void ACheckPoint::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComponent,
 	}
 }
 
-void ACheckPoint::BeginPlay()
-{
-	Super::BeginPlay();
 
-	Sphere->OnComponentBeginOverlap.AddDynamic(this, &ACheckPoint::OnSphereBeginOverlap);
-}
 
 void ACheckPoint::HighlightActor_Implementation()
 {
-	CheckPointMesh->SetRenderCustomDepth(true);
+	if (!bReached)
+	{
+		CheckPointMesh->SetRenderCustomDepth(true);
+	}
 }
 
 void ACheckPoint::UnHighlightActor_Implementation()

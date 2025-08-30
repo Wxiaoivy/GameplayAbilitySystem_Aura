@@ -29,8 +29,11 @@ public:
 	void LoadActor_Implementation();
 	/*end Save Interface*/
 
-	UPROPERTY(BlueprintReadOnly,SaveGame)
+	UPROPERTY(BlueprintReadWrite,SaveGame)
 	bool bReached = false;
+
+	UPROPERTY(EditAnywhere)
+	bool  bBindOverlapCallback = true;
 
 protected:
 
