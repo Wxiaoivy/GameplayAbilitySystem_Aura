@@ -92,7 +92,7 @@ void AAuraPlayerController::HightlightActor(AActor* InActor)
 {
 	if (IsValid(InActor) && InActor->Implements<UHighlightInterface>())
 	{
-		IHighlightInterface::Execute_HighlightActor;
+		IHighlightInterface::Execute_HighlightActor(InActor);
 	}
 }
 
@@ -100,7 +100,7 @@ void AAuraPlayerController::UnHightlightActor(AActor* InActor)
 {
 	if (IsValid(InActor) && InActor->Implements<UHighlightInterface>())
 	{
-		IHighlightInterface::Execute_UnHighlightActor;
+		IHighlightInterface::Execute_UnHighlightActor(InActor);
 	}
 }
 

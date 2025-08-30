@@ -28,7 +28,7 @@ class UInputMappingContext;
 class AMagicCircle;
 class IHighlightInterface;
 
-enum class ETargetingStatus : unit8
+enum class ETargetingStatus : uint8
 {
 	TargetingEnemy,
 	TargetingNonEnemy,
