@@ -20,7 +20,9 @@ class AURA_API IHighlightInterface
 	GENERATED_BODY()
 
 public:
+	UFUNCTION(BlueprintNativeEvent)
+	void HighlightActor();
 
-	virtual void HighlightActor() = 0;
-	virtual void UnHighlightActor() = 0;
+	UFUNCTION(BlueprintNativeEvent)
+	void UnHighlightActor();
 };

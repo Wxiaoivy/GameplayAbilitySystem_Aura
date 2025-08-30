@@ -28,6 +28,12 @@ class UInputMappingContext;
 class AMagicCircle;
 class IHighlightInterface;
 
+enum class ETargetingStatus : unit8
+{
+	TargetingEnemy,
+	TargetingNonEnemy,
+	NotTargeting
+};
 
 UCLASS()
 class AURA_API AAuraPlayerController : public APlayerController
@@ -82,9 +88,12 @@ private:
 	bool bShiftKeyDown = false;
 
 	void CursorTrace();
-	IHighlightInterface* LastActor;
-	IHighlightInterface* ThisActor;
-
+	TObjectPtr<AActor> LastActor;
+	TObjectPtr<AActor> ThisActor;
+	// 定义一个FHitResult类型的变量CursorHit，用于存储光标追踪的结果。
+	FHitResult CursorHit;
+	static void HightlightActor(AActor* InActor);
+	static void UnHightlightActor(AActor* InActor);
 
 	void AbilityInputTagPressed(FGameplayTag InputTag);
 	void AbilityInputTagReleased(FGameplayTag InputTag);
@@ -95,13 +104,13 @@ private:
 
 	UAuraAbilitySystemComponent* GetASC();
 
-	// 定义一个FHitResult类型的变量CursorHit，用于存储光标追踪的结果。
-	FHitResult CursorHit;
+
 	FVector CachedDestination = FVector::ZeroVector;
 	float FollowTime = 0.f;
 	float ShortPressThreshold = 0.5f;
 	bool bAutoRunning = false;
-	bool bTargeting = false;
+	//bool bTargeting = false;
+	ETargetingStatus TargetingStatus = ETargetingStatus::NotTargeting;
 
 
 	UPROPERTY(EditDefaultsOnly)

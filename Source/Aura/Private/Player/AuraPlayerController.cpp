@@ -88,95 +88,156 @@ void AAuraPlayerController::SetupInputComponent()
 	}
 }
 
+void AAuraPlayerController::HightlightActor(AActor* InActor)
+{
+	if (IsValid(InActor) && InActor->Implements<UHighlightInterface>())
+	{
+		IHighlightInterface::Execute_HighlightActor;
+	}
+}
+
+void AAuraPlayerController::UnHightlightActor(AActor* InActor)
+{
+	if (IsValid(InActor) && InActor->Implements<UHighlightInterface>())
+	{
+		IHighlightInterface::Execute_UnHighlightActor;
+	}
+}
+
 void AAuraPlayerController::AbilityInputTagPressed(FGameplayTag InputTag)
 {
+	// 检查1：如果能力系统组件(ASC)存在，并且当前拥有阻止“输入按下”的标签（例如处于硬直、施法状态），则直接返回，不处理输入。
 	if (GetASC() && GetASC()->HasMatchingGameplayTag(FAuraGameplayTags::Get().Player_Block_InputPresssed))
 	{
 		return;
 	}
+	// 检查2：如果按下的输入标签是右键（RMB）
 	if (InputTag.MatchesTagExact(FAuraGameplayTags::Get().InputTag_RMB))
 	{
-		bTargeting = ThisActor ? true : false;
+		// 【核心逻辑】设置当前的瞄准状态(TargetingStatus)
+		// 判断当前光标下的Actor（ThisActor）是否实现了 UEnemyInterface 接口。
+		// - 如果实现了（是敌人），则状态设为 TargetingEnemy（瞄准敌人）。
+		// - 如果没实现（不是敌人），则状态设为 TargetingNonEnemy（瞄准非敌人）。这包括友方NPC、可交互物、环境等。
+		TargetingStatus = ThisActor->Implements<UEnemyInterface>() ? ETargetingStatus::TargetingEnemy : ETargetingStatus::TargetingNonEnemy;
+
+		// 当按下右键时，取消自动移动状态。(bAutoRunning = false; 在按下瞬间的首要目的不是决定新操作，而是终止旧操作。语义：“不管我接下来要做什么（移动或攻击），先停止当前的自动移动再说。)
 		bAutoRunning = false;
+		/*所以，当您按下右键想移动时：
+
+			您的第一次按下，首先起到了 “刹车”(bAutoRunning = false) 的作用。
+			随后您的持续按住，起到了 “手动方向盘”(AddMovementInput) 的作用。
+			或者您的快速点击释放，起到了 “设置导航目的地”(新的 bAutoRunning = true) 的作用。*/
 	}
+
+
+
+	// 最后，将“按下”事件传递给能力系统组件(ASC)，以便触发相应的GameplayAbility（例如，按下瞬间触发的技能）。
 	if (GetASC())GetASC()->AbilityInputTagPressed(InputTag);
 }
 
+// 当某个绑定到能力的输入键被释放时调用
 void AAuraPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 {
+	// 检查1：如果ASC存在且拥有阻止“输入释放”的标签，则直接返回。
 	if (GetASC() && GetASC()->HasMatchingGameplayTag(FAuraGameplayTags::Get().Player_Block_InputReleased))
 	{
 		return;
 	}
+	// 检查2：如果释放的键不是右键（RMB），则直接传递给ASC处理然后返回。
+   // （例如，释放Q、E等按键，只触发能力，不涉及移动逻辑）
 	if (!InputTag.MatchesTagExact(FAuraGameplayTags::Get().InputTag_RMB))
 	{
 		if (GetASC())
 		{
 			GetASC()->AbilityInputTagReleased(InputTag);
 		}
-		return;
+		return; // 注意这里的return，非RMB的处理到此结束
 	}
+
+	// 以下是专门处理右键释放的逻辑...
+	// 首先，无论如何都先把“释放”事件传递给ASC（可能有些能力需要监听Release事件，如结束引导技能）
 	if (GetASC())
 	{
 		GetASC()->AbilityInputTagReleased(InputTag);
 	}
-	if (!bTargeting && !bShiftKeyDown)
+
+	// 【核心逻辑】关键判断：如果当前状态不是“瞄准敌人” 并且 没有按下Shift键
+   // 这个条件意味着：只有当你瞄准的不是敌人（即TargetingNonEnemy状态）且没有强制站立（Shift）时，才处理移动逻辑。
+   // 如果你瞄准的是敌人（TargetingEnemy），或者按下了Shift键，都会跳过移动逻辑。
+	if (TargetingStatus != ETargetingStatus::TargetingEnemy && !bShiftKeyDown)
 	{
-		APawn* ControlledPawn = GetPawn();
+		// 获取当前控制的角色
+		const APawn* ControlledPawn = GetPawn();
+		// 判断是否为“短按”（按住时间小于阈值）并且角色有效
 		if (FollowTime <= ShortPressThreshold && ControlledPawn)
 		{
-			// 获取点击位置
+			// 获取光标下的命中结果
 			FHitResult Hit;
 			bool bHit = GetHitResultUnderCursor(ECC_Visibility, false, Hit);
 
 			// 如果点击的位置在导航网格上，直接使用点击的位置
 			if (bHit)
 			{
+				// 缓存点击的位置作为目标点
 				CachedDestination = Hit.ImpactPoint;
 			}
-			// 计算路径
+
+			// 计算从角色当前位置到目标点的导航路径
 			UNavigationPath* NavPath = UNavigationSystemV1::FindPathToLocationSynchronously(
-				GetWorld(),                      // WorldContextObject
-				ControlledPawn->GetActorLocation(), // Start Location
-				CachedDestination               // End Location
+				GetWorld(),                      // 世界上下文
+				ControlledPawn->GetActorLocation(), // 路径起点：角色位置
+				CachedDestination               /// 路径终点：光标点击位置
 			);
 
-			// 更新 Spline
+			// 如果路径计算成功且至少有一个路径点
 			if (NavPath && NavPath->PathPoints.Num() > 0)
 			{
+				// 安全检查Spline组件是否有效（用于显示移动路径或控制自动移动）
 				if (!IsValid(Spline))
 				{
 					UE_LOG(LogTemp, Error, TEXT("Spline is not valid!"));
 					return;
 				}
-
+				// 清空Spline上已有的点
 				Spline->ClearSplinePoints();
+
+				// 将导航路径的每一个点添加到Spline中
 				for (const FVector& PointLoc : NavPath->PathPoints)
 				{
+					// 跳过无效的位置（包含NaN）
 					if (PointLoc.ContainsNaN())
 					{
 						continue;
 					}
 
+					// 在世界空间下添加Spline点
 					Spline->AddSplinePoint(PointLoc, ESplineCoordinateSpace::World);
+					// 绘制调试球体，显示路径点（仅在开发版本可见）
 					DrawDebugSphere(GetWorld(), PointLoc, 8.f, 8, FColor::Green, false, 5.f);
 				}
+				// 将最终目标点更新为路径的最后一个点（导航网格上的精确点）
 				CachedDestination = NavPath->PathPoints[NavPath->PathPoints.Num() - 1];
+
+				// 设置自动移动状态为true，角色将开始沿着Spline路径自动移动
 				bAutoRunning = true;
 			}
 			else
 			{
 				UE_LOG(LogTemp, Error, TEXT("NavPath is invalid or has no points!"));
 			}
+			// 如果当前有阻止“输入持有”的标签（可能用于控制何时播放特效），则在目标点生成点击特效
 			if (GetASC() && GetASC()->HasMatchingGameplayTag(FAuraGameplayTags::Get().Player_Block_InputHeld))
 			{
 				UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ClickNiagaraSystem, CachedDestination);
 			}
 		}
+		// 重置按住时间，为下一次按键做准备
 		FollowTime = 0.f;
-		bTargeting = false;
+
+		// 重置瞄准状态为“未瞄准”    重置：在 AbilityInputTagReleased（释放右键后）处理完所有逻辑后，必须将其归位。为了保证状态机严谨和清晰而必须重置
+		TargetingStatus = ETargetingStatus::NotTargeting;
 	}
-	
+	// 如果条件不满足（瞄准了敌人或按着Shift），则什么都不做，只传递能力输入。
 }
 
 void AAuraPlayerController::AbilityInputTagHeld(FGameplayTag InputTag)
@@ -197,7 +258,7 @@ void AAuraPlayerController::AbilityInputTagHeld(FGameplayTag InputTag)
 		return;
 	}
 	// 右键输入的特殊处理分支
-	if (bTargeting||bShiftKeyDown)
+	if (TargetingStatus == ETargetingStatus::TargetingEnemy || bShiftKeyDown)
 	{
 		// 处于瞄准状态或按住Shift时，当作普通能力输入处理
 		if (GetASC())
@@ -300,8 +361,8 @@ void AAuraPlayerController::CursorTrace()
 {
 	if (GetASC()&&GetASC()->HasMatchingGameplayTag(FAuraGameplayTags::Get().Player_Block_CursorTrace))
 	{
-		if (LastActor)LastActor->UnHighlightActor();
-		if (ThisActor)ThisActor->UnHighlightActor();
+		UnHightlightActor(LastActor);
+		UnHightlightActor(ThisActor);
 		LastActor = nullptr;
 		ThisActor = nullptr;
 		return;
@@ -316,12 +377,20 @@ void AAuraPlayerController::CursorTrace()
 	// 检查CursorHit.bBlockingHit是否为false，即是否没有发生阻挡碰撞。
 	if (!CursorHit.bBlockingHit)return;
 
+
 	// 如果发生了阻挡碰撞，更新LastActor为之前的ThisActor。
-    // 这里假设LastActor用于存储上一次选中的怪物。
+    // 这里LastActor用于存储上一次选中的怪物。
 	LastActor = ThisActor;
 
 	// 如果转换成功，ThisActor将指向一个新的怪物对象；如果失败，则ThisActor将为nullptr。
-	ThisActor = Cast<IHighlightInterface>(CursorHit.GetActor());
+	if (IsValid(CursorHit.GetActor()) && CursorHit.GetActor()->Implements<UHighlightInterface>())
+	{
+		ThisActor = CursorHit.GetActor();
+	}
+	else
+	{
+		ThisActor = nullptr;
+	}
 
 
 	/*
@@ -343,39 +412,10 @@ void AAuraPlayerController::CursorTrace()
     - Do nothing
 
 	*/
-	if (LastActor==nullptr)
+	if (LastActor!=ThisActor)
 	{
-		if (ThisActor) 
-		{
-			//Case B :
-			ThisActor->HighlightActor();
-		}
-		else
-		{
-			//Case A : Do nothing
-		}
-	}
-	else 
-	{
-		if (ThisActor)
-		{
-			if (LastActor != ThisActor)
-			{
-				//Case D :
-				LastActor->UnHighlightActor();
-				ThisActor->HighlightActor();
-			}
-			else
-			{
-				//Case E : Do nothing
-			}
-		}
-		else
-		{
-			//Case C :
-			LastActor->UnHighlightActor();
-
-		}
+		UnHightlightActor(LastActor);
+		HightlightActor(ThisActor);
 	}
 }
 
