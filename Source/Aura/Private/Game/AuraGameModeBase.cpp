@@ -126,7 +126,7 @@ void AAuraGameModeBase::SaveInGameProgressData(ULoadScreenSaveGame* SaveObject)
 
 
 
-void AAuraGameModeBase::SaveWorldState(UWorld* World)const
+void AAuraGameModeBase::SaveWorldState(UWorld* World, const FString& DestinationMapAssetName)const
 {
 	// 获取当前世界的名称，并移除流式关卡前缀（如"UEDPIE_0_"）
 	FString WorldName = World->GetMapName();
@@ -139,6 +139,11 @@ void AAuraGameModeBase::SaveWorldState(UWorld* World)const
 	// 获取指定槽位的存档数据
 	if (ULoadScreenSaveGame* SaveGame = GetSaveSlotData(AuraGI->LoadSlotName, AuraGI->LoadSlotIndex))
 	{
+		if (DestinationMapAssetName != FString(""))
+		{
+			SaveGame->MapAssetName = DestinationMapAssetName;
+			SaveGame->MapName = GetMapNameFromMapAssetName(DestinationMapAssetName);
+		}
 		// 检查存档中是否已有当前地图的保存数据，如果没有则创建新的
 		if (!SaveGame->HasMap(WorldName))
 		{
@@ -205,6 +210,7 @@ void AAuraGameModeBase::SaveWorldState(UWorld* World)const
 	}
 }
 
+
 //作用：从存档中加载世界状态，包括所有实现了SaveInterface的Actor的变换信息和自定义属性。
 void AAuraGameModeBase::LoadWorldState(UWorld* World)const
 {
@@ -269,6 +275,18 @@ void AAuraGameModeBase::TravelToMap(UMVVM_LoadSlot* Slot)
 	const int32 SlotIndex = Slot->SlotIndex;
 
 	UGameplayStatics::OpenLevelBySoftObjectPtr(Slot, Maps.FindChecked(Slot->GetMapName()));
+}
+
+FString AAuraGameModeBase::GetMapNameFromMapAssetName(const FString& MapAssetName)const
+{
+	for (auto& Map : Maps)
+	{
+		if (Map.Value.ToSoftObjectPath().GetAssetName() == MapAssetName)
+		{
+			return Map.Key;
+		}
+	}
+	return FString();
 }
 
 AActor* AAuraGameModeBase::ChoosePlayerStart_Implementation(AController* Player)

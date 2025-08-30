@@ -36,7 +36,7 @@ public:
 	ULoadScreenSaveGame* RetriveInGameSaveData();
 	void SaveInGameProgressData(ULoadScreenSaveGame* SaveObject);
 
-	void SaveWorldState(UWorld* World)const;
+	void SaveWorldState(UWorld* World,const FString& DestinationMapAssetName = FString(""))const;//只有通过传送门到下一个地图的保存功能时 才传入DestinationMapAssetName
 	void LoadWorldState(UWorld* World)const;
 
 	void TravelToMap(UMVVM_LoadSlot* Slot);
@@ -58,6 +58,7 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	TMap<FString, TSoftObjectPtr<UWorld>> Maps;
 
+	FString GetMapNameFromMapAssetName(const FString& MapAssetName)const;
 
 
 	virtual AActor* ChoosePlayerStart_Implementation(AController* Player)override;

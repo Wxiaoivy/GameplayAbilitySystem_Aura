@@ -35,6 +35,11 @@ public:
 	UPROPERTY(EditAnywhere)
 	bool  bBindOverlapCallback = true;
 
+
+	UPROPERTY(EditDefaultsOnly)
+	int32 CustomDepthStencilOverride = CUSTOM_DEPTH_TAN;
+
+
 protected:
 
 	UFUNCTION()
@@ -51,9 +56,6 @@ protected:
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<USceneComponent>MoveToComponent;
 
-	UPROPERTY(EditDefaultsOnly)
-	int32 CustomDepthStencilOverride = CUSTOM_DEPTH_TAN;
-
 	UFUNCTION(BlueprintImplementableEvent)
 	void CheckPointReached(UMaterialInstanceDynamic* DynamicMaterialInstance);
 
@@ -62,11 +64,8 @@ protected:
 
 	UPROPERTY(VisibleAnywhere,BlueprintReadOnly)
 	TObjectPtr<UStaticMeshComponent>CheckPointMesh;
-
-private:
 		
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<USphereComponent>Sphere;
 
-	
 };
