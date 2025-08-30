@@ -30,8 +30,18 @@ class IHighlightInterface;
 
 enum class ETargetingStatus : uint8
 {
-	TargetingEnemy,
+	// 状态：正在瞄准敌人
+	// 表示光标当前指向一个被识别为"敌人"的可交互对象
+	TargetingEnemy, 
+
+	// 状态：正在瞄准非敌人
+	// 表示光标当前指向一个可交互对象，但该对象不是敌人
+	// （可能是友方NPC、中立单位、可交互环境物体等）
 	TargetingNonEnemy,
+
+	// 状态：未瞄准任何特定目标
+	// 表示光标指向的是不可交互的环境（如地面、墙壁）
+	// 或者没有指向任何有效的游戏对象
 	NotTargeting
 };
 
@@ -88,10 +98,12 @@ private:
 	bool bShiftKeyDown = false;
 
 	void CursorTrace();
-	TObjectPtr<AActor> LastActor;
-	TObjectPtr<AActor> ThisActor;
+	TObjectPtr<AActor> LastActor;// 上一帧的光标所指的可交互对象
+	TObjectPtr<AActor> ThisActor;// 当前帧（这一帧）的光标所指的可交互对象
+
 	// 定义一个FHitResult类型的变量CursorHit，用于存储光标追踪的结果。
 	FHitResult CursorHit;
+
 	static void HightlightActor(AActor* InActor);
 	static void UnHightlightActor(AActor* InActor);
 

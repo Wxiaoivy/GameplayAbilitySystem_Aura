@@ -118,8 +118,14 @@ void AAuraPlayerController::AbilityInputTagPressed(FGameplayTag InputTag)
 		// 判断当前光标下的Actor（ThisActor）是否实现了 UEnemyInterface 接口。
 		// - 如果实现了（是敌人），则状态设为 TargetingEnemy（瞄准敌人）。
 		// - 如果没实现（不是敌人），则状态设为 TargetingNonEnemy（瞄准非敌人）。这包括友方NPC、可交互物、环境等。
-		TargetingStatus = ThisActor->Implements<UEnemyInterface>() ? ETargetingStatus::TargetingEnemy : ETargetingStatus::TargetingNonEnemy;
-
+		if (IsValid(ThisActor))
+		{
+			TargetingStatus = ThisActor->Implements<UEnemyInterface>() ? ETargetingStatus::TargetingEnemy : ETargetingStatus::TargetingNonEnemy;
+		}
+		else
+		{
+			TargetingStatus = ETargetingStatus::NotTargeting;
+		}
 		// 当按下右键时，取消自动移动状态。(bAutoRunning = false; 在按下瞬间的首要目的不是决定新操作，而是终止旧操作。语义：“不管我接下来要做什么（移动或攻击），先停止当前的自动移动再说。)
 		bAutoRunning = false;
 		/*所以，当您按下右键想移动时：
@@ -382,13 +388,17 @@ void AAuraPlayerController::CursorTrace()
     // 这里LastActor用于存储上一次选中的怪物。
 	LastActor = ThisActor;
 
-	// 如果转换成功，ThisActor将指向一个新的怪物对象；如果失败，则ThisActor将为nullptr。
+	// 检查光标击中的Actor是否有效（不为nullptr）并且是否实现了UHighlightInterface接口
 	if (IsValid(CursorHit.GetActor()) && CursorHit.GetActor()->Implements<UHighlightInterface>())
 	{
+		// 如果条件满足，将ThisActor指针设置为当前击中的Actor
+	    // 这意味着我们找到了一个可高亮、可交互的对象（如敌人、宝箱、NPC等）
 		ThisActor = CursorHit.GetActor();
 	}
 	else
 	{
+		// 如果条件不满足（要么没击中任何Actor，要么击中的Actor不可交互）
+	    // 将ThisActor指针设置为空指针(nullptr)，表示没有有效的可交互对象
 		ThisActor = nullptr;
 	}
 
