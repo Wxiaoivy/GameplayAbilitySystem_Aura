@@ -99,6 +99,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
 	float BaseWalkSpeed = 600.f;
+
+	UPROPERTY(BlueprintReadOnly)
+	bool bDead = false;
 	
 
 	virtual void ApplyEffectToSelf(TSubclassOf<UGameplayEffect> GameplayEffect, float level)const;

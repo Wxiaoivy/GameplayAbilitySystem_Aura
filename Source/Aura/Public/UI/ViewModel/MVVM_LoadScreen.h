@@ -18,10 +18,11 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnChangeTitleRequested);
 
 UCLASS()
 class AURA_API UMVVM_LoadScreen : public UMVVMViewModelBase
-{
-	GENERATED_BODY()
+{	
 
-public:
+         GENERATED_BODY()
+
+  public:
 
 	/*AI加的  为了正确使用MVVM*/
 
@@ -64,7 +65,7 @@ public:
 
 	void LoadData();
 
-private:
+  private:
 
 	UPROPERTY()
 	TMap<int32, UMVVM_LoadSlot*>LoadSlots;

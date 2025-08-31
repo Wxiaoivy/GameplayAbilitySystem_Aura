@@ -15,6 +15,7 @@ class UAbilityInfo;
 class UMVVM_LoadSlot;
 class ULoadScreenSaveGame;
 class UWorld;
+class ACharacter;
 
 UCLASS()
 class AURA_API AAuraGameModeBase : public AGameModeBase
@@ -63,6 +64,7 @@ public:
 
 	virtual AActor* ChoosePlayerStart_Implementation(AController* Player)override;
 
+	void PlayerDied(ACharacter* DeadCharacter);
 
 protected:
 

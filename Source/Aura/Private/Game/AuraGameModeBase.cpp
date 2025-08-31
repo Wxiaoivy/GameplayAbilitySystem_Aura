@@ -10,6 +10,7 @@
 #include <../../../../../../../Source/Runtime/Engine/Public/EngineUtils.h>
 #include "Interaction/SaveInterface.h"
 #include <../../../../../../../Source/Runtime/CoreUObject/Public/Serialization/ObjectAndNameAsStringProxyArchive.h>
+#include <../../../../../../../Source/Runtime/Engine/Classes/GameFramework/Character.h>
 
 
 void AAuraGameModeBase::DeleteSlot(const FString& SlotName, int32 SlotIndex)
@@ -43,6 +44,8 @@ void AAuraGameModeBase::SaveSlotData(UMVVM_LoadSlot* LoadSlot, int32 SlotIndex)/
 	LoadScreenSaveGame->MapName = LoadSlot->GetMapName();
 
 	LoadScreenSaveGame->PlayerStartTag = LoadSlot->PlayerStartTag;
+
+	LoadScreenSaveGame->MapAssetName=LoadSlot->MapAssetName;
 
 	// 将存档数据保存到指定槽位名称和索引的位置
 	UGameplayStatics::SaveGameToSlot(LoadScreenSaveGame, LoadSlot->LoadSlotName, SlotIndex);
@@ -287,6 +290,19 @@ FString AAuraGameModeBase::GetMapNameFromMapAssetName(const FString& MapAssetNam
 		}
 	}
 	return FString();
+}
+
+void AAuraGameModeBase::PlayerDied(ACharacter* DeadCharacter)
+{
+	// 从存储系统中检索当前的游戏存档数据
+	ULoadScreenSaveGame* SaveGame = RetriveInGameSaveData();
+	// 如果存档无效，直接返回（防止空指针操作）
+	if (!IsValid(SaveGame))return;
+
+	// 使用存档中记录的地图资源名称，重新加载对应关卡
+    // 实现玩家死亡后的关卡重置或重生逻辑
+	UGameplayStatics::OpenLevel(DeadCharacter, FName(SaveGame->MapAssetName));
+
 }
 
 AActor* AAuraGameModeBase::ChoosePlayerStart_Implementation(AController* Player)

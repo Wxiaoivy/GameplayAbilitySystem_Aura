@@ -201,6 +201,42 @@ void AAuraCharacter::SaveProgress_Implementation(const FName& CheckPointTag)
 	}
 }
 
+void AAuraCharacter::die(const FVector& DeathImpuse)
+{
+	// 调用父类的死亡处理逻辑（基础死亡行为）
+	Super::die(DeathImpuse);
+
+	// 设置定时器委托，用于延迟执行死亡后续处理
+	FTimerDelegate DeathTimerDelegate;
+	DeathTimerDelegate.BindLambda
+	(
+		[this]()
+		{
+			// 获取当前游戏的GameMode，并转换为自定义的AAuraGameModeBase类型
+			AAuraGameModeBase* AuraGameMode = Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(this));
+			// 如果成功获取到游戏模式，通知游戏模式玩家死亡事件
+			if (AuraGameMode)
+			{
+				AuraGameMode->PlayerDied(this);
+			}
+		}
+	);
+	// 设置死亡定时器，在DeathTime后执行死亡处理逻辑
+	GetWorldTimerManager().SetTimer(DeathTimer, DeathTimerDelegate, DeathTime, false);
+	// 分离顶部摄像机组件，保持当前世界变换（死亡后摄像机不再跟随角色）
+	TopDownCameraComponent->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+
+	//继承父类行为：先执行基础死亡逻辑
+
+	//	延迟回调：使用定时器延迟执行死亡后续处理
+
+	//	游戏模式通知：通知游戏模式处理玩家死亡事件
+
+	//	摄像机分离：死亡后摄像机停止跟随角色移动
+
+
+}
+
 void AAuraCharacter::OnRep_Stunned()
 {
 	Super::OnRep_Stunned();

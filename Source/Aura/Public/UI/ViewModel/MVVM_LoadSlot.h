@@ -54,6 +54,9 @@ public:
 	UPROPERTY()
 	FName PlayerStartTag;
 
+	UPROPERTY()
+	FString MapAssetName;
+
 	/*Field Notify*/
 	UPROPERTY(BlueprintReadWrite, FieldNotify)
 	FString LoadSlotName;

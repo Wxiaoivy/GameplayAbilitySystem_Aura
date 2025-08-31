@@ -106,6 +106,7 @@ void UMVVM_LoadScreen::NewSlotButtonPressed(int32 Slot, const FString& EnteredNa
 	LoadSlots[Slot]->SlotStatus = Taken;
 	// 更新视图模型中的PlayerStartTag
 	LoadSlots[Slot]->PlayerStartTag = AuraGameMode->DefaultPlayerStartTag;
+	LoadSlots[Slot]->MapAssetName = AuraGameMode->DefaultMap.ToSoftObjectPath().GetAssetName();
 
 
 	// 调用游戏模式的保存功能，将数据持久化到磁盘(这是自定义的函数)
