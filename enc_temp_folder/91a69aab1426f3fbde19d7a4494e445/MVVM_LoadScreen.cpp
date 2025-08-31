@@ -139,6 +139,12 @@ void UMVVM_LoadScreen::NewGameButtonPressed(int32 Slot)
  */
 void UMVVM_LoadScreen::SelecteSlotButtonPressed(int32 Slot)
 {
+	// 获取游戏模式基类实例
+	AAuraGameModeBase* AuraGameMode = Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(this));
+	// 服务器端权限验证：AuraGameMode 仅在服务器端有效
+	// 客户端检测到无效的 GameMode 对象，说明当前运行在客户端环境
+	// 阻止客户端对服务器存档的非法操作.
+	if (!IsValid(AuraGameMode))return;
 	// 广播槽位选择事件，通知其他系统有槽位被选择
 	SlotSelected.Broadcast();
 	// 遍历所有存档槽
@@ -182,6 +188,7 @@ void UMVVM_LoadScreen::DeleteButtonPressed()
 void UMVVM_LoadScreen::PlayButtonPressed()
 {
 	AAuraGameModeBase* AuraGameMode = Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(this));
+	if (!IsValid(AuraGameMode))return;
 	UAuraGameInstance* AuraGameInstance = Cast<UAuraGameInstance>(AuraGameMode->GetGameInstance());
 	AuraGameInstance->PlayerStartTag = SelectedSlot->PlayerStartTag;//如果直接打开Dungeon关卡  不经过这个PlayButtonPressed函数，不按这个Play按钮， PlayerStartTag 就不会被正确初始化 就找不到正确的PlayerStart。
 	AuraGameInstance->LoadSlotName = SelectedSlot->LoadSlotName;
