@@ -44,7 +44,8 @@ void AAuraEnemySpawnVolume::OnBoxBeginOverlap(UPrimitiveComponent* OverlappedCom
 			Point->SpawnEnemy();
 		}
 	}
-	Destroy();
+	//Destroy();这里不能销毁，如果销毁了在保存游戏的时候这个Actor就无效不会被保存， 下次LoadActor的时候会自动摧毁
+	Box->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 
