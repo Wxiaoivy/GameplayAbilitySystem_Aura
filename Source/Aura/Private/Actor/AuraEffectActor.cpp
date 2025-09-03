@@ -59,9 +59,9 @@ void AAuraEffectActor::ItemMovement(float DeltaTime)
 void AAuraEffectActor::BeginPlay()
 {
 	Super::BeginPlay();
-	//InitialLocation = GetActorLocation();
-	//CalculatedLocation = InitialLocation;
-	//CalculatedRotation = GetActorRotation();
+	InitialLocation = GetActorLocation();
+	CalculatedLocation = InitialLocation;
+	CalculatedRotation = GetActorRotation();
 }
 
 
