@@ -126,7 +126,7 @@ void AAuraPlayerController::AbilityInputTagPressed(FGameplayTag InputTag)
 		{
 			TargetingStatus = ETargetingStatus::NotTargeting;
 		}
-		// 当按下右键时，取消自动移动状态。(bAutoRunning = false; 在按下瞬间的首要目的不是决定新操作，而是终止旧操作。语义：“不管我接下来要做什么（移动或攻击），先停止当前的自动移动再说。)不管ThisActor有没有效都要取消自动移动状态
+		// 当按下右键时，取消自动移动状态。(bAutoRunning = false; 在按下瞬间的首要目的不是决定新操作，而是终止旧操作。语义：“不管我接下来要做什么（移动或攻击），先停止当前的自动移动再说。)
 		bAutoRunning = false;
 		/*所以，当您按下右键想移动时：
 

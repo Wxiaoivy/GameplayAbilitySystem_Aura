@@ -50,7 +50,7 @@ protected:
 	FVector CalculatedLocation;
 
 	UPROPERTY(BlueprintReadOnly)
-	FRotator CalculatedRotation;
+	FRotator CalcultedRotation;
 
 
 	/*参数调整建议

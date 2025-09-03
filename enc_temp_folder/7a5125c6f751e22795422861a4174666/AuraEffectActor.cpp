@@ -40,7 +40,7 @@ void AAuraEffectActor::ItemMovement(float DeltaTime)
 
 		// 将新的旋转量 DeltaRotation 叠加到当前的计算旋转值 CalcultedRotation 上
         // 实现旋转的累积效果
-		CalculatedRotation = UKismetMathLibrary::ComposeRotators(CalculatedRotation, DeltaRotation); //UKismetMathLibrary::ComposeRotators()作用：组合两个旋转量，相当于数学上的旋转叠加
+		CalcultedRotation = UKismetMathLibrary::ComposeRotators(CalcultedRotation, DeltaRotation); //UKismetMathLibrary::ComposeRotators()作用：组合两个旋转量，相当于数学上的旋转叠加
 	}
 
 	// 检查 bSinusoidalMovement 布尔变量是否为 true
@@ -59,16 +59,16 @@ void AAuraEffectActor::ItemMovement(float DeltaTime)
 void AAuraEffectActor::BeginPlay()
 {
 	Super::BeginPlay();
-	//InitialLocation = GetActorLocation();
-	//CalculatedLocation = InitialLocation;
-	//CalculatedRotation = GetActorRotation();
+	InitialLocation = GetActorLocation();
+	CalculatedLocation = InitialLocation;
+	CalcultedRotation = GetActorRotation();
 }
 
 
 void AAuraEffectActor::StartRotation()
 {
 	bRotates = true;
-	CalculatedRotation = GetActorRotation();
+	CalcultedRotation = GetActorRotation();
 }
 
 void AAuraEffectActor::StartSinusoidalMovement()
