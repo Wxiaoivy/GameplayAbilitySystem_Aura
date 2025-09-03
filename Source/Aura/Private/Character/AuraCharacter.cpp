@@ -57,7 +57,7 @@ void AAuraCharacter::PossessedBy(AController* NewController)
 	{
 		AuraGameMode->LoadWorldState(GetWorld());
 	}
-
+	//死亡 → 重新加载关卡 → 角色重新生成 → PossessedBy → 读取最近存档 → 应用数据
 }
 
 void AAuraCharacter::LoadProgress()

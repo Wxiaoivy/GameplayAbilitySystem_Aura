@@ -76,10 +76,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "CharacterClassDefaultInfo")
 	int32 Level = 1;
 
-	
-
-	
-
 	UPROPERTY(VisibleAnywhere,BlueprintReadOnly)
 	UWidgetComponent* HealthBar;
 
@@ -89,5 +85,7 @@ protected:
 	UPROPERTY()
 	TObjectPtr<AAuraAIController>AuraAIController;
 
-	
+	UFUNCTION(BlueprintImplementableEvent)
+	void SpawnLoot();
+
 };

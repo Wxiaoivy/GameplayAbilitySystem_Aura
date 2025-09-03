@@ -20,6 +20,7 @@ class UOverlayWidgetController;
 class AAuraHUD;
 class USpellMenuWidgetController;
 class UAbilityInfo;
+class ULootTiers;
 
 UCLASS()
 class AURA_API UAuraAbilitySystemLibrary : public UBlueprintFunctionLibrary
@@ -67,6 +68,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "AuraAbilitySystemLibrary|CharacterClassDefault")
 	static UAbilityInfo* GetAbilityInfo(const UObject* WorldContextObject);
 
+	UFUNCTION(BlueprintCallable, Category = "AuraAbilitySystemLibrary|CharacterClassDefault", meta = (DefaultToSelf = "WorldContextObject"))
+	static ULootTiers* GetLootTiers(const UObject* WorldContextObject);
 	/*
 	*Gameplay Effects Getter
 	*

@@ -3,6 +3,7 @@
 
 #include "AbilitySystem/AuraAbilitySystemLibrary.h"
 #include "UI/HUD/AuraHUD.h"
+//#include "Data/LootTiers.h"
 #include "Game/LoadScreenSaveGame.h"
 
 //返回一个布尔值(true/false)
@@ -321,6 +322,14 @@ UAbilityInfo* UAuraAbilitySystemLibrary::GetAbilityInfo(const UObject* WorldCont
 	if (AuraGameModeBase == nullptr)return nullptr;
 
 	return AuraGameModeBase->AbilityInfo;
+}
+
+ULootTiers* UAuraAbilitySystemLibrary::GetLootTiers(const UObject* WorldContextObject)
+{
+	const AAuraGameModeBase* AuraGameModeBase = Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(WorldContextObject));
+	if (AuraGameModeBase == nullptr)return nullptr;
+
+	return AuraGameModeBase->LootTiers;
 }
 
 bool UAuraAbilitySystemLibrary::IsBlockedHit(const FGameplayEffectContextHandle& EffectContextHandle)

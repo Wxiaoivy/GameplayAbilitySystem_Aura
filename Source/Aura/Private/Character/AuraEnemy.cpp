@@ -85,13 +85,14 @@ void AAuraEnemy::SetMoveToLocation_Implementation(FVector& OutDestination)
 
 void AAuraEnemy::die(const FVector& DeathImpuse)
 {
-	Super::die(DeathImpuse);
+	SetLifeSpan(LifeSpan);
 	if (AuraAIController)
 	{
 		AuraAIController->GetBlackboardComponent()->SetValueAsBool(FName("Dead"), true);
 	}
+	SpawnLoot();
+	Super::die(DeathImpuse);
 	
-	SetLifeSpan(LifeSpan);
 }
 
 

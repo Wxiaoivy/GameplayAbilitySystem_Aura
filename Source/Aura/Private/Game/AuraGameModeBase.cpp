@@ -301,6 +301,8 @@ void AAuraGameModeBase::PlayerDied(ACharacter* DeadCharacter)
 
 	// 使用存档中记录的地图资源名称，重新加载对应关卡
     // 实现玩家死亡后的关卡重置或重生逻辑
+	// 这里必须使用 MapAssetName（完整资源路径）
+	// 因为引擎需要确切知道哪个资源文件要加载
 	UGameplayStatics::OpenLevel(DeadCharacter, FName(SaveGame->MapAssetName));
 
 }

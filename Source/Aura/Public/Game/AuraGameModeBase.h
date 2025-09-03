@@ -16,6 +16,7 @@ class UMVVM_LoadSlot;
 class ULoadScreenSaveGame;
 class UWorld;
 class ACharacter;
+class ULootTiers;
 
 UCLASS()
 class AURA_API AAuraGameModeBase : public AGameModeBase
@@ -23,13 +24,14 @@ class AURA_API AAuraGameModeBase : public AGameModeBase
 	GENERATED_BODY()
 public:
 
-	UPROPERTY(EditDefaultsOnly, Category = "CharacterClassDefaultInfo")
+	UPROPERTY(EditDefaultsOnly, Category = "Character Class Defaults")
 	TObjectPtr<UCharacterClassInfo>CharacterClassInfo;
 
-
-	UPROPERTY(EditDefaultsOnly, Category = "AbilityInfo")
+	UPROPERTY(EditDefaultsOnly, Category = "Ability Info")
 	TObjectPtr<UAbilityInfo>AbilityInfo;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Loot Tiers")
+	TObjectPtr<ULootTiers>LootTiers;
 
 	void SaveSlotData(UMVVM_LoadSlot* LoadSlot, int32 SlotIndex);
 	ULoadScreenSaveGame* GetSaveSlotData(const FString& SlotName, int32 SlotIndex)const;

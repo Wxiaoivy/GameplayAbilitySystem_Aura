@@ -39,7 +39,7 @@ struct FSavedAbility
 	FGameplayTag AbilityType = FGameplayTag();
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "ClassDefaults")
-	int32 AbilityLevel;
+	int32 AbilityLevel = 1;
 };
 
 //结构体数组想正常使用使用AddUnique  因为不能直接比较两个结构体是否相等（判断是否相等 才能判断是否Unique）， 所以要运算符重载。
@@ -104,7 +104,7 @@ public:
 
 	UPROPERTY()
 	FString MapName = FString("Default Map Name");
-
+	//MapName 是给人看的逻辑名称，MapAssetName 是给引擎看的完整资源路径。在资源加载时必须使用 MapAssetName。
 	UPROPERTY()
 	FString MapAssetName = FString("Default Map Asset Name");
 
